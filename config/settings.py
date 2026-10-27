@@ -16,12 +16,35 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Carga variables de entorno desde .env (si existe).
 load_dotenv(BASE_DIR / ".env")
 
+# ¿Estamos corriendo en Vercel? (la variable VERCEL=1 la pone Vercel sola)
+EN_VERCEL = os.environ.get("VERCEL", "").strip() in ("1", "true", "yes")
+
 # Seguridad
 SECRET_KEY = os.getenv("SECRET_KEY", "clave-insegura-solo-para-desarrollo-local")
-DEBUG = os.getenv("DEBUG", "True").strip().lower() in ("1", "true", "yes", "on")
+# En Vercel se despliega siempre con DEBUG apagado (a menos que se pida lo contrario)
+DEBUG = os.getenv("DEBUG", "False" if EN_VERCEL else "True").strip().lower() in ("1", "true", "yes", "on")
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
 ]
+# Dominios de Vercel (*.vercel.app) permitidos en producción
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
+if EN_VERCEL:
+    ALLOWED_HOSTS += [
+        ".vercel.app",
+        "vercel.app",
+        os.environ.get("VERCEL_URL", ""),
+        os.environ.get("VERCEL_PROJECT_PRODUCTION_URL", ""),
+    ]
+    ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]
+    CSRF_TRUSTED_ORIGINS += [
+        "https://*.vercel.app",
+        f"https://{os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', '')}",
+    ]
+    CSRF_TRUSTED_ORIGINS = [o for o in CSRF_TRUSTED_ORIGINS if not o.endswith("://")]
 
 # Aplicaciones
 INSTALLED_APPS = [
@@ -96,6 +119,24 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+
+if EN_VERCEL and DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    # En Vercel el disco de la función es de solo lectura; solo /tmp se puede escribir.
+    # En el despliegue (build.py) se "hornea" la base con los datos demo; aquí se copia
+    # a /tmp en el primer arranque de cada instancia para poder escribir (sesiones, etc.).
+    import shutil
+
+    _db_origen = BASE_DIR / "db.sqlite3"
+    _db_destino = Path("/tmp/ciudad-bonita.sqlite3")
+    try:
+        if _db_origen.exists() and not _db_destino.exists():
+            _db_destino.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(_db_origen, _db_destino)
+        if _db_destino.exists():
+            DATABASES["default"]["NAME"] = str(_db_destino)
+    except OSError:
+        # Si algo falla, se usa la ruta original (en Vercel /tmp siempre existe)
+        pass
 
 # Contraseñas
 AUTH_PASSWORD_VALIDATORS = [

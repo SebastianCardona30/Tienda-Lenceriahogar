@@ -12,7 +12,20 @@ urlpatterns = [
     path("", include("core.urls")),  # contiene <slug>/ que atrapa todo lo demás
 ]
 
-if settings.DEBUG:
+if settings.EN_VERCEL:
+    # En Vercel las imágenes subidas se sirven desde el propio despliegue (media/ viaja
+    # en el bundle; las copias estáticas públicas las resuelve antes el CDN de Vercel).
+    from django.urls import re_path
+    from django.views.static import serve as servir_archivo
+
+    urlpatterns += [
+        re_path(
+            r"^media/(?P<path>.*)$",
+            servir_archivo,
+            {"document_root": settings.MEDIA_ROOT},
+        ),
+    ]
+elif settings.DEBUG:
     # Sirve media/ en desarrollo con runserver
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

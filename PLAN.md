@@ -57,6 +57,15 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [ ] Rendimiento (Lighthouse móvil >= 90), accesibilidad AA, pruebas completas
 - [ ] Comando backup_db + README completo: instalación, variables, Wompi, PythonAnywhere, Render (advertencia), costos futuros, guía para la dueña
 
+## Puesta en línea en Vercel (pedido del usuario — 27/10/2026)
+- [x] Adaptar settings.py para Vercel: hosts `*.vercel.app`, DEBUG apagado, CSRF, base SQLite horneada copiada a /tmp en el arranque y media/ servido desde el bundle
+- [x] build.py (ejecuta Vercel en cada despliegue): migrate + seed_demo + collectstatic + copia media/ → public/media
+- [x] pyproject.toml con `[tool.vercel.scripts]` y `.python-version` (3.12)
+- [x] iniciar.bat (arranque local completo en un clic) y publicar-vercel.bat (despliegue en un clic)
+- [x] README.md completo: instalación, despliegue en Vercel, variables de entorno y licencias (costo $0)
+- [x] Verificación local: build.py en limpio OK, 25/25 pruebas, simulación VERCEL=1 (home/tienda/estáticos 200)
+- [ ] Desplegar a Vercel y verificar la URL pública (requiere iniciar sesión en la cuenta Vercel del usuario)
+
 ## Decisiones anotadas (opción más simple y segura)
 - Python del equipo: 3.14.7 (no hay 3.12 instalada); Django 5.2.18 instalado y verificado funcionando sobre 3.14. Spec dice 3.12: se usa la versión disponible porque el código no depende de 3.12 en particular.
 - git no estaba instalado en la máquina; se instaló Git 2.56.0.3 (gratuito) con winget para poder cumplir los commits por fase.

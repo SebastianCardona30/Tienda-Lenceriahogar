@@ -11,6 +11,10 @@ media/
 staticfiles/
 backups/
 
+# Vercel (salida de build; se regenera en cada despliegue)
+.vercel/
+public/
+
 # Editores / SO
 .vscode/
 .idea/

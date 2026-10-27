@@ -1,0 +1,6 @@
+# Configuración mínima para el despliegue en Vercel.
+# Las dependencias siguen en requirements.txt (pip las instala en el despliegue).
+
+[tool.vercel.scripts]
+# Corre después de instalar dependencias y antes de publicar (ver build.py)
+build = "python build.py"
