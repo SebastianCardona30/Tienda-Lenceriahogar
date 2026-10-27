@@ -41,6 +41,13 @@ class SiteConfig(models.Model):
         default="Envíos en todo Santander · Pagos con Nequi, PSE y contraentrega",
     )
 
+    # Ofertas de la semana (cuenta regresiva del inicio)
+    ofertas_hasta = models.DateTimeField(
+        "ofertas de la semana hasta", null=True, blank=True,
+        help_text="Fecha y hora en que termina la cuenta regresiva de ofertas del inicio. "
+                  "Si está vacía, no se muestra la sección.",
+    )
+
     # Impuestos y moneda
     iva_incluido = models.BooleanField(
         "precios con IVA incluido", default=True,
@@ -77,3 +84,19 @@ class SiteConfig(models.Model):
     def delete(self, *args, **kwargs):
         # Evita borrar la configuración por accidente desde el admin.
         pass
+
+
+class Suscripcion(models.Model):
+    """Correos suscritos al boletín (cupón de bienvenida en Fase 2)."""
+
+    email = models.EmailField("correo", unique=True)
+    activo = models.BooleanField("activo", default=True)
+    creada = models.DateTimeField("creada el", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "suscripción"
+        verbose_name_plural = "suscripciones al boletín"
+        ordering = ["-creada"]
+
+    def __str__(self):
+        return self.email

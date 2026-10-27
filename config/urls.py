@@ -6,7 +6,10 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("core.urls")),
+    # El orden importa: las apps específicas ANTES del catch-all de core
+    path("", include("catalog.urls")),
+    path("", include("cart.urls")),
+    path("", include("core.urls")),  # contiene <slug>/ que atrapa todo lo demás
 ]
 
 if settings.DEBUG:

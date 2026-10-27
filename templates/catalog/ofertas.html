@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block titulo %}Ofertas de la semana — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+  {% if site.ofertas_hasta %}
+    <div class="barra-oferta">
+      <div class="contenedor texto-centrado">
+        <strong>/ofertas de la semana/</strong>
+        <span class="cuenta-regresiva"
+              x-data="cuentaRegresiva('{{ site.ofertas_hasta|date:'c' }}')"
+              x-text="reloj">--:--:--</span>
+      </div>
+    </div>
+  {% endif %}
+  {% include "catalog/partials/_listado.html" %}
+{% endblock contenido %}

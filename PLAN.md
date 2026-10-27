@@ -14,15 +14,17 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Páginas institucionales placeholder (quienes-somos, contacto, etc.) y 404/500 amigables
 - [x] Smoke test: check, migrate, prueba de home + SiteConfig, runserver OK
 
-## Fase 1 — Catálogo
-- [ ] Categorías con subcategorías, imagen, orden y SEO
-- [ ] Proveedor, Producto y Variante (SKU) con estados, precios, stock, fotos múltiples
-- [ ] Conversión a WebP y miniaturas con Pillow; marcadores SVG de posición
-- [ ] Inicio completa (hero, categorías, ofertas semana con cuenta regresiva, más vendidos, novedades, banner bordados, combos, beneficios, reseñas, suscripción, footer)
-- [ ] Listado de tienda con filtros laterales (categoría, talla, color, material, precio, oferta, stock, calificación, marca, hilos, gramaje), chips, orden y "cargar más" (HTMX)
-- [ ] Ficha de producto: galería, selectores, precio, WhatsApp, envío por municipio, pestañas, reseñas, relacionados, schema.org
-- [ ] Búsqueda normalizada con sinónimos y tolerancia a errores; autocompletado HTMX; registro de búsquedas sin resultados
-- [ ] Comando seed_demo (8 categorías, 40 productos, proveedores, ofertas, imágenes placeholder)
+## Fase 1 — Catálogo ✅ (25/25 pruebas OK)
+- [x] Categorías con subcategorías, imagen, orden y SEO — menú **interactivo**: desplegables en escritorio, panel lateral con acordeón en celular (pedido del usuario)
+- [x] Proveedor, Producto y Variante (SKU) con estados, precios, stock, fotos múltiples — reseñas, combos, sinónimos y búsquedas sin resultados también en models
+- [x] Conversión a WebP y miniaturas con Pillow; marcadores SVG de posición (seed genera 2 fotos SVG por producto)
+- [x] Inicio completa (hero, categorías con imagen, ofertas semana con cuenta regresiva vía Alpine, más vendidos, novedades, banner bordados, combos, beneficios, reseñas, suscripción al boletín, footer)
+- [x] Listado de tienda con filtros laterales (categoría, talla, color swatches, material, precio, oferta, stock, calificación, marca, hilos, gramaje), chips removibles, orden y "cargar más" (HTMX) + panel deslizable en celular
+- [x] Ficha de producto: galería, selectores de variante (Alpine, precio/stock en vivo), WhatsApp prellenado, pestañas, reseñas con formulario, relacionados, vistos recientemente, schema.org JSON-LD, barra de compra fija en celular
+- [x] Búsqueda normalizada con sinónimos y tolerancia a errores (rapidfuzz); autocompletado HTMX; registro de búsquedas sin resultados en admin
+- [x] Comando seed_demo idempotente (8 categorías con subcategorías, 40 productos, variantes, 4 proveedores, 8 reseñas, 3 combos, 8 sinónimos, 3 cupones, ofertas_hasta)
+- [x] Carrito: solo stub `cart:agregar` informativo (el real llega en Fase 2)
+- [x] Verificación: `manage.py check` OK, 25/25 pruebas, home/tienda/categoría/búsqueda/autocomplete responden 200
 
 ## Fase 2 — Compra
 - [ ] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp
@@ -58,3 +60,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 ## Decisiones anotadas (opción más simple y segura)
 - Python del equipo: 3.14.7 (no hay 3.12 instalada); Django 5.2.18 instalado y verificado funcionando sobre 3.14. Spec dice 3.12: se usa la versión disponible porque el código no depende de 3.12 en particular.
 - git no estaba instalado en la máquina; se instaló Git 2.56.0.3 (gratuito) con winget para poder cumplir los commits por fase.
+- Fase 1: propiedades de Producto renombradas (`tiene_oferta`, `stock_disponible`) para no chocar con las anotaciones ORM (`en_oferta`, `stock_total`).
+- Fase 1: orden de URLs en config/urls.py — apps específicas (catalog, cart) ANTES del catch-all `<slug:slug>/` de core.
+- Fase 1: "Ofertas de la semana" usa `SiteConfig.ofertas_hasta` (cuenta regresiva) + variantes con `precio_oferta`; el motor de descuentos completo llega en Fase 2.
+- Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.

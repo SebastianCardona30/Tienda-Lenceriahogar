@@ -55,8 +55,28 @@ PAGINAS = {
 
 
 def home(request):
-    """Página de inicio."""
-    return render(request, "core/home.html")
+    """Página de inicio con todas las secciones del diseño."""
+    from catalog.filters import queryset_base
+    from catalog.models import Categoria, Combo, Resena
+
+    base = queryset_base()
+
+    contexto = {
+        "categorias_home": Categoria.objects.filter(activa=True, padre=None)
+                                          .prefetch_related("hijas")[:8],
+        # "Ofertas de la semana": productos con precio de oferta
+        "ofertas": base.filter(variantes__precio_oferta__isnull=False,
+                               variantes__activa=True).distinct()[:8],
+        # Mientras no haya ventas reales se muestran los destacados
+        "mas_vendidos": base.filter(destacado=True)[:4],
+        "novedades": base.order_by("-creado")[:4],
+        # Productos con bordado personalizable
+        "bordados": base.filter(es_bordado=True)[:4],
+        "combos_home": Combo.objects.filter(activo=True)[:3],
+        "resenas_home": Resena.objects.filter(aprobada=True)
+                            .select_related("producto")[:6],
+    }
+    return render(request, "core/home.html", contexto)
 
 
 def pagina(request, slug):

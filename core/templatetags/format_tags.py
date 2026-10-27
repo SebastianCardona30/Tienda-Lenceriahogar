@@ -5,6 +5,14 @@ register = template.Library()
 
 
 @register.filter
+def dictkey(d, clave):
+    """Obtiene un valor de un diccionario: {{ conteos.tallas|dictkey:t }}."""
+    if not d:
+        return ""
+    return d.get(clave, "")
+
+
+@register.filter
 def cop(valor):
     """
     Formato de moneda colombiana sin decimales: 89900 -> "$89.900".
