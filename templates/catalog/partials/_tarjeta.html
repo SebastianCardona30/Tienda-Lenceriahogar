@@ -1,0 +1,47 @@
+{% load static format_tags %}
+<article class="tarjeta-producto">
+  <a class="tarjeta-producto__foto" href="{{ producto.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+    {% if producto.portada %}
+      <img src="{% if producto.portada.miniatura %}{{ producto.portada.miniatura.url }}{% else %}{{ producto.portada.imagen.url }}{% endif %}"
+           alt="{{ producto.portada.alt|default:producto.nombre }}" loading="lazy" width="400" height="400">
+    {% else %}
+      <img src="{% static 'img/placeholder.svg' %}" alt="{{ producto.nombre }}" loading="lazy" width="400" height="400">
+    {% endif %}
+    <div class="tarjeta-producto__etiquetas">
+      {% if producto.ahorro_pct %}<span class="etiqueta etiqueta-oferta">-{{ producto.ahorro_pct }}%</span>{% endif %}
+      {% if producto.es_nuevo %}<span class="etiqueta etiqueta-nuevo">Nuevo</span>{% endif %}
+      {% if producto.agotado %}<span class="etiqueta etiqueta-unidades">Agotado</span>
+      {% elif producto.stock_disponible <= 5 %}<span class="etiqueta etiqueta-unidades">Últimas unidades</span>{% endif %}
+    </div>
+  </a>
+
+  <div class="tarjeta-producto__cuerpo">
+    <a class="tarjeta-producto__nombre" href="{{ producto.get_absolute_url }}">{{ producto.nombre }}</a>
+    {% if producto.descripcion_corta %}<p class="tarjeta-producto__detalle">{{ producto.descripcion_corta }}</p>{% endif %}
+
+    <div class="tarjeta-producto__precios">
+      {% if producto.precio_tachado %}
+        <span class="precio precio--tachado">{{ producto.precio_tachado|cop }}</span>
+      {% endif %}
+      {% if producto.precio_minimo %}
+        <span class="precio">{{ producto.precio_minimo|cop }}</span>
+      {% else %}
+        <span class="precio">—</span>
+      {% endif %}
+    </div>
+
+    {% if producto.tiene_oferta %}<span class="nota-oferta">IVA incluido · Oferta por tiempo limitado</span>
+    {% else %}<span class="nota-oferta">IVA incluido</span>{% endif %}
+
+    {% if producto.total_resenas %}
+      <div class="resumen-estrellas" aria-label="Calificación {{ producto.promedio_calificacion }} de 5">
+        <span aria-hidden="true">{% for i in "12345" %}{% if forloop.counter <= producto.promedio_calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+        <small>({{ producto.total_resenas }})</small>
+      </div>
+    {% endif %}
+
+    <a class="btn btn-primario btn-bloque" href="{{ producto.get_absolute_url }}">
+      {% if producto.agotado %}Ver producto{% else %}Ver y agregar{% endif %}
+    </a>
+  </div>
+</article>

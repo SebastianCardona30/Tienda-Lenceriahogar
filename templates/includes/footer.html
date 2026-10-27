@@ -1,0 +1,56 @@
+<footer class="pie">
+  <div class="contenedor">
+    <div class="pie__columnas">
+      <div>
+        <h3>{{ site.nombre_negocio }}</h3>
+        <p>{{ site.lema }}</p>
+        <p class="mt-1">
+          {% if site.direccion %}{{ site.direccion }}<br>{% endif %}
+          {% if site.ciudad %}{{ site.ciudad }}<br>{% endif %}
+          {% if site.horario %}{{ site.horario }}{% endif %}
+        </p>
+        <div class="pie__redes mt-1">
+          {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+          {% if site.instagram %}<a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+          {% if site.facebook %}<a href="{{ site.facebook }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+          {% if site.tiktok %}<a href="{{ site.tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif %}
+        </div>
+      </div>
+
+      <div>
+        <h4>Ayuda</h4>
+        <ul>
+          <li><a href="{% url 'core:pagina' 'preguntas-frecuentes' %}">Preguntas frecuentes</a></li>
+          <li><a href="{% url 'core:pagina' 'envios-y-cobertura' %}">Envíos y cobertura</a></li>
+          <li><a href="{% url 'core:pagina' 'cambios-y-devoluciones' %}">Cambios y devoluciones</a></li>
+          <li><a href="{% url 'core:pagina' 'contacto' %}">Contacto y PQRS</a></li>
+          <li><a href="{% url 'core:pagina' 'cuenta' %}">Mi cuenta</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="{% url 'core:pagina' 'quienes-somos' %}">Quiénes somos</a></li>
+          <li><a href="{% url 'core:pagina' 'terminos' %}">Términos y condiciones</a></li>
+          <li><a href="{% url 'core:pagina' 'privacidad' %}">Política de privacidad (Ley 1581 de 2012)</a></li>
+          <li><a href="{% url 'core:pagina' 'cookies' %}">Política de cookies</a></li>
+        </ul>
+        <h4 class="mt-2">Medios de pago</h4>
+        <div class="pie__mediospago">
+          <span>Nequi</span><span>Daviplata</span><span>PSE</span>
+          <span>Transferencia</span><span>Contraentrega</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pie__legal">
+      <p>
+        {% if site.nit %}NIT {{ site.nit }} · {% else %}[NIT] · {% endif %}
+        {% if site.email_contacto %}{{ site.email_contacto }}{% else %}[EMAIL]{% endif %}
+        {% if site.telefono %} · {{ site.telefono }}{% endif %}
+      </p>
+      <p>© {% now "Y" %} {{ site.nombre_negocio }}. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>

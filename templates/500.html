@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block titulo %}Error del servidor — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+  <div class="contenedor estado-error">
+    <h1>500 — Algo salió mal</h1>
+    <p>Nosotros ya nos enteramos del error. Intenta de nuevo en unos minutos.</p>
+    <a class="btn btn-primario" href="{% url 'core:home' %}">Ir al inicio</a>
+  </div>
+{% endblock contenido %}

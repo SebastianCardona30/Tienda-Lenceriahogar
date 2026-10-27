@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static format_tags %}
+
+{% block titulo %}{{ site.nombre_negocio }} — Ropa de cama y hogar en Bucaramanga{% endblock titulo %}
+
+{% block metas_extra %}
+  <meta property="og:title" content="{{ site.nombre_negocio }}">
+  <meta property="og:description" content="{{ site.lema|default:'Sábanas, edredones, toallas y más para tu hogar en Bucaramanga, Santander.' }}">
+  <meta property="og:type" content="website">
+{% endblock metas_extra %}
+
+{% block contenido %}
+  {# ============ 1. HERO ============ #}
+  <section class="hero">
+    <div class="contenedor hero__contenido">
+      <div>
+        <span class="etiqueta etiqueta-nuevo">Envíos en todo Santander</span>
+        <h1>Tu hogar se ve mejor con Ciudad Bonita</h1>
+        <p class="hero__bajada">
+          Sábanas, edredones, toallas, cortinas y más, a precios accesibles y con la
+          confianza de pagar como quieras: Nequi, PSE, transferencia o contraentrega.
+        </p>
+        <div class="hero__botones">
+          <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ver la tienda</a>
+          {% if site.whatsapp %}
+            <a class="btn btn-whatsapp" href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, quisiera ver el catálogo'|urlencode }}" target="_blank" rel="noopener">Comprar por WhatsApp</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="hero__ilustracion" aria-hidden="true">
+        <img src="{% static 'img/placeholder.svg' %}" alt="" width="420" height="420">
+      </div>
+    </div>
+  </section>
+
+  {# ============ 2. CATEGORÍAS CON IMAGEN ============ #}
+  {% if categorias_home %}
+  <section class="seccion">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Categorías</h2>
+      <p class="seccion__bajada">Encuentra lo que necesitas para tu cama, tu baño y tu mesa</p>
+      <div class="categorias-home">
+        {% for cat in categorias_home %}
+          <a class="categoria-home" href="{{ cat.get_absolute_url }}">
+            <div class="categoria-home__foto">
+              {% if cat.imagen %}<img src="{{ cat.imagen.url }}" alt="{{ cat.nombre }}" loading="lazy" width="300" height="300">
+              {% else %}<img src="{% static 'img/placeholder.svg' %}" alt="{{ cat.nombre }}" loading="lazy" width="300" height="300">{% endif %}
+            </div>
+            <strong>{{ cat.nombre }}</strong>
+            <span class="solo-lectura">{{ cat.hijas.all|length }} subcategorías</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 3. OFERTAS DE LA SEMANA CON CUENTA REGRESIVA ============ #}
+  {% if ofertas %}
+  <section class="seccion seccion--lavanda">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Ofertas de la semana</h2>
+      {% if site.ofertas_hasta %}
+        <p class="seccion__bajada">
+          ⏰ Terminan en
+          <strong class="cuenta-regresiva"
+                  x-data="cuentaRegresiva('{{ site.ofertas_hasta|date:'c' }}')"
+                  x-text="reloj">--:--:--</strong>
+        </p>
+      {% endif %}
+      <div class="grilla">
+        {% for producto in ofertas %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+      <p class="texto-centrado mt-3">
+        <a class="btn btn-secundario" href="{% url 'catalog:ofertas' %}">Ver todas las ofertas</a>
+      </p>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 4. MÁS VENDIDOS ============ #}
+  {% if mas_vendidos %}
+  <section class="seccion">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Más vendidos</h2>
+      <p class="seccion__bajada">Los favoritos de nuestras clientas</p>
+      <div class="grilla">
+        {% for producto in mas_vendidos %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 5. NOVEDADES ============ #}
+  {% if novedades %}
+  <section class="seccion">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Novedades</h2>
+      <p class="seccion__bajada">Lo último que llegó a la tienda</p>
+      <div class="grilla">
+        {% for producto in novedades %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 6. BANNER DE BORDADOS ============ #}
+  {% if bordados %}
+  <section class="seccion banner-bordados">
+    <div class="contenedor banner-bordados__contenido">
+      <div>
+        <span class="etiqueta etiqueta-nuevo">Hecho a tu medida</span>
+        <h2>Bordados personalizados</h2>
+        <p>Iniciales, nombres o frases en sábanas, toallas y almohadas. Elige la tipografía
+           y el color del hilo. Es un detalle único para regalar o para ti.</p>
+        <p class="solo-lectura"><small>Los productos personalizados no tienen cambio ni retracto, salvo defecto de fabricación.</small></p>
+        <a class="btn btn-primario mt-2" href="{% url 'catalog:buscar' %}?q=bordado">Ver productos bordables</a>
+      </div>
+      <div class="grilla grilla--mini">
+        {% for producto in bordados %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 7. COMBOS ============ #}
+  {% if combos_home %}
+  <section class="seccion">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Combos y sets</h2>
+      <p class="seccion__bajada">Lleva más por menos con sets armados para ti</p>
+      <div class="grilla grilla--combos">
+        {% for combo in combos_home %}
+          <a class="tarjeta-producto" href="{{ combo.get_absolute_url }}">
+            <div class="tarjeta-producto__cuerpo">
+              <span class="tarjeta-producto__nombre">{{ combo.nombre }}</span>
+              {% if combo.ahorro_pct %}<span class="etiqueta etiqueta-oferta">Ahorras {{ combo.ahorro_pct }}%</span>{% endif %}
+              <div class="tarjeta-producto__precios">
+                <span class="precio precio--tachado">{{ combo.precio_normal|cop }}</span>
+                <span class="precio">{{ combo.precio_combo|cop }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+      <p class="texto-centrado mt-3"><a class="btn btn-secundario" href="{% url 'catalog:combos' %}">Ver todos los combos</a></p>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 8. BENEFICIOS ============ #}
+  <section class="seccion seccion--lavanda">
+    <div class="contenedor">
+      <div class="beneficios">
+        <div class="beneficio"><strong>Pago seguro</strong><span>Nequi, Daviplata, PSE, transferencia o contraentrega</span></div>
+        <div class="beneficio"><strong>Envío en Santander</strong><span>Área metropolitana y todo el departamento</span></div>
+        <div class="beneficio"><strong>Cambios fáciles</strong><span>Retracto en 5 días hábiles (excepto bordados)</span></div>
+        <div class="beneficio"><strong>Atención por WhatsApp</strong><span>Te ayudamos a elegir la talla y el color</span></div>
+      </div>
+    </div>
+  </section>
+
+  {# ============ 9. RESEÑAS ============ #}
+  {% if resenas_home %}
+  <section class="seccion">
+    <div class="contenedor">
+      <h2 class="seccion__titulo">Lo que dicen nuestras clientas</h2>
+      <div class="resenas resenas--home">
+        {% for r in resenas_home %}
+          <article class="resena">
+            <div class="resena__cabecera">
+              <strong>{{ r.nombre }}</strong>
+              <span aria-label="{{ r.calificacion }} de 5 estrellas">{% for i in "12345" %}{% if forloop.counter <= r.calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+            </div>
+            <p>{{ r.comentario|truncatechars:180 }}</p>
+            <small class="solo-lectura">Sobre <a href="{{ r.producto.get_absolute_url }}">{{ r.producto.nombre }}</a></small>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# ============ 10. SUSCRIPCIÓN ============ #}
+  <section class="seccion suscripcion">
+    <div class="contenedor texto-centrado" style="max-width:640px;">
+      <h2>Recibe ofertas antes que nadie</h2>
+      <p>Suscríbete y te avisamos por correo de las ofertas de la semana y las novedades.
+         <strong>Recibirás un cupón de bienvenida</strong> para tu primera compra.</p>
+      <form method="post" action="{% url 'catalog:suscribir' %}" class="suscripcion__form">
+        {% csrf_token %}
+        <input type="email" name="email" required placeholder="Tu correo electrónico"
+               aria-label="Tu correo electrónico">
+        <button type="submit" class="btn btn-primario">Quiero mi cupón</button>
+      </form>
+      <small class="solo-lectura">No compartimos tu correo. Puedes darte de baja cuando quieras.</small>
+    </div>
+  </section>
+{% endblock contenido %}

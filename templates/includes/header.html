@@ -1,0 +1,89 @@
+{% load static %}
+<header class="encabezado">
+  {% if site.banner_promo_activo and site.banner_promo_texto %}
+    <div class="barra-promo">
+      {{ site.banner_promo_texto }}
+      {% if site.whatsapp %} · <a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">¡Escríbenos!</a>{% endif %}
+    </div>
+  {% endif %}
+
+  <div class="contenedor encabezado__fila">
+    {# --- Menú hamburguesa (celular): panel deslizable con acordeón --- #}
+    <button type="button" class="hamburguesa" @click="$dispatch('abrir-menu')"
+            aria-label="Abrir menú de categorías" x-data>
+      <span aria-hidden="true">☰</span>
+    </button>
+
+    <a class="logo" href="{% url 'core:home' %}" aria-label="Ir al inicio de {{ site.nombre_negocio }}">
+      {% if site.logo %}
+        <img src="{{ site.logo.url }}" alt="{{ site.nombre_negocio }}" width="220" height="60">
+      {% else %}
+        <img src="{% static 'img/logo.svg' %}" alt="{{ site.nombre_negocio }}" width="220" height="60">
+      {% endif %}
+    </a>
+
+    {# --- Buscador con autocompletado (HTMX) --- #}
+    <div class="buscar" x-data="{ abierto: false, consulta: '' }" @click.outside="abierto = false">
+      <form class="buscar__caja" action="{% url 'catalog:buscar' %}" method="get" role="search"
+            @submit="abierto = false">
+        <div class="buscar__campo">
+          <input type="search" name="q" placeholder="¿Qué buscas? Ej.: sábanas, edredón, toallas…"
+                 aria-label="Buscar productos" autocomplete="off"
+                 hx-get="{% url 'catalog:autocomplete' %}"
+                 hx-trigger="keyup changed delay:250ms"
+                 hx-target="#sugerencias"
+                 hx-include="closest .buscar"
+                 @focus="abierto = true"
+                 x-model="consulta">
+        </div>
+        <button type="submit">Buscar</button>
+        <div id="sugerencias" class="sugerencias-caja" x-show="abierto" x-cloak></div>
+      </form>
+    </div>
+
+    <nav class="acciones" aria-label="Mi cuenta y carrito">
+      <a href="{% url 'core:pagina' 'cuenta' %}">
+        <span aria-hidden="true">👤</span><span class="texto">Mi cuenta</span>
+      </a>
+      <a href="{% url 'core:pagina' 'carrito' %}">
+        <span aria-hidden="true">🛍️</span><span class="texto">Carrito</span>
+      </a>
+    </nav>
+  </div>
+
+  {# --- Menú de categorías interactivo --- #}
+  {# En escritorio: desplegables al pasar el mouse. En celular: panel lateral con acordeón. #}
+  <nav class="menu-nav" aria-label="Categorías"
+       x-data="{ movil: false }"
+       @abrir-menu.window="movil = true"
+       :class="movil ? 'menu-nav--movil-abierto' : ''">
+    <div class="menu-nav__fondo" x-show="movil" x-cloak @click="movil = false" aria-hidden="true"></div>
+    <div class="contenedor">
+      <button type="button" class="menu-nav__cerrar" @click="movil = false" aria-label="Cerrar menú">✕ Cerrar</button>
+      <ul>
+        <li><a href="{% url 'catalog:tienda' %}">Tienda</a></li>
+        {% for cat in categorias_menu %}
+          <li class="menu-nav__item"
+              x-data="{ abierto: false }"
+              @mouseenter="abierto = true" @mouseleave="abierto = false">
+            <a href="{{ cat.get_absolute_url }}"
+               @click.prevent="if ({{ cat.hijas.all|length }}) { abierto = !abierto } else { window.location = '{{ cat.get_absolute_url }}' }"
+               :aria-expanded="abierto ? 'true' : 'false'">
+              {{ cat.nombre }}{% if cat.hijas.all %} <span aria-hidden="true">⌄</span>{% endif %}
+            </a>
+            {% if cat.hijas.all %}
+              <ul class="menu-nav__sub" x-show="abierto" x-cloak>
+                {% for sub in cat.hijas.all %}
+                  {% if sub.activa %}<li><a href="{{ sub.get_absolute_url }}">{{ sub.nombre }}</a></li>{% endif %}
+                {% endfor %}
+                <li><a class="menu-nav__ver-todo" href="{{ cat.get_absolute_url }}">Ver todo en {{ cat.nombre }} →</a></li>
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        <li><a href="{% url 'catalog:ofertas' %}" class="menu-nav__ofertas">Ofertas</a></li>
+        <li><a href="{% url 'catalog:combos' %}">Combos</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>

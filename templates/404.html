@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block titulo %}Página no encontrada — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+  <div class="contenedor estado-error">
+    <h1>404 — Esta página no existe</h1>
+    <p>Puede que el enlace esté viejo o que el producto ya no esté disponible.</p>
+    <a class="btn btn-primario" href="{% url 'core:home' %}">Ir al inicio</a>
+  </div>
+{% endblock contenido %}

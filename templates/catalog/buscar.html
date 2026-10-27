@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resultados para "{{ consulta }}" — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+  {% include "catalog/partials/_listado.html" %}
+{% endblock contenido %}

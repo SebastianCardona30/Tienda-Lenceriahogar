@@ -1,0 +1,82 @@
+{% load format_tags %}
+{# Listado compartido: tienda, categoría, búsqueda y ofertas #}
+<div class="contenedor listado">
+  <nav class="migas" aria-label="Ruta de navegación">
+    <a href="{% url 'core:home' %}">Inicio</a> ›
+    {% if categoria %}<a href="{% url 'catalog:tienda' %}">Tienda</a> › <span>{{ categoria.nombre }}</span>
+    {% else %}<span>{{ titulo }}</span>{% endif %}
+  </nav>
+
+  <div class="listado__cabecera">
+    <div>
+      <h1>{{ titulo }}</h1>
+      <p class="solo-lectura">{{ total_resultados }} producto{{ total_resultados|pluralize:"s" }}</p>
+    </div>
+    <div class="listado__controles">
+      <button type="button" class="btn btn-secundario solo-movil"
+              @click="$dispatch('abrir-filtros')">
+        Filtros{% if filtros_activos %} ({{ filtros_activos|length }}){% endif %}
+      </button>
+      <form method="get" class="orden-form" aria-label="Ordenar productos">
+        {% for k, v in request.GET.lists %}{% if k != "orden" and k != "pagina" %}{% for valor in v %}<input type="hidden" name="{{ k }}" value="{{ valor }}">{% endfor %}{% endif %}{% endfor %}
+        <label for="orden">Ordenar por:</label>
+        <select name="orden" id="orden" onchange="this.form.submit()">
+          {% for clave, nombre in ordenes %}
+            <option value="{{ clave }}" {% if orden_actual == clave %}selected{% endif %}>{{ nombre }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  {% if filtros_activos %}
+    <div class="chips" aria-label="Filtros activos">
+      {% for chip in chips %}
+        <a class="chip" href="{{ chip.url }}">{{ chip.etiqueta }} <span aria-hidden="true">✕</span></a>
+      {% endfor %}
+      <a class="chip chip--limpiar" href="{{ url_limpiar }}">Limpiar todo</a>
+    </div>
+  {% endif %}
+
+  <div class="listado__cuerpo">
+    {% include "catalog/partials/_filtros.html" %}
+
+    <div class="listado__resultados">
+      {% if subcategorias %}
+        <div class="subcategorias">
+          {% for sub in subcategorias %}
+            <a class="subcategoria-chip" href="{{ sub.get_absolute_url }}">
+              {% if sub.imagen %}<img src="{{ sub.imagen.url }}" alt="" loading="lazy">{% endif %}
+              {{ sub.nombre }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="grilla" id="grilla">
+        {% for producto in productos %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+
+      {% if not productos %}
+        <div class="estado-vacio">
+          <h2>No encontramos productos con esa búsqueda</h2>
+          <p>Prueba con otra palabra, quita algún filtro o escríbenos: quizás lo tenemos y aún no está publicado.</p>
+          {% if site.whatsapp %}
+            <a class="btn btn-whatsapp" href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, busqué un producto en su tienda y no lo encontré: '|add:consulta|urlencode }}" target="_blank" rel="noopener">Preguntar por WhatsApp</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if productos.has_next %}
+        <div id="zona-mas">
+          <button type="button" class="btn btn-secundario btn-bloque"
+                  hx-get="?{{ request.GET.urlencode }}&pagina={{ productos.next_page_number }}"
+                  hx-target="#grilla" hx-swap="beforeend" hx-indicator="#cargando">
+            Cargar más
+          </button>
+        </div>
+      {% endif %}
+      <p id="cargando" class="hx-indicador texto-centrado mt-2 solo-lectura" style="display:none;">Cargando…</p>
+    </div>
+  </div>
+</div>

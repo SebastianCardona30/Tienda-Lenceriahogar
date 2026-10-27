@@ -1,0 +1,172 @@
+{% load format_tags %}
+{# Panel de filtros. En celular se abre deslizando (Alpine), en escritorio queda fijo. #}
+<div class="filtros" id="panel-filtros"
+     x-data="{ abierto: false }"
+     @abrir-filtros.window="abierto = true"
+     :class="abierto ? 'filtros--abierto' : ''"
+     aria-label="Filtros de productos">
+
+  <div class="filtros__fondo" x-show="abierto" x-cloak @click="abierto = false" aria-hidden="true"></div>
+
+  <div class="filtros__cabecera">
+    <h2>Filtrar por</h2>
+    <button type="button" class="filtros__cerrar" @click="abierto = false" aria-label="Cerrar filtros">✕</button>
+  </div>
+
+  <form method="get" action="" id="form-filtros">
+    {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+    {% if request.GET.orden %}<input type="hidden" name="orden" value="{{ request.GET.orden }}">{% endif %}
+    {% if request.GET.categoria %}<input type="hidden" name="categoria" value="{{ request.GET.categoria }}">{% endif %}
+
+    {# --- Categoría --- #}
+    {% if categorias_raiz %}
+    <fieldset class="filtro">
+      <legend>Categoría</legend>
+      {% for c in categorias_raiz %}
+        <label class="filtro__opcion">
+          <input type="radio" name="categoria" value="{{ c.slug }}"
+                 {% if request.GET.categoria == c.slug %}checked{% endif %}>
+          <span>{{ c.nombre }}</span>
+        </label>
+        {% for sub in c.hijas.all %}
+          {% if sub.activa %}
+          <label class="filtro__opcion filtro__opcion--sub">
+            <input type="radio" name="categoria" value="{{ sub.slug }}"
+                   {% if request.GET.categoria == sub.slug %}checked{% endif %}>
+            <span>{{ sub.nombre }}</span>
+          </label>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {# --- Talla --- #}
+    {% if opciones.tallas %}
+    <fieldset class="filtro">
+      <legend>Talla / medida</legend>
+      {% for t in opciones.tallas %}
+        <label class="filtro__opcion">
+          <input type="radio" name="talla" value="{{ t }}" {% if request.GET.talla == t %}checked{% endif %}>
+          <span>{{ t }}</span>
+          {% with c=conteos.tallas|dictkey:t %}{% if c %}<small class="filtro__conteo">{{ c }}</small>{% endif %}{% endwith %}
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {# --- Color (swatches) --- #}
+    {% if opciones.colores %}
+    <fieldset class="filtro">
+      <legend>Color</legend>
+      <div class="swatches">
+        {% for c in opciones.colores %}
+          <button type="button" class="swatch {% if request.GET.color == c.nombre %}swatch--activo{% endif %}"
+                  style="background: {{ c.hex }}" title="{{ c.nombre }}"
+                  @click="
+                    const actual = $el.classList.contains('swatch--activo');
+                    $root.querySelectorAll('.swatch--activo').forEach(b => b.classList.remove('swatch--activo'));
+                    const campo = $el.form.querySelector('input[name=color]');
+                    if (actual) { campo.value = ''; $el.classList.remove('swatch--activo'); }
+                    else { campo.value = $el.title; $el.classList.add('swatch--activo'); }
+                  ">{{ c.nombre }}<span class="sr">{{ c.nombre }}</span></button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="color" value="{{ request.GET.color|default:'' }}">
+    </fieldset>
+    {% endif %}
+
+    {# --- Marca --- #}
+    {% if opciones.marcas %}
+    <fieldset class="filtro">
+      <legend>Marca</legend>
+      {% for m in opciones.marcas %}
+        <label class="filtro__opcion">
+          <input type="radio" name="marca" value="{{ m }}" {% if request.GET.marca == m %}checked{% endif %}>
+          <span>{{ m }}</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {# --- Material --- #}
+    {% if opciones.materiales %}
+    <fieldset class="filtro">
+      <legend>Material</legend>
+      {% for m in opciones.materiales %}
+        <label class="filtro__opcion">
+          <input type="radio" name="material" value="{{ m }}" {% if request.GET.material == m %}checked{% endif %}>
+          <span>{{ m }}</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {# --- Precio --- #}
+    <fieldset class="filtro">
+      <legend>Precio</legend>
+      <div class="filtro__precio">
+        <input type="number" name="precio_min" min="0" step="1000" placeholder="Mínimo"
+               value="{{ request.GET.precio_min|default:'' }}" aria-label="Precio mínimo">
+        <span>–</span>
+        <input type="number" name="precio_max" min="0" step="1000" placeholder="Máximo"
+               value="{{ request.GET.precio_max|default:'' }}" aria-label="Precio máximo">
+      </div>
+    </fieldset>
+
+    {# --- Hilos y gramaje --- #}
+    {% if opciones.hilos %}
+    <fieldset class="filtro">
+      <legend>Conteo de hilos</legend>
+      {% for h in opciones.hilos %}
+        <label class="filtro__opcion">
+          <input type="radio" name="hilos" value="{{ h }}" {% if request.GET.hilos == h|stringformat:'s' %}checked{% endif %}>
+          <span>{{ h }} hilos</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {% if opciones.gramajes %}
+    <fieldset class="filtro">
+      <legend>Gramaje</legend>
+      {% for g in opciones.gramajes %}
+        <label class="filtro__opcion">
+          <input type="radio" name="gramaje" value="{{ g }}" {% if request.GET.gramaje == g|stringformat:'s' %}checked{% endif %}>
+          <span>{{ g }} g/m²</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    {# --- Disponibilidad y oferta --- #}
+    <fieldset class="filtro">
+      <legend>Disponibilidad</legend>
+      <label class="filtro__opcion">
+        <input type="checkbox" name="disponible" value="1" {% if request.GET.disponible == "1" %}checked{% endif %}>
+        <span>Solo disponibles</span>
+      </label>
+      <label class="filtro__opcion">
+        <input type="checkbox" name="oferta" value="1" {% if request.GET.oferta == "1" %}checked{% endif %}>
+        <span>En oferta</span>
+      </label>
+    </fieldset>
+
+    {# --- Calificación --- #}
+    <fieldset class="filtro">
+      <legend>Calificación</legend>
+      {% for n in "54321" %}
+        <label class="filtro__opcion">
+          <input type="radio" name="calificacion" value="{{ n }}"
+                 {% if request.GET.calificacion == n %}checked{% endif %}>
+          <span>{% for i in "12345" %}{% if forloop.counter <= n %}★{% else %}☆{% endif %}{% endfor %} o más</span>
+        </label>
+      {% endfor %}
+    </fieldset>
+
+    <div class="filtros__acciones">
+      <button type="submit" class="btn btn-primario btn-bloque">Aplicar filtros</button>
+      <a class="btn btn-secundario btn-bloque" href="?{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}">Limpiar todo</a>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,17 @@
+{% load format_tags %}
+{# Sugerencias del buscador (HTMX). Se muestra debajo del campo de búsqueda. #}
+{% if sugerencias %}
+  <ul class="sugerencias">
+    {% for s in sugerencias %}
+      <li>
+        <a href="{{ s.get_absolute_url }}">
+          <span class="sugerencias__nombre">{{ s.nombre }}</span>
+          <span class="precio">{{ s.precio_minimo|cop }}</span>
+        </a>
+      </li>
+    {% endfor %}
+    <li class="sugerencias__ver">
+      <a href="{% url 'catalog:buscar' %}?q={{ consulta|urlencode }}">Ver todos los resultados para "{{ consulta }}" →</a>
+    </li>
+  </ul>
+{% endif %}

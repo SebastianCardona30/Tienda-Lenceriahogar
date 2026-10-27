@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static format_tags %}
+
+{% block titulo %}{{ combo.nombre }} — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="migas" aria-label="Ruta de navegación">
+    <a href="{% url 'core:home' %}">Inicio</a> ›
+    <a href="{% url 'catalog:combos' %}">Combos</a> › <span>{{ combo.nombre }}</span>
+  </nav>
+
+  <div class="combo-detalle">
+    <div class="combo-detalle__foto">
+      {% if combo.imagen %}
+        <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" width="800" height="800">
+      {% else %}
+        <img src="{% static 'img/placeholder.svg' %}" alt="{{ combo.nombre }}" width="800" height="800">
+      {% endif %}
+    </div>
+
+    <div>
+      <h1>{{ combo.nombre }}</h1>
+      {% if combo.descripcion %}<p class="mt-1">{{ combo.descripcion|linebreaks }}</p>{% endif %}
+
+      <div class="ficha__precios mt-2">
+        {% if combo.ahorro_pct %}<span class="precio precio--tachado">{{ combo.precio_normal|cop }}</span>{% endif %}
+        <span class="precio precio--grande">{{ combo.precio_combo|cop }}</span>
+        {% if combo.ahorro_pct %}<span class="etiqueta etiqueta-oferta">Ahorras {{ combo.ahorro_pct }}%</span>{% endif %}
+        <span class="iva">IVA incluido</span>
+      </div>
+
+      <h2 class="mt-3">Qué incluye</h2>
+      <ul class="combo-detalle__items">
+        {% for item in combo.items.all %}
+          <li>
+            <strong>{{ item.cantidad }}x</strong>
+            <a href="{{ item.producto.get_absolute_url }}">{{ item.producto.nombre }}</a>
+            {% if item.producto.precio_minimo %}<span class="solo-lectura">({{ item.producto.precio_minimo|cop }} c/u)</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <p class="solo-lectura mt-2">Para armar tu combo en el carrito, agrega cada producto por separado.
+         ¿Prefieres que lo armemos nosotros? Escríbenos por WhatsApp.</p>
+      {% if site.whatsapp %}
+        <a class="btn btn-whatsapp btn-bloque mt-1"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, me interesa el combo: '|add:combo.nombre|urlencode }}"
+           target="_blank" rel="noopener">Pedir combo por WhatsApp</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock contenido %}

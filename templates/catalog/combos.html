@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static format_tags %}
+
+{% block titulo %}Combos y sets — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="migas" aria-label="Ruta de navegación">
+    <a href="{% url 'core:home' %}">Inicio</a> › <span>Combos y sets</span>
+  </nav>
+
+  <h1>Combos y sets</h1>
+  <p class="solo-lectura">Lleva más por menos: sets armados para renovar tu cama o tu baño completo.</p>
+
+  {% if combos %}
+    <div class="grilla grilla--combos mt-2">
+      {% for combo in combos %}
+        <a class="tarjeta-producto" href="{{ combo.get_absolute_url }}">
+          {% if combo.imagen %}
+            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" loading="lazy" width="400" height="400">
+          {% else %}
+            <img src="{% static 'img/placeholder.svg' %}" alt="{{ combo.nombre }}" loading="lazy" width="400" height="400">
+          {% endif %}
+          <div class="tarjeta-producto__cuerpo">
+            <span class="tarjeta-producto__nombre">{{ combo.nombre }}</span>
+            {% if combo.ahorro_pct %}<span class="etiqueta etiqueta-oferta">Ahorras {{ combo.ahorro_pct }}%</span>{% endif %}
+            <div class="tarjeta-producto__precios">
+              <span class="precio precio--tachado">{{ combo.precio_normal|cop }}</span>
+              <span class="precio">{{ combo.precio_combo|cop }}</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="estado-vacio">
+      <h2>Estamos armando los primeros combos</h2>
+      <p>Escríbenos por WhatsApp y te armamos un set a la medida.</p>
+      {% if site.whatsapp %}
+        <a class="btn btn-whatsapp" href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, quisiera un combo o set'|urlencode }}" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock contenido %}

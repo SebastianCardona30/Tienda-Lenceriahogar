@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ pagina.titulo }} — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block metas_extra %}
+  {% if categoria.meta_descripcion %}<meta name="description" content="{{ categoria.meta_descripcion }}">{% endif %}
+{% endblock metas_extra %}
+
+{% block contenido %}
+  {% include "catalog/partials/_listado.html" %}
+{% endblock contenido %}

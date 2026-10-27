@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% load static format_tags %}
+
+{% block titulo %}{{ producto.meta_titulo|default:producto.nombre }} — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block metas_extra %}
+  <meta name="description" content="{{ producto.meta_descripcion|default:producto.descripcion_corta|default:'Compra en ' }}{{ site.nombre_negocio }}">
+  <meta property="og:title" content="{{ producto.nombre }}">
+  <meta property="og:type" content="product">
+  {% if producto.portada %}<meta property="og:image" content="{{ producto.portada.imagen.url }}">{% endif %}
+  {# Datos estructurados schema.org (se arman en la vista) #}
+  <script type="application/ld+json">{{ schema_json|safe }}</script>
+{% endblock metas_extra %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="migas" aria-label="Ruta de navegación">
+    <a href="{% url 'core:home' %}">Inicio</a> ›
+    <a href="{% url 'catalog:tienda' %}">Tienda</a> ›
+    {% with cat=producto.categorias.first %}
+      {% if cat %}<a href="{{ cat.get_absolute_url }}">{{ cat.nombre }}</a> › {% endif %}
+    {% endwith %}
+    <span>{{ producto.nombre }}</span>
+  </nav>
+
+  <div class="ficha" x-data="fichaProducto({{ variantes_json }})">
+    {# ============ GALERÍA ============ #}
+    <div class="ficha__galeria" x-data="{ activa: 0 }">
+      <div class="galeria__principal">
+        {% if producto.fotos.all %}
+          {% for foto in producto.fotos.all %}
+            <img src="{{ foto.imagen.url }}" alt="{{ foto.alt|default:producto.nombre }}"
+                 x-show="activa === {{ forloop.counter0 }}" width="800" height="800"
+                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+          {% endfor %}
+        {% else %}
+          <img src="{% static 'img/placeholder.svg' %}" alt="{{ producto.nombre }}" width="800" height="800">
+        {% endif %}
+        {% if producto.ahorro_pct %}
+          <span class="etiqueta etiqueta-oferta galeria__bandera">-{{ producto.ahorro_pct }}%</span>
+        {% endif %}
+      </div>
+      {% if producto.fotos.count > 1 %}
+        <div class="galeria__miniaturas">
+          {% for foto in producto.fotos.all %}
+            <button type="button" @click="activa = {{ forloop.counter0 }}"
+                    :class="activa === {{ forloop.counter0 }} ? 'activa' : ''"
+                    aria-label="Ver foto {{ forloop.counter }}">
+              <img src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}" alt="" loading="lazy">
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    {# ============ INFORMACIÓN ============ #}
+    <div class="ficha__info">
+      {% if producto.marca %}<p class="ficha__marca">{{ producto.marca }}</p>{% endif %}
+      <h1>{{ producto.nombre }}</h1>
+
+      {% if producto.total_resenas %}
+        <a href="#resenas" class="resumen-estrellas">
+          <span aria-hidden="true">{% for i in "12345" %}{% if forloop.counter <= producto.promedio_calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+          <span>{{ producto.promedio_calificacion }} · {{ producto.total_resenas }} reseña{{ producto.total_resenas|pluralize }}</span>
+        </a>
+      {% endif %}
+
+      <div class="ficha__precios">
+        {% if producto.precio_tachado %}
+          <span class="precio precio--tachado"
+                x-text="varianteSeleccionada.ahorro > 0 ? formatear(varianteSeleccionada.precio) : ''"
+                x-cloak>{{ producto.precio_tachado|cop }}</span>
+        {% endif %}
+        <span class="precio precio--grande" x-text="formatear(varianteSeleccionada.precio_final)">{{ producto.precio_minimo|cop }}</span>
+        <span class="iva">IVA {% if site.iva_incluido %}incluido{% else %}por aparte{% endif %}</span>
+        <span class="etiqueta etiqueta-oferta" x-show="varianteSeleccionada.ahorro > 0" x-text="'Ahorras ' + varianteSeleccionada.ahorro + '%'"></span>
+      </div>
+
+      {% if producto.descripcion_corta %}<p class="ficha__bajada">{{ producto.descripcion_corta }}</p>{% endif %}
+
+      {# --- Selectores de variante --- #}
+      {% if tallas %}
+      <div class="selector">
+        <p class="selector__titulo">Talla / medida: <strong x-text="seleccion.talla || 'elige una'"></strong></p>
+        <div class="selector__opciones">
+          {% for t in tallas %}
+            <button type="button" class="opcion" :class="seleccion.talla === '{{ t }}' ? 'activa' : ''"
+                    @click="elegir('talla', '{{ t }}')">{{ t }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if colores %}
+      <div class="selector">
+        <p class="selector__titulo">Color: <strong x-text="seleccion.color || 'elige uno'"></strong></p>
+        <div class="selector__opciones">
+          {% for c in colores %}
+            <button type="button" class="opcion" :class="seleccion.color === '{{ c }}' ? 'activa' : ''"
+                    @click="elegir('color', '{{ c }}')">{{ c }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if materiales %}
+      <div class="selector">
+        <p class="selector__titulo">Material: <strong x-text="seleccion.material || 'elige uno'"></strong></p>
+        <div class="selector__opciones">
+          {% for m in materiales %}
+            <button type="button" class="opcion" :class="seleccion.material === '{{ m }}' ? 'activa' : ''"
+                    @click="elegir('material', '{{ m }}')">{{ m }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# --- Stock y cantidad --- #}
+      <p class="ficha__stock" :class="varianteSeleccionada.disponible ? 'hay' : 'nohay'">
+        <span x-show="varianteSeleccionada.disponible && varianteSeleccionada.stock <= 5"
+              x-text="'¡Solo quedan ' + varianteSeleccionada.stock + '! aprovecha'"></span>
+        <span x-show="varianteSeleccionada.disponible && varianteSeleccionada.stock > 5">Disponible ✅</span>
+        <span x-show="!varianteSeleccionada.disponible && varianteSeleccionada.sku" x-text="'Agotado por ahora'"></span>
+        <span x-show="!varianteSeleccionada.sku && ({{ tallas|length }} + {{ colores|length }} + {{ materiales|length }}) > 0">Elige talla y color para ver disponibilidad</span>
+      </p>
+
+      <form method="post" action="{% url 'cart:agregar' %}" class="ficha__compra" id="form-compra">
+        {% csrf_token %}
+        <input type="hidden" name="sku" :value="varianteSeleccionada.sku">
+        <div class="cantidad">
+          <button type="button" @click="cantidad = Math.max(1, cantidad - 1)" aria-label="Quitar uno">−</button>
+          <input type="number" name="cantidad" x-model.number="cantidad" min="1" value="1" aria-label="Cantidad">
+          <button type="button" @click="cantidad++" aria-label="Agregar uno">+</button>
+        </div>
+        <button type="submit" class="btn btn-primario btn-bloque" x-show="varianteSeleccionada.sku">
+          Agregar al carrito
+        </button>
+        <button type="button" class="btn btn-primario btn-bloque" x-show="!varianteSeleccionada.sku"
+                @click="avisarEleccion()">Elige talla y color</button>
+      </form>
+
+      {% if site.whatsapp %}
+        <a class="btn btn-whatsapp btn-bloque"
+           :href="'https://wa.me/{{ site.whatsapp }}?text=' + encodeURIComponent(mensajeWhatsapp())"
+           target="_blank" rel="noopener">Comprar por WhatsApp</a>
+      {% endif %}
+
+      <button type="button" class="btn btn-secundario btn-bloque"
+              @click="CiudadBonita.avisar('Tu lista de deseos llega en la Fase 2. Por ahora, escríbenos por WhatsApp.')">
+        ♡ Agregar a mi lista de deseos
+      </button>
+
+      {# --- Ayudas --- #}
+      <div class="ficha__ayudas">
+        <details class="ayuda">
+          <summary>📏 Guía de tallas</summary>
+          <p>Sencilla: 140×190 cm · Semidoble: 160×200 cm · Doble: 200×200 cm · Queen: 200×230 cm · King: 230×230 cm.
+             ¿Dudas? Escríbenos por WhatsApp y te ayudamos a elegir.</p>
+        </details>
+        <details class="ayuda">
+          <summary>🚚 Envíos en Santander</summary>
+          <p>Entregamos en el área metropolitana de Bucaramanga y en todo el departamento con transportadora.
+             <a href="{% url 'core:pagina' 'envios-y-cobertura' %}">Ver zonas y tarifas</a>.</p>
+        </details>
+        <details class="ayuda">
+          <summary>🔄 Cambios y devoluciones</summary>
+          <p>Tienes 5 días hábiles para retractarte desde la entrega.
+             {% if producto.es_bordado %}<strong>Los productos personalizados con bordado no tienen cambio ni retracto</strong>, salvo defecto de fabricación.{% endif %}
+             <a href="{% url 'core:pagina' 'cambios-y-devoluciones' %}">Ver política completa</a>.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  {# ============ PESTAÑAS ============ #}
+  <section class="ficha__pestanas" x-data="{ pestana: 'descripcion' }">
+    <div class="pestanas__botones" role="tablist">
+      <button type="button" :class="pestana === 'descripcion' ? 'activa' : ''" @click="pestana = 'descripcion'">Descripción</button>
+      <button type="button" :class="pestana === 'cuidado' ? 'activa' : ''" @click="pestana = 'cuidado'">Materiales y cuidado</button>
+      <button type="button" :class="pestana === 'envios' ? 'activa' : ''" @click="pestana = 'envios'">Envíos y devoluciones</button>
+    </div>
+    <div class="pestanas__contenido">
+      <div x-show="pestana === 'descripcion'">
+        {% if producto.descripcion_larga %}{{ producto.descripcion_larga|linebreaks }}{% else %}<p class="solo-lectura">Estamos preparando la descripción de este producto. Escríbenos por WhatsApp si quieres fotos o detalles.</p>{% endif %}
+      </div>
+      <div x-show="pestana === 'cuidado'">
+        {% if producto.material %}<p><strong>Material:</strong> {{ producto.material }}</p>{% endif %}
+        {% if producto.composicion %}<p><strong>Composición:</strong> {{ producto.composicion }}</p>{% endif %}
+        {% if producto.cuidado %}<p><strong>Cuidado:</strong> {{ producto.cuidado|linebreaks }}</p>{% else %}<p class="solo-lectura">Lavar con agua fría, no usar blanqueante y secar a baja temperatura.</p>{% endif %}
+      </div>
+      <div x-show="pestana === 'envios'">
+        <p>Enviamos solo dentro de Santander: área metropolitana de Bucaramanga con entrega propia o mensajero, y el resto del departamento por transportadora.</p>
+        <p>Retracto dentro de los 5 días hábiles siguientes a la entrega (excepto productos personalizados con bordado).</p>
+        <a class="btn btn-secundario mt-1" href="{% url 'core:pagina' 'envios-y-cobertura' %}">Ver detalle de envíos</a>
+      </div>
+    </div>
+  </section>
+
+  {# ============ COMBOS QUE INCLUYEN ESTE PRODUCTO ============ #}
+  {% if combos_producto %}
+    <section class="seccion">
+      <h2 class="seccion__titulo">Completa tu set</h2>
+      <div class="grilla grilla--combos">
+        {% for combo in combos_producto %}
+          <a class="tarjeta-producto" href="{{ combo.get_absolute_url }}">
+            <div class="tarjeta-producto__cuerpo">
+              <span class="tarjeta-producto__nombre">{{ combo.nombre }}</span>
+              <span class="precio">{{ combo.precio_combo|cop }}</span>
+              <span class="etiqueta etiqueta-envio">Ahorras {{ combo.ahorro_pct }}%</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {# ============ RESEÑAS ============ #}
+  <section class="seccion" id="resenas">
+    <h2 class="seccion__titulo">Reseñas de clientes</h2>
+    {% if resenas %}
+      <div class="resenas">
+        {% for r in resenas %}
+          <article class="resena">
+            <div class="resena__cabecera">
+              <strong>{{ r.nombre }}</strong>
+              <span aria-label="{{ r.calificacion }} de 5 estrellas">{% for i in "12345" %}{% if forloop.counter <= r.calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+              {% if r.verificada %}<span class="etiqueta etiqueta-envio">Compra verificada</span>{% endif %}
+            </div>
+            <p>{{ r.comentario|linebreaksbr }}</p>
+            <small class="solo-lectura">{{ r.creada|date:"d/m/Y" }}</small>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="texto-centrado solo-lectura">Aún no hay reseñas. ¡Sé la primera persona en opinar!</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'catalog:enviar_resena' producto.slug %}" class="form-resena">
+      {% csrf_token %}
+      <h3>Deja tu reseña</h3>
+      <label>Tu nombre
+        <input type="text" name="nombre" required maxlength="80">
+      </label>
+      <label>Calificación
+        <select name="calificacion" required>
+          <option value="5">★★★★★ Excelente</option>
+          <option value="4">★★★★ Muy bueno</option>
+          <option value="3">★★★ Regular</option>
+          <option value="2">★★ Deficiente</option>
+          <option value="1">★ Malo</option>
+        </select>
+      </label>
+      <label>Tu comentario
+        <textarea name="comentario" rows="3" required maxlength="2000"></textarea>
+      </label>
+      <p class="solo-lectura">Tu reseña será publicada tras una breve revisión.</p>
+      <button type="submit" class="btn btn-primario">Enviar reseña</button>
+    </form>
+  </section>
+
+  {# ============ RELACIONADOS ============ #}
+  {% if relacionados %}
+    <section class="seccion">
+      <h2 class="seccion__titulo">También te puede gustar</h2>
+      <div class="grilla">
+        {% for producto in relacionados %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {# ============ VISTOS RECIENTEMENTE ============ #}
+  {% if vistos %}
+    <section class="seccion">
+      <h2 class="seccion__titulo">Vistos recientemente</h2>
+      <div class="grilla">
+        {% for producto in vistos %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+{# ============ Barra fija de compra (celular) ============ #}
+<div class="barra-compra-movil">
+  <div>
+    <span class="precio" x-text="formatear(varianteSeleccionada.precio_final)"></span>
+  </div>
+  <button type="submit" form="form-compra" class="btn btn-primario" x-show="varianteSeleccionada.sku">Agregar</button>
+  <button type="button" class="btn btn-primario" x-show="!varianteSeleccionada.sku" @click="avisarEleccion()">Elegir talla</button>
+</div>
+{% endblock contenido %}
+
+{% block scripts_extra %}
+<script>
+// Lógica de selección de variante (Alpine.js)
+function fichaProducto(variantes) {
+  return {
+    variantes: variantes,
+    seleccion: { talla: "", color: "", material: "" },
+    cantidad: 1,
+    get varianteSeleccionada() {
+      var s = this.seleccion;
+      var lista = this.variantes.filter(function (v) {
+        return (!s.talla || v.talla === s.talla)
+          && (!s.color || v.color === s.color)
+          && (!s.material || v.material === s.material);
+      });
+      // Primero una disponible, si no, la primera que aplique
+      return lista.find(function (v) { return v.disponible; }) || lista[0] || {};
+    },
+    elegir: function (campo, valor) {
+      this.seleccion[campo] = this.seleccion[campo] === valor ? "" : valor;
+    },
+    formatear: function (n) {
+      if (n === undefined || n === null) return "";
+      return "$" + Math.round(n).toLocaleString("es-CO");
+    },
+    mensajeWhatsapp: function () {
+      var v = this.varianteSeleccionada;
+      var partes = [{{ producto_nombre_json|safe }}];
+      if (v.talla) partes.push("Talla: " + v.talla);
+      if (v.color) partes.push("Color: " + v.color);
+      if (v.material) partes.push("Material: " + v.material);
+      partes.push("Cantidad: " + this.cantidad);
+      partes.push("Precio: " + this.formatear(v.precio_final));
+      partes.push("Link: " + window.location.origin + "{{ producto.get_absolute_url }}");
+      return "Hola, quisiera comprar:\n" + partes.join("\n");
+    },
+    avisarEleccion: function () {
+      CiudadBonita.avisar("Elige talla y color para continuar 😉");
+    },
+  };
+}
+</script>
+{% endblock scripts_extra %}

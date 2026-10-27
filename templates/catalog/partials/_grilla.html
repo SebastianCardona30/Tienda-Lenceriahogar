@@ -1,0 +1,4 @@
+{% load format_tags %}
+{# Devuelve solo las tarjetas (respuesta HTMX de "cargar más") #}
+{% for producto in productos %}{% include "catalog/partials/_tarjeta.html" %}{% empty %}{% endfor %}
+{% if not productos.has_next %}<div id="zona-mas" hx-swap-oob="delete:#zona-mas"></div>{% endif %}
