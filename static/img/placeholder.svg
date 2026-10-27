@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#F1E8FA"/>
+  <g opacity="0.85">
+    <ellipse cx="200" cy="180" rx="110" ry="70" fill="#FFFFFF"/>
+    <rect x="105" y="180" width="190" height="90" rx="24" fill="#E7DCEE"/>
+    <rect x="120" y="150" width="80" height="46" rx="14" fill="#FBD5E5"/>
+    <rect x="205" y="150" width="80" height="46" rx="14" fill="#FBD5E5"/>
+    <circle cx="322" cy="108" r="26" fill="#8A4FBF"/>
+    <circle cx="322" cy="108" r="9" fill="#C2185B"/>
+  </g>
+  <text x="200" y="330" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#5B2A86">Ciudad Bonita</text>
+  <text x="200" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#6A6173">Foto próximamente</text>
+</svg>
