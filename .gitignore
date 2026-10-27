@@ -20,3 +20,6 @@ public/
 .idea/
 Thumbs.db
 .DS_Store
+
+.vercel
+.env*
