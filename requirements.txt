@@ -1,0 +1,12 @@
+# Dependencias del proyecto Lencería de Hogar Ciudad Bonita (todas gratuitas / open source)
+# Licencias en README.md
+# En Vercel las mismas dependencias viven en pyproject.toml: mantener en sincronía.
+Django==5.2.18            # BSD-3-Clause
+dj-database-url==3.1.2    # MIT
+python-dotenv==1.2.4      # BSD-3-Clause
+Pillow==13.0.0            # MIT-CMU (HPND)
+django-unfold==0.110.0    # MIT
+django-otp==1.7.5         # MIT
+django-axes==8.3.1        # MIT
+rapidfuzz==3.14.6         # MIT
+whitenoise==6.12.0        # MIT

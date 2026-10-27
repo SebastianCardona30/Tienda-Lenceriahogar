@@ -1,0 +1,25 @@
+# Configuración del proyecto para Vercel (plan Hobby, $0).
+# Vercel instala las dependencias desde este archivo (con uv) y ejecuta
+# [tool.vercel.scripts] build antes de publicar (ver build.py).
+# En local se instalan con: pip install -r requirements.txt
+# IMPORTANTE: mantener esta lista en sincronía con requirements.txt.
+
+[project]
+name = "ciudad-bonita"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "Django==5.2.18",
+    "dj-database-url==3.1.2",
+    "python-dotenv==1.2.4",
+    "Pillow==13.0.0",
+    "django-unfold==0.110.0",
+    "django-otp==1.7.5",
+    "django-axes==8.3.1",
+    "rapidfuzz==3.14.6",
+    "whitenoise==6.12.0",
+]
+
+[tool.vercel.scripts]
+# Corre después de instalar dependencias y antes de publicar (ver build.py)
+build = "python build.py"
