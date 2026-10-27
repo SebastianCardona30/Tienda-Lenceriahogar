@@ -16,7 +16,7 @@ if not exist venv (
     if not exist venv (
         echo.
         echo NO SE ENCONTRO PYTHON. Instalalo desde https://www.python.org/downloads/
-        echo (marca la casilla "Add Python to PATH" al instalar).
+        echo Marca la casilla Add Python to PATH al instalar Python.
         pause
         exit /b 1
     )
