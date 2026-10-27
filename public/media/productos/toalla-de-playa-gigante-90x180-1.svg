@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#F2A516"/>
+  <g opacity="0.25" fill="#FFFFFF">
+    <ellipse cx="300" cy="200" rx="180" ry="110"/>
+    <rect x="170" y="200" width="260" height="110" rx="30" fill="#00000022"/>
+  </g>
+  <text x="300" y="215" text-anchor="middle" font-family="Georgia, serif" font-size="30" font-weight="700" fill="#FFFFFF">Toalla de playa gigante 90x180</text>
+</svg>
