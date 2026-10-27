@@ -345,3 +345,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             "\nListo: datos de demostración cargados. Abre la tienda y el panel de administración."
         ))
+
+        # ---------- Envíos: zonas y municipios de Santander (idempotente) ----------
+        from django.core.management import call_command
+
+        call_command("seed_municipios", verbosity=0)
