@@ -64,7 +64,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] iniciar.bat (arranque local completo en un clic) y publicar-vercel.bat (despliegue en un clic)
 - [x] README.md completo: instalación, despliegue en Vercel, variables de entorno y licencias (costo $0)
 - [x] Verificación local: build.py en limpio OK, 25/25 pruebas, simulación VERCEL=1 (home/tienda/estáticos 200)
-- [ ] Desplegar a Vercel y verificar la URL pública (requiere iniciar sesión en la cuenta Vercel del usuario)
+- [x] Desplegar a Vercel y verificar la URL pública — **https://ciudad-bonita.vercel.app** (proyecto outi2/ciudad-bonita; SECRET_KEY guardada como variable de entorno; build remoto OK con uv desde pyproject.toml)
 
 ## Decisiones anotadas (opción más simple y segura)
 - Python del equipo: 3.14.7 (no hay 3.12 instalada); Django 5.2.18 instalado y verificado funcionando sobre 3.14. Spec dice 3.12: se usa la versión disponible porque el código no depende de 3.12 en particular.

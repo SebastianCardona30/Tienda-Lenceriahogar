@@ -46,7 +46,7 @@
             <button type="button" @click="activa = {{ forloop.counter0 }}"
                     :class="activa === {{ forloop.counter0 }} ? 'activa' : ''"
                     aria-label="Ver foto {{ forloop.counter }}">
-              <img src="{{ foto.miniatura.url|default:foto.imagen.url }}" alt="" loading="lazy">
+              <img src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}" alt="" loading="lazy">
             </button>
           {% endfor %}
         </div>

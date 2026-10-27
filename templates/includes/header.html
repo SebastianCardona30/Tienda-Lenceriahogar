@@ -23,7 +23,7 @@
     </a>
 
     {# --- Buscador con autocompletado (HTMX) --- #}
-    <div class="buscar" x-data="{ abierto: false }" @click.outside="abierto = false">
+    <div class="buscar" x-data="{ abierto: false, consulta: '' }" @click.outside="abierto = false">
       <form class="buscar__caja" action="{% url 'catalog:buscar' %}" method="get" role="search"
             @submit="abierto = false">
         <div class="buscar__campo">

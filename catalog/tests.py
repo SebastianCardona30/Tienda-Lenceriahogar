@@ -125,6 +125,16 @@ class VistasTests(TestCase):
         self.assertContains(r, "Sábanas dobles bonitas")
         self.assertContains(r, "application/ld+json")  # schema.org
 
+    def test_ficha_con_foto_sin_miniatura_no_cae(self):
+        # Regresión: las fotos marcador (SVG) no generan miniatura; la ficha debe
+        # servir la foto principal en vez de fallar con ValueError.
+        from catalog.models import FotoProducto
+
+        FotoProducto.objects.create(producto=self.prod, imagen="productos/marcador.svg")
+        r = self.client.get(self.prod.get_absolute_url())
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "productos/marcador.svg")
+
     def test_categoria(self):
         r = self.client.get(self.cat.get_absolute_url())
         self.assertEqual(r.status_code, 200)
