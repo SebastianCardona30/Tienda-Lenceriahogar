@@ -1,0 +1,341 @@
+/* =========================================================
+   Lencería de Hogar Ciudad Bonita — hoja de estilos base
+   Mobile-first (360 px en adelante), variables de la paleta,
+   sin paso de compilación.
+   ========================================================= */
+
+:root {
+  /* Paleta */
+  --ciruela: #5B2A86;
+  --purpura: #8A4FBF;
+  --lavanda: #F1E8FA;
+  --rosa-cta: #C2185B;
+  --rosa-cta-hover: #A5144D;
+  --rosa-suave: #FBD5E5;
+  --crema: #FFF8FB;
+  --texto: #2A2230;
+  --texto-2: #6A6173;
+  --borde: #E7DCEE;
+  --oferta: #E0245E;
+  --exito: #2E9E6B;
+  --aviso: #F2A516;
+  --error: #D93F3F;
+  --blanco: #FFFFFF;
+
+  /* Tipografías (respaldo del sistema) */
+  --fuente-titulos: "Playfair Display", Georgia, "Times New Roman", serif;
+  --fuente-texto: "Nunito Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Formas y sombras */
+  --radio: 12px;
+  --radio-lg: 16px;
+  --sombra: 0 2px 10px rgba(91, 42, 134, 0.08);
+  --sombra-alta: 0 6px 24px rgba(91, 42, 134, 0.14);
+  --transicion: 180ms ease;
+
+  /* Medidas */
+  --ancho-max: 1200px;
+}
+
+/* ---------- Reset básico ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  font-family: var(--fuente-texto);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--texto);
+  background-color: var(--crema);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+img, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; color: inherit; }
+a { color: var(--purpura); text-decoration: none; transition: color var(--transicion); }
+a:hover { color: var(--ciruela); }
+
+h1, h2, h3, h4 {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  color: var(--ciruela);
+  line-height: 1.2;
+}
+h1 { font-size: 1.7rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.15rem; }
+
+/* Accesibilidad: foco visible (AA) */
+:focus-visible {
+  outline: 3px solid var(--purpura);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Contenedor principal */
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+main.contenido { flex: 1 0 auto; padding-block: 24px 48px; }
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;              /* objetivo táctil AA */
+  padding: 10px 22px;
+  border: 2px solid transparent;
+  border-radius: var(--radio);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color var(--transicion), color var(--transicion),
+              border-color var(--transicion), transform var(--transicion);
+}
+.btn:active { transform: scale(0.98); }
+
+.btn-primario { background: var(--rosa-cta); color: var(--blanco); }
+.btn-primario:hover { background: var(--rosa-cta-hover); color: var(--blanco); }
+
+.btn-secundario { background: transparent; color: var(--ciruela); border-color: var(--ciruela); }
+.btn-secundario:hover { background: var(--lavanda); color: var(--ciruela); }
+
+.btn-whatsapp { background: #25D366; color: #103d22; }
+.btn-whatsapp:hover { background: #1EBE5A; color: #fff; }
+
+.btn-bloque { width: 100%; }
+
+/* ---------- Etiquetas ---------- */
+.etiqueta {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.etiqueta-oferta { background: var(--oferta); color: var(--blanco); }
+.etiqueta-nuevo { background: var(--rosa-suave); color: var(--ciruela); }
+.etiqueta-unidades { background: var(--aviso); color: #3d2a00; }
+.etiqueta-envio { background: var(--exito); color: var(--blanco); }
+
+/* ---------- Barra superior de promoción ---------- */
+.barra-promo {
+  background: var(--ciruela);
+  color: var(--lavanda);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 8px 16px;
+}
+.barra-promo a { color: var(--blanco); font-weight: 700; text-decoration: underline; }
+
+/* ---------- Encabezado ---------- */
+.encabezado {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--sombra);
+}
+.encabezado__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 10px;
+}
+.logo img { width: 160px; height: auto; }
+.buscar { display: none; }        /* el buscador grande entra desde 768 px */
+.buscar__caja { display: flex; gap: 8px; }
+.buscar input[type="search"] {
+  flex: 1;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--borde);
+  border-radius: 999px;
+  background: var(--crema);
+  transition: border-color var(--transicion);
+}
+.buscar input[type="search"]:focus { border-color: var(--purpura); outline: none; }
+.buscar button {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ciruela);
+  color: var(--blanco);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transicion);
+}
+.buscar button:hover { background: var(--purpura); }
+
+.acciones { display: flex; align-items: center; gap: 6px; }
+.acciones a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 8px;
+  color: var(--ciruela);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: var(--radio);
+}
+.acciones a:hover { background: var(--lavanda); }
+.acciones .texto { display: none; }  /* el texto aparece desde 768 px */
+
+/* Menú de categorías (entra en fases posteriores) */
+.menu-nav { display: none; background: var(--lavanda); font-weight: 600; }
+.menu-nav ul { display: flex; gap: 4px; list-style: none; padding: 0; margin: 0; flex-wrap: wrap; }
+.menu-nav a { display: block; padding: 10px 12px; color: var(--ciruela); border-radius: 8px 8px 0 0; }
+.menu-nav a:hover { background: rgba(138, 79, 191, 0.12); }
+
+/* ---------- Secciones ---------- */
+.seccion { padding-block: 28px; }
+.seccion--lavanda { background: var(--lavanda); }
+.seccion__titulo { text-align: center; margin-bottom: 6px; }
+.seccion__bajada { text-align: center; color: var(--texto-2); margin-bottom: 20px; }
+
+/* ---------- Tarjeta de producto (base; se completa en Fase 1) ---------- */
+.tarjeta-producto {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+  box-shadow: var(--sombra);
+  transition: box-shadow var(--transicion), transform var(--transicion);
+  display: flex;
+  flex-direction: column;
+}
+.tarjeta-producto:hover { box-shadow: var(--sombra-alta); transform: translateY(-2px); }
+.tarjeta-producto__cuerpo { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.tarjeta-producto__nombre { font-family: var(--fuente-texto); font-weight: 700; color: var(--texto); font-size: 0.95rem; }
+.precio { font-weight: 700; color: var(--ciruela); font-size: 1.1rem; }
+.precio--tachado { color: var(--texto-2); text-decoration: line-through; font-weight: 400; font-size: 0.9rem; }
+
+/* ---------- Beneficios ---------- */
+.beneficios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.beneficio {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 14px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.beneficio strong { display: block; color: var(--ciruela); }
+.beneficio span { color: var(--texto-2); }
+
+/* ---------- Pie de página ---------- */
+.pie {
+  background: var(--ciruela);
+  color: var(--lavanda);
+  margin-top: auto;
+  padding-block: 32px 16px;
+  font-size: 0.9rem;
+}
+.pie h3, .pie h4 { color: var(--blanco); font-family: var(--fuente-texto); font-size: 0.95rem; margin-bottom: 10px; }
+.pie a { color: var(--lavanda); }
+.pie a:hover { color: var(--blanco); text-decoration: underline; }
+.pie__columnas { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.pie__columnas ul { list-style: none; padding: 0; display: grid; gap: 6px; }
+.pie__mediospago { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pie__mediospago span {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.pie__legal {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 24px;
+  padding-top: 14px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(241, 232, 250, 0.85);
+}
+.pie__redes { display: flex; gap: 10px; }
+.pie__redes a { font-weight: 700; }
+
+/* ---------- Botón flotante de WhatsApp ---------- */
+.whatsapp-flotante {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #25D366;
+  color: #103d22;
+  font-weight: 700;
+  box-shadow: var(--sombra-alta);
+  transition: transform var(--transicion);
+}
+.whatsapp-flotante:hover { transform: scale(1.04); color: #103d22; }
+.whatsapp-flotante svg { width: 24px; height: 24px; fill: currentColor; }
+
+/* ---------- Mensajes (django.contrib.messages) ---------- */
+.mensajes { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.mensaje { padding: 12px 16px; border-radius: var(--radio); font-weight: 600; border: 1px solid; }
+.mensaje--exito { background: #E8F7EF; color: #1c6c46; border-color: var(--exito); }
+.mensaje--error { background: #FDECEC; color: #8f2626; border-color: var(--error); }
+.mensaje--aviso { background: #FEF6E3; color: #6b4a05; border-color: var(--aviso); }
+.mensaje--info { background: var(--lavanda); color: var(--ciruela); border-color: var(--purpura); }
+
+/* ---------- Páginas simples y errores ---------- */
+.pagina-simple { max-width: 760px; margin-inline: auto; }
+.pagina-simple h1 { margin-bottom: 12px; }
+.pagina-simple .bajada { color: var(--texto-2); margin-bottom: 16px; }
+.pagina-simple .en-construccion {
+  background: var(--lavanda);
+  border: 1px dashed var(--purpura);
+  border-radius: var(--radio);
+  padding: 16px;
+  color: var(--ciruela);
+}
+.estado-error { text-align: center; padding-block: 60px; }
+.estado-error p { color: var(--texto-2); margin-block: 12px 20px; }
+
+/* ---------- Utilidades ---------- */
+.texto-centrado { text-align: center; }
+.mt-1 { margin-top: 8px; } .mt-2 { margin-top: 16px; } .mt-3 { margin-top: 24px; }
+.solo-lectura { color: var(--texto-2); }
+
+/* ---------- Tablet (>= 768 px) ---------- */
+@media (min-width: 768px) {
+  h1 { font-size: 2.1rem; }
+  h2 { font-size: 1.7rem; }
+  .buscar { display: block; flex: 1; max-width: 560px; }
+  .acciones .texto { display: inline; }
+  .logo img { width: 200px; }
+  .menu-nav { display: block; }
+  .beneficios { grid-template-columns: repeat(4, 1fr); }
+  .pie__columnas { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---------- Escritorio (>= 1280 px) ---------- */
+@media (min-width: 1280px) {
+  .logo img { width: 220px; }
+}
+
+/* ---------- Impresión ---------- */
+@media print {
+  .barra-promo, .encabezado, .pie, .whatsapp-flotante, .menu-nav { display: none !important; }
+  body { background: #fff; }
+}

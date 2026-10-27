@@ -1,0 +1,49 @@
+{% load static %}
+<header class="encabezado">
+  {% if site.banner_promo_activo and site.banner_promo_texto %}
+    <div class="barra-promo">
+      {{ site.banner_promo_texto }}
+      {% if site.whatsapp %} · <a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">¡Escríbenos!</a>{% endif %}
+    </div>
+  {% endif %}
+
+  <div class="contenedor encabezado__fila">
+    <a class="logo" href="{% url 'core:home' %}" aria-label="Ir al inicio de {{ site.nombre_negocio }}">
+      {% if site.logo %}
+        <img src="{{ site.logo.url }}" alt="{{ site.nombre_negocio }}" width="220" height="60">
+      {% else %}
+        <img src="{% static 'img/logo.svg' %}" alt="{{ site.nombre_negocio }}" width="220" height="60">
+      {% endif %}
+    </a>
+
+    <!-- TODO(Fase 1): apuntar a la vista de resultados de búsqueda -->
+    <form class="buscar" action="/" method="get" role="search">
+      <div class="buscar__caja">
+        <input type="search" name="q" placeholder="¿Qué buscas? Ej.: sábanas, edredón, toallas…"
+               aria-label="Buscar productos">
+        <button type="submit">Buscar</button>
+      </div>
+    </form>
+
+    <nav class="acciones" aria-label="Mi cuenta y carrito">
+      <a href="{% url 'core:pagina' 'cuenta' %}">
+        <span aria-hidden="true">👤</span><span class="texto">Mi cuenta</span>
+      </a>
+      <a href="{% url 'core:pagina' 'carrito' %}">
+        <span aria-hidden="true">🛍️</span><span class="texto">Carrito</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- TODO(Fase 1): menú de categorías desde el catálogo -->
+  <nav class="menu-nav" aria-label="Categorías">
+    <div class="contenedor">
+      <ul>
+        <li><a href="{% url 'core:pagina' 'carrito' %}">Tienda</a></li>
+        <li><a href="{% url 'core:pagina' 'envios-y-cobertura' %}">Envíos</a></li>
+        <li><a href="{% url 'core:pagina' 'quienes-somos' %}">Quiénes somos</a></li>
+        <li><a href="{% url 'core:pagina' 'contacto' %}">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>

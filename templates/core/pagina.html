@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ pagina.titulo }} — {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+  <div class="contenedor">
+    <article class="pagina-simple">
+      <h1>{{ pagina.titulo }}</h1>
+      <p class="bajada">{{ pagina.bajada }}</p>
+      <div class="en-construccion">
+        Esta página se está construyendo. En las siguientes fases tendrás su contenido
+        completo y editable desde el panel de administración.
+      </div>
+      <p class="mt-2"><a class="btn btn-secundario" href="{% url 'core:home' %}">Volver al inicio</a></p>
+    </article>
+  </div>
+{% endblock contenido %}
