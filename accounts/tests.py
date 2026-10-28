@@ -198,7 +198,7 @@ class IngresoTests(BaseCuentas):
 
 class PanelTests(BaseCuentas):
     def test_paginas_de_cuenta_piden_ingreso(self):
-        for url in ("accounts:panel", "accounts:datos", "accounts:pedidos",
+        for url in ("accounts:panel", "accounts:datos", "orders:mis_pedidos",
                     "accounts:direcciones", "accounts:deseos",
                     "accounts:eliminar_cuenta"):
             r = self.client.get(reverse(url))
@@ -207,7 +207,7 @@ class PanelTests(BaseCuentas):
 
     def test_paginas_de_cuenta_se_muestran(self):
         self.client.force_login(self.usuario)
-        for url in ("accounts:panel", "accounts:datos", "accounts:pedidos",
+        for url in ("accounts:panel", "accounts:datos", "orders:mis_pedidos",
                     "accounts:direcciones", "accounts:deseos",
                     "accounts:eliminar_cuenta"):
             r = self.client.get(reverse(url))

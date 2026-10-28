@@ -124,12 +124,6 @@ def mis_datos(request):
     return render(request, "accounts/datos.html", {"form": form})
 
 
-@login_required
-def mis_pedidos(request):
-    """Historial de compras (el modelo Pedido llega en el paso 5)."""
-    return render(request, "accounts/pedidos.html")
-
-
 # ------------------------------------------------------------------ direcciones
 
 @login_required
@@ -232,6 +226,13 @@ def eliminar_cuenta(request):
         if form.is_valid():
             usuario = request.user
             logout(request)
+            # Habeas Data: la venta se conserva, los datos personales no
+            from orders.models import Pedido
+
+            Pedido.objects.filter(usuario=usuario).update(
+                nombre="Cliente eliminada", email="", telefono="", cedula="",
+                direccion="", barrio="", indicaciones="", usuario=None,
+            )
             usuario.delete()  # direcciones, deseos y carrito se borran en cascada
             messages.success(
                 request,

@@ -211,10 +211,9 @@
              href="https://wa.me/{{ site.whatsapp }}?text={{ carrito_ui.whatsapp_texto|urlencode }}"
              target="_blank" rel="noopener">Enviar mi pedido por WhatsApp</a>
         {% endif %}
-        <button type="button" class="btn btn-primario btn-bloque" disabled aria-disabled="true">
+        <a class="btn btn-primario btn-bloque" href="{% url 'orders:checkout' %}">
           Finalizar compra
-        </button>
-        <p class="resumen__nota">El pago en línea se habilita pronto; mientras tanto puedes pedir por WhatsApp.</p>
+        </a>
         <p class="resumen__nota">Todos los precios incluyen IVA.</p>
       </aside>
     </div>

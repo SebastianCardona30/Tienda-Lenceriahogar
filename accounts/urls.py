@@ -13,7 +13,6 @@ urlpatterns = [
     # Panel
     path("cuenta/", views.panel, name="panel"),
     path("cuenta/datos/", views.mis_datos, name="datos"),
-    path("cuenta/pedidos/", views.mis_pedidos, name="pedidos"),
     path("cuenta/direcciones/", views.direcciones, name="direcciones"),
     path("cuenta/direcciones/<int:pk>/editar/", views.editar_direccion, name="editar_direccion"),
     path("cuenta/direcciones/<int:pk>/eliminar/", views.eliminar_direccion, name="eliminar_direccion"),
