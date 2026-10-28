@@ -28,9 +28,9 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 
 ## Fase 2 — Compra
 - [ ] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp
-- [ ] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto
+- [x] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto (Paso 2: promotions/engine.py, cálculo en servidor, 27 pruebas)
 - [ ] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago)
-- [ ] Zonas de envío configurables + lista oficial de municipios de Santander
+- [x] Zonas de envío configurables + lista oficial de municipios de Santander (Paso 1: 87 municipios, seed_municipios, 9 pruebas)
 - [ ] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre
 - [ ] Botón flotante de WhatsApp y mensajes wa.me prellenados
 
@@ -72,4 +72,6 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 1: propiedades de Producto renombradas (`tiene_oferta`, `stock_disponible`) para no chocar con las anotaciones ORM (`en_oferta`, `stock_total`).
 - Fase 1: orden de URLs en config/urls.py — apps específicas (catalog, cart) ANTES del catch-all `<slug:slug>/` de core.
 - Fase 1: "Ofertas de la semana" usa `SiteConfig.ofertas_hasta` (cuenta regresiva) + variantes con `precio_oferta`; el motor de descuentos completo llega en Fase 2.
+- Fase 2: motor de ofertas — cada línea del carrito recibe UNA sola oferta automática (la que más descuente: relámpago, descuento directo, 2x1/3x2 o volumen); el cupón va al final y si no es acumulable se compara el total de ambas opciones y gana la más barata para el cliente. Todo en promotions/engine.py con pruebas.
+- Fase 2: cupón de bienvenida por suscripción — `Cupon.es_bienvenida` marca la plantilla (BIENVENIDA10 en seed_demo) y `Cupon.crear_bienvenida()` genera un código único de un solo uso por suscriptor, mostrado en pantalla (sin correo).
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.

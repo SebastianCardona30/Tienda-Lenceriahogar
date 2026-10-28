@@ -257,8 +257,9 @@ def combo(request, slug):
 
 @require_POST
 def suscribir(request):
-    """Suscripción al boletín desde el inicio."""
+    """Suscripción al boletín desde el inicio (genera cupón de bienvenida)."""
     from core.models import Suscripcion
+    from promotions.models import Cupon
 
     email = (request.POST.get("email") or "").strip().lower()
     if not email or "@" not in email:
@@ -267,11 +268,18 @@ def suscribir(request):
 
     suscripcion, creada = Suscripcion.objects.get_or_create(email=email)
     if creada:
-        messages.success(
-            request,
-            "¡Listo! Te escribiremos con las ofertas de la semana. "
-            "Tu cupón de bienvenida te llegará por correo.",
-        )
+        cupon = Cupon.crear_bienvenida()
+        if cupon:
+            messages.success(
+                request,
+                f"¡Listo! Tu cupón de bienvenida es {cupon.codigo}. "
+                "Guárdalo: es de un solo uso. Te escribiremos con las ofertas de la semana.",
+            )
+        else:
+            messages.success(
+                request,
+                "¡Listo! Te escribiremos con las ofertas de la semana.",
+            )
     else:
         messages.info(request, "Este correo ya estaba suscrito. ¡Gracias por seguir con nosotros!")
     return redirect(request.META.get("HTTP_REFERER", reverse("core:home")))
