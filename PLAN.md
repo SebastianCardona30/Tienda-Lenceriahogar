@@ -27,7 +27,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Verificación: `manage.py check` OK, 25/25 pruebas, home/tienda/categoría/búsqueda/autocomplete responden 200
 
 ## Fase 2 — Compra
-- [ ] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp
+- [x] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp (Paso 3: cart/servicios.py, 28 pruebas; la fusión se conecta al login en el Paso 4)
 - [x] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto (Paso 2: promotions/engine.py, cálculo en servidor, 27 pruebas)
 - [ ] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago)
 - [x] Zonas de envío configurables + lista oficial de municipios de Santander (Paso 1: 87 municipios, seed_municipios, 9 pruebas)
@@ -74,4 +74,5 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 1: "Ofertas de la semana" usa `SiteConfig.ofertas_hasta` (cuenta regresiva) + variantes con `precio_oferta`; el motor de descuentos completo llega en Fase 2.
 - Fase 2: motor de ofertas — cada línea del carrito recibe UNA sola oferta automática (la que más descuente: relámpago, descuento directo, 2x1/3x2 o volumen); el cupón va al final y si no es acumulable se compara el total de ambas opciones y gana la más barata para el cliente. Todo en promotions/engine.py con pruebas.
 - Fase 2: cupón de bienvenida por suscripción — `Cupon.es_bienvenida` marca la plantilla (BIENVENIDA10 en seed_demo) y `Cupon.crear_bienvenida()` genera un código único de un solo uso por suscriptor, mostrado en pantalla (sin correo).
+- Fase 2: el carrito vive en la sesión (`cart/servicios.py`) y se expone en todas las páginas con un context processor (contador, drawer, resumen). El stepper del carrito envía `cantidad` (botones −/+) y `cantidad_ingresada` (campo digitado) porque el botón − va antes que el input en el DOM y, con el mismo nombre, su valor perdía.
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.

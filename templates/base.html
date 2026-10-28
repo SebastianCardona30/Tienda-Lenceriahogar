@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+  <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   {% block metas_extra %}{% endblock metas_extra %}
 </head>
 <body>
@@ -29,6 +30,7 @@
   </main>
 
   {% include "includes/footer.html" %}
+  {% include "includes/drawer_carrito.html" %}
 
   {% if site.whatsapp %}
     <a class="whatsapp-flotante"

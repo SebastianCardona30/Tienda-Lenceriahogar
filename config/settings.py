@@ -103,6 +103,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_config",
+                "cart.context_processors.carrito",
             ],
         },
     },
@@ -110,6 +111,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
+
+# Etiquetas de mensajes con los nombres de color de la paleta (ver base.css)
+MESSAGE_TAGS = {
+    "debug": "info",
+    "info": "info",
+    "success": "exito",
+    "warning": "aviso",
+    "error": "error",
+}
 
 # Base de datos: SQLite por defecto; PostgreSQL solo cambiando DATABASE_URL.
 DATABASES = {

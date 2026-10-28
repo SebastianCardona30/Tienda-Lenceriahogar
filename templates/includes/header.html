@@ -45,8 +45,11 @@
       <a href="{% url 'core:pagina' 'cuenta' %}">
         <span aria-hidden="true">👤</span><span class="texto">Mi cuenta</span>
       </a>
-      <a href="{% url 'core:pagina' 'carrito' %}">
+      <a href="{% url 'cart:pagina' %}" {% if carrito_ui.items %}class="tiene-items"{% endif %}>
         <span aria-hidden="true">🛍️</span><span class="texto">Carrito</span>
+        {% if carrito_ui.items %}
+          <span class="encabezado__contador" aria-label="{{ carrito_ui.items }} productos en el carrito">{{ carrito_ui.items }}</span>
+        {% endif %}
       </a>
     </nav>
   </div>

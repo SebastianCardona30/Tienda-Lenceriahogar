@@ -78,6 +78,7 @@ class ResumenCarrito:
     cupon: Cupon = None
     cupon_descuento: Decimal = CERO
     cupon_error: str = ""
+    cupon_aviso: str = ""
     descuento_ofertas: Decimal = CERO
 
     @property
@@ -109,13 +110,45 @@ class ResumenCarrito:
         return sum(l.cantidad for l in self.lineas)
 
 
-def _mejor_descuento_directo(variante, ahora):
+def _contexto_promos(ahora):
+    """Carga todas las promociones vigentes una sola vez para todo el carrito."""
+    return {
+        "relampagos": list(
+            VentaRelampago.objects.filter(activo=True, desde__lte=ahora, hasta__gte=ahora)
+        ),
+        "descuentos": list(
+            Descuento.objects.filter(activo=True)
+            .select_related("producto", "variante", "categoria")
+        ),
+        "unidades": list(
+            PromoUnidades.objects.filter(activo=True).select_related("producto", "categoria")
+        ),
+        "volumen": list(
+            PromoVolumen.objects.filter(activo=True).select_related("producto", "categoria")
+        ),
+    }
+
+
+def _aplica_a(promo, variante, cats):
+    """Versión en memoria de promo.aplica_a (sin consultas)."""
+    sobre = getattr(promo, "sobre", None)
+    if sobre == "variante":
+        return promo.variante_id == variante.id
+    if sobre == "producto":
+        return promo.producto_id == variante.producto_id
+    if sobre == "categoria":
+        return promo.categoria_id in cats
+    # PromoUnidades / PromoVolumen: producto o categoría
+    if promo.producto_id:
+        return promo.producto_id == variante.producto_id
+    return promo.categoria_id in cats
+
+
+def _mejor_descuento_directo(variante, ahora, cats, descuentos):
     """Devuelve el mejor descuento directo vigente para la variante, o None."""
     candidatos = []
-    for d in Descuento.objects.filter(activo=True).select_related(
-        "producto", "variante", "categoria"
-    ):
-        if not d.vigente(ahora) or not d.aplica_a(variante):
+    for d in descuentos:
+        if not d.vigente(ahora) or not _aplica_a(d, variante, cats):
             continue
         if d.tipo == "porcentaje":
             ahorro = _d(variante.precio_final * d.valor / 100)
@@ -127,7 +160,7 @@ def _mejor_descuento_directo(variante, ahora):
     return max(candidatos, key=lambda c: c[0])[1]
 
 
-def _calcular_linea(linea, ahora, permitir_automaticas=True):
+def _calcular_linea(linea, ahora, ctx, permitir_automaticas=True):
     """
     Calcula una línea: elige la mejor oferta automática (una sola) y la
     expresa como descuento en pesos sobre el precio publicado.
@@ -142,20 +175,20 @@ def _calcular_linea(linea, ahora, permitir_automaticas=True):
         # Cupón no acumulable que ganó: solo queda el precio publicado.
         return LineaCalculada(v, cantidad, precio, precio_base, CERO, motivos)
 
+    cats = set(v.producto.categorias.values_list("id", flat=True))
     linea_total = precio * cantidad
     candidatos = []  # (ahorro en pesos, etiqueta visible)
 
-    # Venta relámpago
-    relampago = (
-        VentaRelampago.objects.filter(variante=v, activo=True, desde__lte=ahora, hasta__gte=ahora)
-        .order_by("precio").first()
-    )
-    if relampago and relampago.precio < precio:
-        ahorro = min(_d(linea_total - relampago.precio * cantidad), linea_total)
-        candidatos.append((ahorro, f"Relámpago -{relampago.ahorro_pct}%"))
+    # Venta relámpago (ya filtrada por fecha en el contexto)
+    relampagos = [r for r in ctx["relampagos"] if r.variante_id == v.id]
+    if relampagos:
+        relampago = min(relampagos, key=lambda r: r.precio)
+        if relampago.precio < precio:
+            ahorro = min(_d(linea_total - relampago.precio * cantidad), linea_total)
+            candidatos.append((ahorro, f"Relámpago -{relampago.ahorro_pct}%"))
 
     # Descuento directo (el mejor de los vigentes)
-    d = _mejor_descuento_directo(v, ahora)
+    d = _mejor_descuento_directo(v, ahora, cats, ctx["descuentos"])
     if d is not None:
         if d.tipo == "porcentaje":
             ahorro = min(_d(linea_total * d.valor / 100), linea_total)
@@ -166,8 +199,8 @@ def _calcular_linea(linea, ahora, permitir_automaticas=True):
         candidatos.append((ahorro, etiqueta))
 
     # Promo de unidades (2x1, 3x2)
-    for p in PromoUnidades.objects.filter(activo=True).select_related("producto", "categoria"):
-        if not (p.vigente(ahora) and p.aplica_a(v)):
+    for p in ctx["unidades"]:
+        if not (p.vigente(ahora) and _aplica_a(p, v, cats)):
             continue
         grupos = cantidad // p.llevar
         if grupos <= 0:
@@ -177,8 +210,8 @@ def _calcular_linea(linea, ahora, permitir_automaticas=True):
         candidatos.append((ahorro, p.etiqueta))
 
     # Descuento por volumen
-    for p in PromoVolumen.objects.filter(activo=True).select_related("producto", "categoria"):
-        if not (p.vigente(ahora) and p.aplica_a(v) and cantidad >= p.cantidad_minima):
+    for p in ctx["volumen"]:
+        if not (p.vigente(ahora) and _aplica_a(p, v, cats) and cantidad >= p.cantidad_minima):
             continue
         if p.tipo == "porcentaje":
             ahorro = min(_d(linea_total * p.valor / 100), linea_total)
@@ -214,8 +247,9 @@ def calcular_carrito(lineas, codigo_cupon=None, usuario=None, ahora=None):
         else:  # tupla (variante, cantidad)
             preparadas.append(LineaCarrito(variante=l[0], cantidad=l[1]))
 
-    # Ofertas automáticas (una sola por línea)
-    lineas_calc = [_calcular_linea(l, ahora) for l in preparadas]
+    # Ofertas automáticas (una sola por línea, con promos cargadas una vez)
+    ctx = _contexto_promos(ahora)
+    lineas_calc = [_calcular_linea(l, ahora, ctx) for l in preparadas]
     descuento_ofertas = _d(sum(l.descuento for l in lineas_calc))
 
     resumen = ResumenCarrito(
@@ -265,7 +299,7 @@ def calcular_carrito(lineas, codigo_cupon=None, usuario=None, ahora=None):
             return resumen
         # Las ofertas automáticas ganan: el cupón no se aplica.
         resumen.cupon = None
-        resumen.cupon_error = (
+        resumen.cupon_aviso = (
             "Este cupón no se acumula con ofertas; se aplicó la mejor opción para ti."
         )
         return resumen
