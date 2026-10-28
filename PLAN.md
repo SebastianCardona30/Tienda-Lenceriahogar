@@ -32,7 +32,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago) (Paso 5: orders con Pedido/ItemPedido, precios congelados, descuento de stock en transacción y confirmación; reserva de 15 min y pago simulado llegan en Fase 3)
 - [x] Zonas de envío configurables + lista oficial de municipios de Santander (Paso 1: 87 municipios, seed_municipios, 9 pruebas)
 - [x] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre (Paso 4: accounts con fusión del carrito al ingresar, 32 pruebas)
-- [ ] Botón flotante de WhatsApp y mensajes wa.me prellenados
+- [x] Botón flotante de WhatsApp y mensajes wa.me prellenados (Paso 6: el flotante viaja con mensaje según la página —inicio, tienda, categoría, búsqueda, ofertas, combos, ficha de producto y carrito—; los botones "Comprar por WhatsApp" y "Enviar mi pedido" ya existían)
 
 ## Fase 3 — Pagos y pedidos
 - [ ] Pasarela simulada local (Aprobado/Rechazado/Pendiente) con misma interfaz que la real
@@ -77,4 +77,5 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 2: el carrito vive en la sesión (`cart/servicios.py`) y se expone en todas las páginas con un context processor (contador, drawer, resumen). El stepper del carrito envía `cantidad` (botones −/+) y `cantidad_ingresada` (campo digitado) porque el botón − va antes que el input en el DOM y, con el mismo nombre, su valor perdía.
 - Fase 2: cuentas — el correo es el nombre de usuario; el carrito del invitado se fusiona con el guardado en la cuenta al iniciar sesión o registrarse (`fusionar_carrito`, suma cantidades) y `Usuario.carrito` se sincroniza en cada guardado para que salir y volver no duplique. El borrado de cuenta (Habeas Data) borra direcciones, deseos y carrito en cascada.
 - Fase 2: pedidos — `Pedido` guarda una foto de los datos y precios al confirmar (nombre, envío, descuentos, total) y el usuario es `SET_NULL` (la venta sobrevive). Al borrar la cuenta se anonimizan los pedidos (nombre→"Cliente eliminada", email/teléfono/dirección vacíos), como manda la Ley 1581. Contraentrega entra "En preparación"; transferencia queda "Pendiente de pago" (el comprobante llega en Fase 3).
+- Fase 2: WhatsApp — el botón flotante de `base.html` usa el bloque `mensaje_whatsapp` (con `{% filter urlencode %}`); cada página lo sobreescribe con un mensaje propio (la ficha menciona el producto, la búsqueda la consulta, etc.). Sin número en `SiteConfig.whatsapp` no se muestra.
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.

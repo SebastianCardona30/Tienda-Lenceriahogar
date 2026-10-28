@@ -2,6 +2,7 @@
 {% load static format_tags %}
 
 {% block titulo %}{{ producto.meta_titulo|default:producto.nombre }} — {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, quisiera información sobre «{{ producto.nombre }}». ¿Me confirmas disponibilidad y envío?{% endblock mensaje_whatsapp %}
 
 {% block metas_extra %}
   <meta name="description" content="{{ producto.meta_descripcion|default:producto.descripcion_corta|default:'Compra en ' }}{{ site.nombre_negocio }}">

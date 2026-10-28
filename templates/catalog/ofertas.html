@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block titulo %}Ofertas de la semana — {{ site.nombre_negocio }}{% endblock titulo %}
+{% block titulo %}Ofertas de la semana - {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, vi las ofertas de la semana y quisiera saber cuáles aplican a mi pedido.{% endblock mensaje_whatsapp %}
 
 {% block contenido %}
   {% if site.ofertas_hasta %}
