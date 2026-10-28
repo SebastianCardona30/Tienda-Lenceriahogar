@@ -104,6 +104,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_config",
                 "cart.context_processors.carrito",
+                "accounts.context_processors.deseos",
             ],
         },
     },
@@ -164,6 +165,9 @@ AXES_RESET_ON_SUCCESS = True
 
 # Usuario personalizado (accounts.Usuario)
 AUTH_USER_MODEL = "accounts.Usuario"
+
+# Acceso a la cuenta (siempre opcional: la compra como invitado está permitida)
+LOGIN_URL = "accounts:ingreso"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
     "django.contrib.auth.backends.ModelBackend",

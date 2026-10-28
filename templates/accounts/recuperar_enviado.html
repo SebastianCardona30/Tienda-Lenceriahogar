@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block titulo %}Revisa tu correo · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta">
+    <h1>¡Revisa tu correo! 📧</h1>
+    <p class="cuenta__bajada">
+      Si hay una cuenta con ese correo, ya te enviamos el enlace para crear una
+      contraseña nueva. No olvides revisar la carpeta de spam.
+    </p>
+
+    <p class="cuenta__enlaces">
+      <a class="btn btn-primario" href="{% url 'accounts:ingreso' %}">Volver a iniciar sesión</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

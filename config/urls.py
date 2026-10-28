@@ -9,6 +9,7 @@ urlpatterns = [
     # El orden importa: las apps específicas ANTES del catch-all de core
     path("", include("catalog.urls")),
     path("", include("cart.urls")),
+    path("", include("accounts.urls")),
     path("", include("core.urls")),  # contiene <slug>/ que atrapa todo lo demás
 ]
 

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block titulo %}Recuperar contraseña · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta">
+    <h1>Recupera tu contraseña</h1>
+    <p class="cuenta__bajada">
+      Escribe el correo de tu cuenta y te enviamos un enlace para crear una nueva
+      contraseña. El correo llega en unos minutos.
+    </p>
+
+    <form method="post" action="{% url 'accounts:recuperar' %}" novalidate>
+      {% csrf_token %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-primario btn-bloque">Enviarme el enlace</button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      <a href="{% url 'accounts:ingreso' %}">← Recordé mi contraseña</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

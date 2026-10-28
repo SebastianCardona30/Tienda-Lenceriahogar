@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block titulo %}Contraseña actualizada · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta">
+    <h1>¡Contraseña actualizada! ✅</h1>
+    <p class="cuenta__bajada">
+      Ya puedes entrar a tu cuenta con tu contraseña nueva.
+    </p>
+
+    <p class="cuenta__enlaces">
+      <a class="btn btn-primario" href="{% url 'accounts:ingreso' %}">Iniciar sesión</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

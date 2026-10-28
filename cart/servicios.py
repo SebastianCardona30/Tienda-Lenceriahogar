@@ -37,9 +37,13 @@ def leer(request):
 
 
 def guardar(request, datos):
-    """Escribe el carrito completo en la sesión."""
+    """Escribe el carrito en la sesión y, si hay sesión de cliente, en la cuenta."""
     request.session[CLAVE] = datos
     request.session.modified = True
+    usuario = getattr(request, "user", None)
+    if usuario is not None and usuario.is_authenticated:
+        usuario.carrito = datos
+        usuario.save(update_fields=["carrito"])
 
 
 def agregar_linea(request, sku, cantidad):

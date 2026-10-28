@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block titulo %}Eliminar mi cuenta · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta cuenta__tarjeta--ancha cuenta__peligro">
+    <h1>Eliminar mi cuenta</h1>
+
+    <div class="cuenta__aviso" role="alert">
+      <p><strong>Esto no se puede deshacer.</strong> Al confirmar:</p>
+      <ul>
+        <li>Se borran tu cuenta, tus direcciones, tu lista de deseos y tus datos personales (Ley 1581 de 2012 — Habeas Data).</li>
+        <li>Los registros de ventas se conservan de forma anónima, sin tus datos, porque son obligatorios para la contabilidad.</li>
+        <li>Si prefieres, antes puedes <a href="{% url 'accounts:datos' %}">descargar o revisar tus datos</a>.</li>
+      </ul>
+    </div>
+
+    <form method="post" action="{% url 'accounts:eliminar_cuenta' %}" novalidate
+          onsubmit="return confirm('¿Segura? Se eliminará tu cuenta y tus datos personales.')">
+      {% csrf_token %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-bloque cuenta__boton-peligro">
+        Eliminar mi cuenta y mis datos
+      </button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      <a href="{% url 'accounts:panel' %}">← No, volver a mi cuenta</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

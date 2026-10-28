@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear cuenta · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta">
+    <h1>Crea tu cuenta</h1>
+    <p class="cuenta__bajada">
+      Guarda tus direcciones, deseos y pedidos para la próxima vez.
+      También puedes comprar como invitado: nadie te obliga a registrarte.
+    </p>
+
+    <form method="post" action="{% url 'accounts:registro' %}" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-primario btn-bloque">Crear mi cuenta</button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      ¿Ya tienes cuenta? <a href="{% url 'accounts:ingreso' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Inicia sesión</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

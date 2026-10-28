@@ -31,7 +31,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto (Paso 2: promotions/engine.py, cálculo en servidor, 27 pruebas)
 - [ ] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago)
 - [x] Zonas de envío configurables + lista oficial de municipios de Santander (Paso 1: 87 municipios, seed_municipios, 9 pruebas)
-- [ ] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre
+- [x] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre (Paso 4: accounts con fusión del carrito al ingresar, 32 pruebas)
 - [ ] Botón flotante de WhatsApp y mensajes wa.me prellenados
 
 ## Fase 3 — Pagos y pedidos
@@ -75,4 +75,5 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 2: motor de ofertas — cada línea del carrito recibe UNA sola oferta automática (la que más descuente: relámpago, descuento directo, 2x1/3x2 o volumen); el cupón va al final y si no es acumulable se compara el total de ambas opciones y gana la más barata para el cliente. Todo en promotions/engine.py con pruebas.
 - Fase 2: cupón de bienvenida por suscripción — `Cupon.es_bienvenida` marca la plantilla (BIENVENIDA10 en seed_demo) y `Cupon.crear_bienvenida()` genera un código único de un solo uso por suscriptor, mostrado en pantalla (sin correo).
 - Fase 2: el carrito vive en la sesión (`cart/servicios.py`) y se expone en todas las páginas con un context processor (contador, drawer, resumen). El stepper del carrito envía `cantidad` (botones −/+) y `cantidad_ingresada` (campo digitado) porque el botón − va antes que el input en el DOM y, con el mismo nombre, su valor perdía.
+- Fase 2: cuentas — el correo es el nombre de usuario; el carrito del invitado se fusiona con el guardado en la cuenta al iniciar sesión o registrarse (`fusionar_carrito`, suma cantidades) y `Usuario.carrito` se sincroniza en cada guardado para que salir y volver no duplique. El borrado de cuenta (Habeas Data) borra direcciones, deseos y carrito en cascada.
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.

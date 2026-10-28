@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Mis pedidos · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <header class="cuenta__cabecera">
+    <h1>Mis pedidos</h1>
+    <a class="btn btn-secundario" href="{% url 'accounts:panel' %}">← Mi cuenta</a>
+  </header>
+
+  <div class="cuenta__vacio">
+    <p>
+      Aquí aparecerán tus compras con su estado y el botón
+      <strong>«Volver a comprar»</strong>. Si aún no has pedido, ¡empieza por la tienda!
+    </p>
+    <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ir a la tienda</a>
+  </div>
+</div>
+{% endblock contenido %}
