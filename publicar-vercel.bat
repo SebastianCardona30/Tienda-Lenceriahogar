@@ -15,7 +15,7 @@ echo.
 
 where npx >nul 2>nul
 if errorlevel 1 (
-    echo NO SE ENCONTRO NODE.JS (npx).
+    echo NO SE ENCONTRO NODE.JS. Falta el comando npx.
     echo Instalalo desde https://nodejs.org y vuelve a ejecutar este archivo.
     echo.
     pause

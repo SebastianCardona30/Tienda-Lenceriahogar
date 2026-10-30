@@ -27,18 +27,18 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Verificación: `manage.py check` OK, 25/25 pruebas, home/tienda/categoría/búsqueda/autocomplete responden 200
 
 ## Fase 2 — Compra
-- [ ] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp
-- [ ] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto
-- [ ] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago)
-- [ ] Zonas de envío configurables + lista oficial de municipios de Santander
-- [ ] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre
-- [ ] Botón flotante de WhatsApp y mensajes wa.me prellenados
+- [x] Carrito persistente en sesión (drawer + página), fusión al iniciar sesión, cupones, envío por municipio, barra de envío gratis, resumen por WhatsApp (Paso 3: cart/servicios.py, 28 pruebas; la fusión se conecta al login en el Paso 4)
+- [x] Motor de ofertas: descuentos por producto/variante/categoría, cupones, 2x1/3x2, combos, volumen, venta relámpago, envío gratis desde monto (Paso 2: promotions/engine.py, cálculo en servidor, 27 pruebas)
+- [x] Checkout en 3 pasos (datos + mayor de edad + términos; envío Santander con municipios y zonas; pago) (Paso 5: orders con Pedido/ItemPedido, precios congelados, descuento de stock en transacción y confirmación; reserva de 15 min y pago simulado llegan en Fase 3)
+- [x] Zonas de envío configurables + lista oficial de municipios de Santander (Paso 1: 87 municipios, seed_municipios, 9 pruebas)
+- [x] Cuentas: registro/ingreso, mis pedidos, direcciones, lista de deseos, mis datos, recuperar contraseña, borrado Habeas Data; compra como invitado siempre (Paso 4: accounts con fusión del carrito al ingresar, 32 pruebas)
+- [x] Botón flotante de WhatsApp y mensajes wa.me prellenados (Paso 6: el flotante viaja con mensaje según la página —inicio, tienda, categoría, búsqueda, ofertas, combos, ficha de producto y carrito—; los botones "Comprar por WhatsApp" y "Enviar mi pedido" ya existían)
 
 ## Fase 3 — Pagos y pedidos
-- [ ] Pasarela simulada local (Aprobado/Rechazado/Pendiente) con misma interfaz que la real
-- [ ] Transferencia/Nequi/Daviplata manual con comprobante (imagen/PDF validado), aprobación con un clic
-- [ ] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations
-- [ ] Estados de pedido con historial; seguimiento público por número + celular
+- [x] Pasarela simulada local (Aprobado/Rechazado/Pendiente) con misma interfaz que la real (Paso 1: app payments, pantalla con formato de monto + referencia, `orders.servicios.cambiar_estado`, admin de Pago, 13 pruebas; se oculta con PASARELA_SIMULADA=0 o con llaves WOMPI_* en .env)
+- [x] Transferencia/Nequi/Daviplata manual con comprobante (imagen/PDF validado), aprobación con un clic (Paso 2: datos de cuenta como marcadores en SiteConfig, subida con validación real Pillow/PDF y 5 MB, pedido pasa a "Pago por verificar", acciones del admin aprueban/rechazan en un clic, 12 pruebas; el medio se oculta del checkout si no tiene datos)
+- [x] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations (Paso 3: Pedido.reserva_hasta + stock_devuelto, devolución idempotente en cambiar_estado, horas de reserva configurables en SiteConfig, comandos con --simular y margen de seguridad, 10 pruebas; al pagar se libera la reserva)
+- [x] Estados de pedido con historial; seguimiento público por número + celular (Paso 4: vista pública /seguimiento/ que valida número + últimos 10 dígitos del celular sin cuenta, línea de tiempo del historial, enlace desde confirmación y pie de página, 6 pruebas; HistorialPedido ya existía desde Fase 2)
 - [ ] Correos de marca por plantilla (consola en dev) + aviso interno por email/WhatsApp; send_abandoned_cart_emails
 - [ ] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves
 
@@ -72,4 +72,11 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 1: propiedades de Producto renombradas (`tiene_oferta`, `stock_disponible`) para no chocar con las anotaciones ORM (`en_oferta`, `stock_total`).
 - Fase 1: orden de URLs en config/urls.py — apps específicas (catalog, cart) ANTES del catch-all `<slug:slug>/` de core.
 - Fase 1: "Ofertas de la semana" usa `SiteConfig.ofertas_hasta` (cuenta regresiva) + variantes con `precio_oferta`; el motor de descuentos completo llega en Fase 2.
+- Fase 2: motor de ofertas — cada línea del carrito recibe UNA sola oferta automática (la que más descuente: relámpago, descuento directo, 2x1/3x2 o volumen); el cupón va al final y si no es acumulable se compara el total de ambas opciones y gana la más barata para el cliente. Todo en promotions/engine.py con pruebas.
+- Fase 2: cupón de bienvenida por suscripción — `Cupon.es_bienvenida` marca la plantilla (BIENVENIDA10 en seed_demo) y `Cupon.crear_bienvenida()` genera un código único de un solo uso por suscriptor, mostrado en pantalla (sin correo).
+- Fase 2: el carrito vive en la sesión (`cart/servicios.py`) y se expone en todas las páginas con un context processor (contador, drawer, resumen). El stepper del carrito envía `cantidad` (botones −/+) y `cantidad_ingresada` (campo digitado) porque el botón − va antes que el input en el DOM y, con el mismo nombre, su valor perdía.
+- Fase 2: cuentas — el correo es el nombre de usuario; el carrito del invitado se fusiona con el guardado en la cuenta al iniciar sesión o registrarse (`fusionar_carrito`, suma cantidades) y `Usuario.carrito` se sincroniza en cada guardado para que salir y volver no duplique. El borrado de cuenta (Habeas Data) borra direcciones, deseos y carrito en cascada.
+- Fase 2: pedidos — `Pedido` guarda una foto de los datos y precios al confirmar (nombre, envío, descuentos, total) y el usuario es `SET_NULL` (la venta sobrevive). Al borrar la cuenta se anonimizan los pedidos (nombre→"Cliente eliminada", email/teléfono/dirección vacíos), como manda la Ley 1581. Contraentrega entra "En preparación"; transferencia queda "Pendiente de pago" (el comprobante llega en Fase 3).
+- Fase 3: pagos — `metodo_pago` incluye "pasarela" (primera opción del checkout cuando está habilitada). Contraentrega entra "En preparación"; pasarela y transferencia entran "Pendiente de pago". La pasarela simulada es una pantalla propia con el mismo formato de monto y referencia que la real: con una llave de Wompi se cambia solo la vista y la simulada se oculta sola. Todas las transiciones de estado pasan por `orders.servicios.cambiar_estado` (escribe en `HistorialPedido`).
+- Fase 2: WhatsApp — el botón flotante de `base.html` usa el bloque `mensaje_whatsapp` (con `{% filter urlencode %}`); cada página lo sobreescribe con un mensaje propio (la ficha menciona el producto, la búsqueda la consulta, etc.). Sin número en `SiteConfig.whatsapp` no se muestra.
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.
