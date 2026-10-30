@@ -1,4 +1,5 @@
-"""Checkout en 3 pasos (una página), confirmación y repetir pedido."""
+"""Checkout en 3 pasos (una página), confirmación, seguimiento y repetir pedido."""
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -7,6 +8,36 @@ from django.urls import reverse
 from orders.forms import CheckoutForm
 from orders.models import Pedido
 from orders.servicios import ErrorDeCompra, crear_pedido
+
+
+class SeguimientoForm(forms.Form):
+    """Consulta pública: número de pedido + celular (sin cuenta, sin login)."""
+
+    numero = forms.CharField(
+        label="Número de pedido",
+        max_length=20,
+        help_text="Está en tu comprobante. Ej.: CB-123456",
+    )
+    telefono = forms.CharField(label="Celular con el que compraste", max_length=20)
+
+    def clean(self):
+        datos = super().clean()
+        numero = (datos.get("numero") or "").strip().upper()
+        telefono = _digitos(datos.get("telefono") or "")
+        if numero and telefono:
+            # Los últimos 10 dígitos ignoran +57, espacios y guiones
+            pedido = Pedido.objects.filter(numero=numero).first()
+            if pedido is None or _digitos(pedido.telefono)[-10:] != telefono[-10:]:
+                raise forms.ValidationError(
+                    "No encontramos ese pedido con ese celular. Revisa el número "
+                    "y el celular; si sigue fallando, escríbenos por WhatsApp."
+                )
+            datos["pedido"] = pedido
+        return datos
+
+
+def _digitos(texto):
+    return "".join(c for c in texto if c.isdigit())
 
 
 def _volver(request, defecto="core:home"):
@@ -94,6 +125,18 @@ def confirmacion(request, numero):
     """Página de éxito tras confirmar el pedido (accesible por número)."""
     pedido = get_object_or_404(Pedido.objects.prefetch_related("items"), numero=numero)
     return render(request, "orders/confirmacion.html", {"pedido": pedido})
+
+
+def seguimiento(request):
+    """Seguimiento público del pedido por número + celular (sin cuenta)."""
+    pedido = None
+    form = SeguimientoForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        pedido = form.cleaned_data["pedido"]
+    return render(
+        request, "orders/seguimiento.html",
+        {"form": form, "pedido": pedido},
+    )
 
 
 @login_required

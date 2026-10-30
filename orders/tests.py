@@ -470,3 +470,65 @@ class ReservaDeStockTests(TestCase):
         call_command("release_stock_reservations")
         self.variante.refresh_from_db()
         self.assertEqual(self.variante.stock, 10)
+
+
+class SeguimientoTests(TestCase):
+    """Seguimiento público por número + celular, sin cuenta y sin historial ajeno."""
+
+    def setUp(self):
+        zona, _ = ZonaEnvio.objects.get_or_create(
+            nombre="Área metropolitana de Bucaramanga",
+            defaults={"tarifa": Decimal(8000),
+                      "envio_gratis_desde": Decimal(150000),
+                      "tiempo_estimado": "Mismo día"},
+        )
+        municipio, _ = MunicipioSantander.objects.get_or_create(
+            nombre="Bucaramanga", defaults={"zona": zona},
+        )
+        self.pedido = Pedido.objects.create(
+            nombre="María Pérez", email="maria@ejemplo.com",
+            telefono="+57 300 111 2233", municipio=municipio,
+            direccion="Cra 15 # 42-10", subtotal=Decimal(200000),
+            total=Decimal(200000), metodo_pago="pasarela", estado="pagado",
+        )
+        HistorialPedido.objects.create(
+            pedido=self.pedido, estado="pagado",
+            nota="Pago aprobado por la pasarela.",
+        )
+
+    def _consultar(self, numero, telefono):
+        return self.client.post(
+            reverse("orders:seguimiento"),
+            {"numero": numero, "telefono": telefono},
+        )
+
+    def test_con_celular_correcto_muestra_el_pedido_y_su_historial(self):
+        r = self._consultar(self.pedido.numero, "3001112233")
+        self.assertContains(r, self.pedido.numero)
+        self.assertContains(r, "Pago aprobado")
+        self.assertContains(r, "Pagado")
+
+    def test_acepta_el_celular_con_mas_formatos(self):
+        r = self._consultar(self.pedido.numero, "+57 (300) 111-2233")
+        self.assertContains(r, self.pedido.numero)
+
+    def test_celular_equivocado_no_muestra_nada(self):
+        r = self._consultar(self.pedido.numero, "3019998877")
+        # El resultado (historial y estado) no aparece; solo el formulario
+        self.assertNotContains(r, "Historial de tu pedido")
+        self.assertContains(r, "No encontramos")
+
+    def test_numero_inexistente_no_muestra_nada(self):
+        r = self._consultar("CB-999999", "3001112233")
+        self.assertNotContains(r, "Historial de tu pedido")
+        self.assertContains(r, "No encontramos")
+
+    def test_la_consulta_no_requiere_sesion(self):
+        # Tras consultar, la sesión no guarda nada sensible del pedido
+        self._consultar(self.pedido.numero, "3001112233")
+        self.assertNotIn("pedido", self.client.session)
+
+    def test_pagina_de_consulta_responde_sin_post(self):
+        r = self.client.get(reverse("orders:seguimiento"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Seguimiento")

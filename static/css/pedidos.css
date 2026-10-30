@@ -147,6 +147,26 @@
 .estado--cancelado,
 .estado--devuelto { background: #FDECEC; color: #8f2626; }
 
+/* ---------- Seguimiento público ---------- */
+.seguimiento__form { display: grid; gap: 14px; margin-bottom: 26px; }
+.seguimiento__campos { display: grid; gap: 12px; }
+.seguimiento__resultado {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 18px;
+  background: var(--blanco);
+}
+.seguimiento__resultado h2 { font-size: 1.05rem; margin: 18px 0 10px; }
+.seguimiento__linea { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.seguimiento__paso { display: flex; gap: 12px; align-items: flex-start; }
+.seguimiento__detalle time { color: var(--texto-2); font-size: 0.85rem; }
+.seguimiento__detalle p { margin: 2px 0 0; font-size: 0.92rem; }
+
+@media (min-width: 640px) {
+  .seguimiento__campos { grid-template-columns: 1fr 1fr; align-items: end; }
+  .seguimiento__form .btn { justify-self: start; }
+}
+
 /* ---------- Escritorio ---------- */
 @media (min-width: 960px) {
   .checkout__grid { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }

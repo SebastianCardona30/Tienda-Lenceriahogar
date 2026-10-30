@@ -66,8 +66,8 @@
       </ul>
 
       <p class="pedido__seguimiento">
-        Consulta el estado cuando quieras con tu número de pedido
-        <strong>{{ pedido.numero }}</strong> y tu celular.
+        <a href="{% url 'orders:seguimiento' %}">Consulta el estado cuando quieras</a>
+        con tu número de pedido <strong>{{ pedido.numero }}</strong> y tu celular.
       </p>
     </section>
 

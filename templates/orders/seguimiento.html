@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Seguimiento de pedido · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor pedido seguimiento">
+  <header class="pedido__cabecera">
+    <h1>¿Dónde está mi pedido? 📦</h1>
+    <p class="pedido__fecha">Consulta con tu número de pedido y tu celular.
+      No necesitas tener cuenta.</p>
+  </header>
+
+  <form method="post" class="seguimiento__form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <p class="campo__error" role="alert">{{ form.non_field_errors|join:", " }}</p>
+    {% endif %}
+    <div class="seguimiento__campos">
+      {% for campo in form %}
+        <div class="campo{% if campo.errors %} campo--error{% endif %}">
+          {{ campo.label_tag }}
+          {{ campo }}
+          {% if campo.help_text %}<small class="campo__ayuda">{{ campo.help_text }}</small>{% endif %}
+          {% for error in campo.errors %}<small class="campo__error" role="alert">{{ error }}</small>{% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primario">Ver mi pedido</button>
+  </form>
+
+  {% if pedido %}
+    <section class="seguimiento__resultado" aria-label="Estado del pedido">
+      <div class="pedido-tarjeta__cabecera">
+        <div>
+          <p class="pedido-tarjeta__numero">{{ pedido.numero }}</p>
+          <p class="pedido-tarjeta__fecha">
+            {{ pedido.creado|date:"d \d\e F \d\e Y, H:i" }} · {{ pedido.nombre }}
+          </p>
+        </div>
+        <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+      </div>
+
+      <dl class="resumen__totales">
+        <div><dt>Productos</dt><dd>{{ pedido.subtotal|cop }}</dd></div>
+        <div><dt>Envío a {{ pedido.municipio.nombre }}</dt>
+          <dd>{% if pedido.costo_envio %}{{ pedido.costo_envio|cop }}{% else %}Gratis{% endif %}</dd></div>
+        <div class="resumen__total"><dt>Total</dt><dd>{{ pedido.total|cop }}</dd></div>
+      </dl>
+
+      <h2>Historial de tu pedido</h2>
+      <ol class="seguimiento__linea">
+        {% for movimiento in pedido.historial.all %}
+          <li class="seguimiento__paso">
+            <span class="estado estado--{{ movimiento.estado }}">{{ movimiento.get_estado_display }}</span>
+            <div class="seguimiento__detalle">
+              <time datetime="{{ movimiento.creado|date:'c' }}">
+                {{ movimiento.creado|date:"d \d\e F, H:i" }}
+              </time>
+              {% if movimiento.nota %}<p>{{ movimiento.nota }}</p>{% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="seguimiento__paso">
+            <p>Todavía no hay movimientos; te avisamos por WhatsApp.</p>
+          </li>
+        {% endfor %}
+      </ol>
+
+      {% if site.whatsapp %}
+        <p class="pedido__seguimiento">
+          ¿Algo no cuadra?
+          <a href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, tengo una duda con el pedido '|add:pedido.numero|urlencode }}"
+             target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.
+        </p>
+      {% endif %}
+    </section>
+  {% endif %}
+</div>
+{% endblock contenido %}
