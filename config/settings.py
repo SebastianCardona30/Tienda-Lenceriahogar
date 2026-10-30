@@ -23,6 +23,21 @@ EN_VERCEL = os.environ.get("VERCEL", "").strip() in ("1", "true", "yes")
 SECRET_KEY = os.getenv("SECRET_KEY", "clave-insegura-solo-para-desarrollo-local")
 # En Vercel se despliega siempre con DEBUG apagado (a menos que se pida lo contrario)
 DEBUG = os.getenv("DEBUG", "False" if EN_VERCEL else "True").strip().lower() in ("1", "true", "yes", "on")
+
+# Pasarela simulada local (Aprobado/Rechazado/Pendiente): activa por defecto en
+# desarrollo para probar todo el flujo sin internet ni costo. Se apaga con
+# PASARELA_SIMULADA=0 o cuando existan llaves reales de Wompi (WOMPI_* en .env).
+PASARELA_SIMULADA = (
+    os.getenv("PASARELA_SIMULADA", "1" if DEBUG else "0").strip().lower()
+    in ("1", "true", "yes", "on")
+) and not (
+    os.getenv("WOMPI_PUBLIC_KEY", "").strip()
+    or os.getenv("WOMPI_PRIVATE_KEY", "").strip()
+)
+
+# Reserva de stock durante el pago en línea (minutos); la transferencia usa
+# SiteConfig.reserva_horas_transferencia (editable en el admin).
+RESERVA_MINUTOS_PASARELA = int(os.getenv("RESERVA_MINUTOS_PASARELA", "15") or 15)
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
 ]
@@ -103,6 +118,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_config",
+                "cart.context_processors.carrito",
+                "accounts.context_processors.deseos",
             ],
         },
     },
@@ -110,6 +127,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
+
+# Etiquetas de mensajes con los nombres de color de la paleta (ver base.css)
+MESSAGE_TAGS = {
+    "debug": "info",
+    "info": "info",
+    "success": "exito",
+    "warning": "aviso",
+    "error": "error",
+}
 
 # Base de datos: SQLite por defecto; PostgreSQL solo cambiando DATABASE_URL.
 DATABASES = {
@@ -154,6 +180,9 @@ AXES_RESET_ON_SUCCESS = True
 
 # Usuario personalizado (accounts.Usuario)
 AUTH_USER_MODEL = "accounts.Usuario"
+
+# Acceso a la cuenta (siempre opcional: la compra como invitado está permitida)
+LOGIN_URL = "accounts:ingreso"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
     "django.contrib.auth.backends.ModelBackend",
@@ -197,6 +226,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL", "Lenceria Ciudad Bonita <no-responder@ejemplo.com>"
 )
+
+# URL pública del sitio: los correos de marca la usan para armar enlaces absolutos
+# (seguimiento, carrito). En producción va en .env con el dominio real.
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000").rstrip("/")
 
 # Correo: consola en desarrollo; SMTP opcional por .env en producción
 EMAIL_BACKEND = os.getenv(
