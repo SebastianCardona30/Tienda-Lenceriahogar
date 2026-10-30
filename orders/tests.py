@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from catalog.models import Producto, Variante
+from core.models import SiteConfig
 from orders.models import HistorialPedido, ItemPedido, Pedido
 from promotions.models import Cupon, UsoCupon
 from shipping.models import MunicipioSantander, ZonaEnvio
@@ -106,6 +107,10 @@ class ConfirmarPedidoTests(CheckoutTestCase):
         self.assertEqual(Pedido.objects.get().estado, "preparacion")
 
     def test_transferencia_queda_pendiente(self):
+        # La transferencia solo se ofrece si el negocio tiene datos de cuenta
+        config = SiteConfig.get()
+        config.pago_nequi = "300 111 2233 — Lencería de Hogar [MARCADOR]"
+        config.save()
         self.client.post(reverse("orders:checkout"),
                          self.datos(metodo_pago="transferencia"))
         self.assertEqual(Pedido.objects.get().estado, "pendiente")

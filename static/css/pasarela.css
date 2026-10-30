@@ -66,3 +66,15 @@
   margin: 0;
 }
 .pasarela__pie a { color: var(--purpura); font-weight: 700; }
+
+/* ---------- Comprobante de transferencia ---------- */
+.comprobante__titulo { margin: 8px 20px 6px; font-size: 1.02rem; color: var(--ciruela); }
+.comprobante__medios { margin: 0; padding: 0 20px 8px; list-style: none; display: grid; gap: 10px; }
+.comprobante__medios li { border: 1px solid var(--borde); border-radius: var(--radio); padding: 10px 12px; }
+.comprobante__datos {
+  margin: 6px 0 0; font-family: var(--fuente-texto, inherit); white-space: pre-wrap;
+  color: var(--texto); font-size: 0.9rem; line-height: 1.5;
+}
+.comprobante__estado { margin: 0 20px 12px; padding: 12px; border-radius: var(--radio); font-size: 0.88rem; }
+.comprobante__estado--recibido { background: #e8f7ef; border: 1px solid var(--exito); color: #1d6b47; }
+.comprobante__form { padding: 0 20px 8px; display: grid; gap: 12px; }

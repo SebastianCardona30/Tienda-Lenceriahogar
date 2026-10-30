@@ -43,8 +43,11 @@
           <li><strong>Pago en línea:</strong> aún no pagas; usa el botón «Pagar ahora»
             para completar el pago de {{ pedido.total|cop }}.</li>
         {% elif pedido.estado == "pendiente" %}
-          <li><strong>Transferencia:</strong> envíanos el comprobante por WhatsApp y
-            revisamos el pago (suele tomar menos de un día hábil).</li>
+          <li><strong>Transferencia:</strong> transfiere {{ pedido.total|cop }} y sube tu
+            comprobante con el botón de abajo (o envíanoslo por WhatsApp).</li>
+        {% elif pedido.estado == "por_verificar" %}
+          <li><strong>Pago por verificar:</strong> recibimos tu comprobante y lo estamos
+            revisando. Te avisamos por WhatsApp cuando quede aprobado.</li>
         {% else %}
           <li><strong>Preparación:</strong> estamos armando tu pedido con cuidado.</li>
         {% endif %}
@@ -64,6 +67,9 @@
     <aside class="pedido__acciones" aria-label="Acciones">
       {% if pedido.metodo_pago == "pasarela" and pedido.estado == "pendiente" %}
         <a class="btn btn-primario btn-bloque" href="{% url 'payments:pagar' pedido.numero %}">Pagar ahora · {{ pedido.total|cop }}</a>
+      {% endif %}
+      {% if pedido.metodo_pago == "transferencia" and pedido.estado == "pendiente" or pedido.metodo_pago == "transferencia" and pedido.estado == "por_verificar" %}
+        <a class="btn btn-primario btn-bloque" href="{% url 'payments:comprobante' pedido.numero %}">Subir comprobante de pago</a>
       {% endif %}
       {% if site.whatsapp %}
         <a class="btn btn-whatsapp btn-bloque"

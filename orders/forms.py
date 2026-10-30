@@ -54,13 +54,20 @@ class CheckoutForm(forms.Form):
     def __init__(self, *args, usuario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.usuario = usuario
-        # La pasarela en línea solo aparece si está habilitada (ver settings)
+        # Métodos que se muestran según configuración (settings y SiteConfig)
         from django.conf import settings
 
+        from core.models import SiteConfig
+
+        opciones = []
         if getattr(settings, "PASARELA_SIMULADA", False):
-            self.fields["metodo_pago"].choices = [
-                ("pasarela", "Tarjeta, PSE o Nequi — pago en línea"),
-            ] + list(self.fields["metodo_pago"].choices)
+            opciones.append(("pasarela", "Tarjeta, PSE o Nequi — pago en línea"))
+        # Transferencia solo si hay datos de cuenta publicados (marcadores en admin)
+        if SiteConfig.get().medios_pago_manuales():
+            opciones.append(("transferencia", "Transferencia / Nequi / Daviplata"))
+        opciones.append(("contraentrega", "Contraentrega — pagas al recibir"))
+        self.fields["metodo_pago"].choices = opciones
+        if opciones[0][0] == "pasarela":
             self.fields["metodo_pago"].initial = "pasarela"
         municipios = MunicipioSantander.objects.order_by("nombre")
         self.fields["municipio"].choices = [("", "Elige tu municipio…")] + [

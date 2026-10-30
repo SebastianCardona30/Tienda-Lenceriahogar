@@ -10,8 +10,10 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from core.models import SiteConfig
 from orders.models import Pedido
 from orders.servicios import cambiar_estado
+from payments.forms import ComprobanteForm
 
 
 def activa():
@@ -72,3 +74,66 @@ def registrar_resultado(request, numero):
     else:
         messages.error(request, "No entendimos el resultado del pago.")
     return redirect("orders:confirmacion", numero=pedido.numero)
+
+
+def comprobante(request, numero):
+    """Transferencia/Nequi/Daviplata: muestra los datos de la cuenta y recibe
+    el comprobante. Página pública (la compra como invitado siempre está permitida).
+    """
+    config = SiteConfig.get()
+    medios = config.medios_pago_manuales()
+    pedido = get_object_or_404(
+        Pedido.objects.prefetch_related("pagos"), numero=numero
+    )
+
+    if pedido.metodo_pago != "transferencia":
+        messages.info(request, "Este pedido no espera comprobante de transferencia.")
+        return redirect("orders:confirmacion", numero=pedido.numero)
+    if pedido.estado not in ("pendiente", "por_verificar"):
+        messages.info(request, f"El pedido {pedido.numero} ya fue pagado.")
+        return redirect("orders:confirmacion", numero=pedido.numero)
+    if not medios:
+        messages.error(
+            request,
+            "La transferencia no está habilitada todavía; escríbenos por WhatsApp "
+            "para acordar el pago.",
+        )
+        return redirect("orders:confirmacion", numero=pedido.numero)
+
+    pago_actual = next(
+        (p for p in pedido.pagos.all() if p.comprobante), None
+    )
+
+    if request.method == "POST":
+        form = ComprobanteForm(request.POST, request.FILES, instance=pago_actual)
+        if form.is_valid():
+            if pago_actual:
+                pago = form.save()
+            else:
+                # Un pedido recibe un solo comprobante por intento de pago
+                pago = form.save(commit=False)
+                pago.pedido = pedido
+                pago.metodo = "transferencia"
+                pago.monto = pedido.total
+                pago.save()
+            cambiar_estado(
+                pedido, "por_verificar",
+                nota=f"Comprobante de {pago.get_metodo_display()} recibido; "
+                     "esperando aprobación.",
+            )
+            messages.success(
+                request,
+                "¡Comprobante enviado! Revisamos el pago y te avisamos por "
+                "WhatsApp en cuanto esté aprobado (suele tomar menos de un "
+                "día hábil).",
+            )
+            return redirect("orders:confirmacion", numero=pedido.numero)
+    else:
+        form = ComprobanteForm(instance=pago_actual)
+
+    return render(request, "payments/comprobante.html", {
+        "pedido": pedido,
+        "medios": medios,
+        "form": form,
+        "pago_actual": pago_actual,
+    })
