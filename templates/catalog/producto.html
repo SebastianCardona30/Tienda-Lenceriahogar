@@ -2,6 +2,7 @@
 {% load static format_tags %}
 
 {% block titulo %}{{ producto.meta_titulo|default:producto.nombre }} — {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, quisiera información sobre «{{ producto.nombre }}». ¿Me confirmas disponibilidad y envío?{% endblock mensaje_whatsapp %}
 
 {% block metas_extra %}
   <meta name="description" content="{{ producto.meta_descripcion|default:producto.descripcion_corta|default:'Compra en ' }}{{ site.nombre_negocio }}">
@@ -145,10 +146,14 @@
            target="_blank" rel="noopener">Comprar por WhatsApp</a>
       {% endif %}
 
-      <button type="button" class="btn btn-secundario btn-bloque"
-              @click="CiudadBonita.avisar('Tu lista de deseos llega en la Fase 2. Por ahora, escríbenos por WhatsApp.')">
-        ♡ Agregar a mi lista de deseos
-      </button>
+      <form method="post" action="{% url 'accounts:alternar_deseo' %}">
+        {% csrf_token %}
+        <input type="hidden" name="producto" value="{{ producto.pk }}">
+        <button type="submit" class="btn btn-secundario btn-bloque {% if producto.pk in deseos_ids %}corazon-activa{% endif %}"
+                aria-pressed="{% if producto.pk in deseos_ids %}true{% else %}false{% endif %}">
+          {% if producto.pk in deseos_ids %}♥ Guardado en mis deseos{% else %}♡ Agregar a mi lista de deseos{% endif %}
+        </button>
+      </form>
 
       {# --- Ayudas --- #}
       <div class="ficha__ayudas">

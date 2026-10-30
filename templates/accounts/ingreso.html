@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar sesión · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta">
+    <h1>Inicia sesión</h1>
+    <p class="cuenta__bajada">
+      Entra para ver tus pedidos, direcciones y deseos.
+      Recuerda que siempre puedes comprar como invitado.
+    </p>
+
+    <form method="post" action="{% url 'accounts:ingreso' %}" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-primario btn-bloque">Entrar</button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      <a href="{% url 'accounts:recuperar' %}">Olvidé mi contraseña</a>
+    </p>
+    <p class="cuenta__enlaces">
+      ¿Primera vez aquí? <a href="{% url 'accounts:registro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Crea tu cuenta</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

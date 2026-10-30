@@ -1,0 +1,81 @@
+{% load format_tags %}
+{# Drawer lateral del carrito: se abre con ?carrito=1 o el evento "abrir-carrito". #}
+<div class="drawer" id="drawer-carrito"
+     x-data="{ abierto: {% if request.GET.carrito %}true{% else %}false{% endif %} }"
+     :class="abierto ? 'drawer--abierto' : ''"
+     @abrir-carrito.window="abierto = true"
+     @keydown.escape.window="abierto = false">
+  <div class="drawer__fondo" x-show="abierto" x-cloak @click="abierto = false" aria-hidden="true"></div>
+
+  <aside class="drawer__panel" x-show="abierto" x-cloak role="dialog" aria-modal="true" aria-label="Tu carrito">
+    <header class="drawer__cabecera">
+      <h2>Tu carrito {% if carrito_ui.items %}({{ carrito_ui.items }}){% endif %}</h2>
+      <button type="button" class="drawer__cerrar" @click="abierto = false" aria-label="Cerrar carrito">✕</button>
+    </header>
+
+    {% if carrito_ui.avisos %}
+      <ul class="drawer__avisos">
+        {% for aviso in carrito_ui.avisos %}<li>{{ aviso }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if carrito_ui.vacio %}
+      <p class="drawer__vacio">Tu carrito está vacío. ¡Explora la tienda y encuentra algo bonito para tu hogar!</p>
+      <a class="btn btn-primario btn-bloque" href="{% url 'catalog:tienda' %}" @click="abierto = false">Ir a la tienda</a>
+    {% else %}
+      <ul class="drawer__lineas">
+        {% for linea in carrito_ui.lineas %}
+          <li class="drawer__linea">
+            {% with foto=linea.variante.producto.portada %}
+              {% if foto %}
+                <img class="drawer__foto"
+                     src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}"
+                     alt="{{ linea.variante.producto.nombre }}" width="56" height="56">
+              {% else %}
+                <span class="drawer__foto drawer__foto--sin" aria-hidden="true">🧵</span>
+              {% endif %}
+            {% endwith %}
+            <div class="drawer__datos">
+              <a class="drawer__nombre" href="{{ linea.variante.producto.get_absolute_url }}" @click="abierto = false">
+                {{ linea.variante.producto.nombre }}
+              </a>
+              <span class="drawer__variante">{{ linea.variante.talla_label }}{% if linea.variante.color %} · {{ linea.variante.color }}{% endif %}</span>
+              {% for motivo in linea.motivos %}<span class="etiqueta-oferta">{{ motivo }}</span>{% endfor %}
+              <div class="drawer__fila">
+                <form method="post" action="{% url 'cart:actualizar' %}" class="cantidad cantidad--chico">
+                  {% csrf_token %}
+                  <input type="hidden" name="sku" value="{{ linea.variante.sku }}">
+                  <button type="submit" name="cantidad" value="{{ linea.cantidad|add:'-1' }}" aria-label="Quitar uno">−</button>
+                  <span aria-label="Cantidad">{{ linea.cantidad }}</span>
+                  <button type="submit" name="cantidad" value="{{ linea.cantidad|add:'1' }}" aria-label="Agregar uno">+</button>
+                </form>
+                <strong>{{ linea.subtotal|cop }}</strong>
+              </div>
+            </div>
+            <form method="post" action="{% url 'cart:eliminar' %}" class="drawer__quitar">
+              {% csrf_token %}
+              <input type="hidden" name="sku" value="{{ linea.variante.sku }}">
+              <button type="submit" aria-label="Quitar {{ linea.variante.producto.nombre }} del carrito">✕</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <footer class="drawer__pie">
+        <div class="drawer__subtotal">
+          <span>Subtotal</span>
+          <strong>{{ carrito_ui.subtotal|cop }}</strong>
+        </div>
+        {% if carrito_ui.total_descuentos %}
+          <div class="drawer__ahorro">Ahorras {{ carrito_ui.total_descuentos|cop }} 🎉</div>
+        {% endif %}
+        <a class="btn btn-secundario btn-bloque" href="{% url 'cart:pagina' %}" @click="abierto = false">Ver mi carrito completo</a>
+        {% if site.whatsapp %}
+          <a class="btn btn-whatsapp btn-bloque"
+             href="https://wa.me/{{ site.whatsapp }}?text={{ carrito_ui.whatsapp_texto|urlencode }}"
+             target="_blank" rel="noopener" @click="abierto = false">Enviar mi pedido por WhatsApp</a>
+        {% endif %}
+      </footer>
+    {% endif %}
+  </aside>
+</div>

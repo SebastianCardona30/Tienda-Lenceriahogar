@@ -1,0 +1,13 @@
+{% load format_tags %}Nuevo pedido {{ pedido.numero }} — {{ site.nombre_negocio }}
+
+Estado: {{ pedido.get_estado_display }} ({{ pedido.creado|date:"d/m/Y H:i" }})
+Cliente: {{ pedido.nombre }} · {{ pedido.telefono }} · {{ pedido.email }}
+Entrega: {{ pedido.direccion }}{% if pedido.barrio %} ({{ pedido.barrio }}){% endif %}, {{ pedido.municipio.nombre }}
+{% if pedido.indicaciones %}Indicaciones: {{ pedido.indicaciones }}
+{% endif %}
+{% for item in items %}- {{ item.cantidad }} x {{ item.producto_nombre }} ({{ item.sku }}): {{ item.subtotal|cop }}
+{% endfor %}
+Total: {{ pedido.total|cop }}
+
+Ver el pedido en el panel:
+{{ site_url }}{% url 'admin:orders_pedido_change' pedido.pk %}

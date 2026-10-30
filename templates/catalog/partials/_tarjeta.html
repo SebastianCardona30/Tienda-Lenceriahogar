@@ -1,5 +1,14 @@
 {% load static format_tags %}
 <article class="tarjeta-producto">
+  <form method="post" action="{% url 'accounts:alternar_deseo' %}" class="tarjeta-producto__deseo">
+    {% csrf_token %}
+    <input type="hidden" name="producto" value="{{ producto.pk }}">
+    <button type="submit" class="corazon {% if producto.pk in deseos_ids %}corazon--activa{% endif %}"
+            aria-pressed="{% if producto.pk in deseos_ids %}true{% else %}false{% endif %}"
+            aria-label="{% if producto.pk in deseos_ids %}Quitar de mis deseos{% else %}Guardar en mis deseos{% endif %}: {{ producto.nombre }}">
+      <span aria-hidden="true">{% if producto.pk in deseos_ids %}♥{% else %}♡{% endif %}</span>
+    </button>
+  </form>
   <a class="tarjeta-producto__foto" href="{{ producto.get_absolute_url }}" tabindex="-1" aria-hidden="true">
     {% if producto.portada %}
       <img src="{% if producto.portada.miniatura %}{{ producto.portada.miniatura.url }}{% else %}{{ producto.portada.imagen.url }}{% endif %}"

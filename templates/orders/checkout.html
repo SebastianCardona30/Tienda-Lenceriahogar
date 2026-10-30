@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Finalizar compra · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor checkout">
+  <h1 class="checkout__titulo">Finalizar compra</h1>
+
+  {# ---------- Barra de progreso (3 pasos) ---------- #}
+  <ol class="pasos" aria-label="Pasos del pedido">
+    <li class="paso {% if paso == 1 %}paso--activo{% elif paso > 1 %}paso--listo{% endif %}">
+      <span class="paso__numero" aria-hidden="true">{% if paso > 1 %}✓{% else %}1{% endif %}</span>
+      <span class="paso__nombre">Datos</span>
+    </li>
+    <li class="paso {% if paso == 2 %}paso--activo{% elif paso > 2 %}paso--listo{% endif %}">
+      <span class="paso__numero" aria-hidden="true">{% if paso > 2 %}✓{% else %}2{% endif %}</span>
+      <span class="paso__nombre">Envío</span>
+    </li>
+    <li class="paso {% if paso == 3 %}paso--activo{% endif %}">
+      <span class="paso__numero" aria-hidden="true">3</span>
+      <span class="paso__nombre">Pago</span>
+    </li>
+  </ol>
+
+  <div class="checkout__grid">
+    {# ---------------- Formulario en 3 pasos ---------------- #}
+    <section class="checkout__pasos">
+      <form method="post" action="{% url 'orders:checkout' %}" novalidate id="form-checkout">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <ul class="formulario__errores" role="alert">
+            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+
+        {# ===== Paso 1: datos ===== #}
+        <fieldset class="paso-contenido" {% if paso != 1 %}hidden{% endif %} data-paso="1">
+          <legend>Tus datos</legend>
+          {% with campo=form.nombre %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.email %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.telefono %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.cedula %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.mayor_de_edad %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.autoriza_datos %}{% include "orders/_campo.html" %}{% endwith %}
+          <button type="button" class="btn btn-primario btn-bloque" data-ir="2">Siguiente: envío →</button>
+        </fieldset>
+
+        {# ===== Paso 2: envío ===== #}
+        <fieldset class="paso-contenido" {% if paso != 2 %}hidden{% endif %} data-paso="2">
+          <legend>¿A dónde llegamos?</legend>
+          {% with campo=form.municipio %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.direccion %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.barrio %}{% include "orders/_campo.html" %}{% endwith %}
+          {% with campo=form.indicaciones %}{% include "orders/_campo.html" %}{% endwith %}
+          {% if carrito_ui.envio %}
+            <p class="checkout__envio">
+              Envío a {{ carrito_ui.envio.municipio }}:
+              {% if carrito_ui.envio.gratis %}<strong>gratis 🚚</strong>{% else %}<strong>{{ carrito_ui.envio.costo|cop }}</strong>{% endif %}
+              · {{ carrito_ui.envio.zona.tiempo_estimado }}
+            </p>
+          {% endif %}
+          <div class="checkout__botones">
+            <button type="button" class="btn btn-secundario" data-ir="1">← Volver</button>
+            <button type="button" class="btn btn-primario" data-ir="3">Siguiente: pago →</button>
+          </div>
+        </fieldset>
+
+        {# ===== Paso 3: pago ===== #}
+        <fieldset class="paso-contenido" {% if paso != 3 %}hidden{% endif %} data-paso="3">
+          <legend>Cómo vas a pagar</legend>
+          {% with campo=form.metodo_pago %}{% include "orders/_campo.html" %}{% endwith %}
+          <p class="checkout__nota">
+            Pagas en efectivo al recibir tu pedido. Si prefieres transferir,
+            te enviamos los datos por WhatsApp una vez confirmes.
+          </p>
+          <div class="checkout__botones">
+            <button type="button" class="btn btn-secundario" data-ir="2">← Volver</button>
+            <button type="submit" class="btn btn-primario">Confirmar mi pedido 🎉</button>
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    {# ---------------- Resumen siempre visible ---------------- #}
+    <aside class="resumen" aria-label="Resumen del pedido">
+      <h2>Tu pedido ({{ carrito_ui.items }})</h2>
+      <ul class="checkout__lineas">
+        {% for linea in carrito_ui.lineas %}
+          <li>
+            <span>{{ linea.cantidad }} × {{ linea.variante.producto.nombre }}
+              <small>{{ linea.variante.talla_label }}</small></span>
+            <strong>{{ linea.subtotal|cop }}</strong>
+          </li>
+        {% endfor %}
+      </ul>
+      <dl class="resumen__totales">
+        <div><dt>Subtotal</dt><dd>{{ carrito_ui.subtotal|cop }}</dd></div>
+        {% if carrito_ui.descuento_ofertas %}
+          <div class="es-descuento"><dt>Ofertas</dt><dd>−{{ carrito_ui.descuento_ofertas|cop }}</dd></div>
+        {% endif %}
+        {% if carrito_ui.cupon_descuento %}
+          <div class="es-descuento"><dt>Cupón {{ carrito_ui.cupon.codigo }}</dt><dd>−{{ carrito_ui.cupon_descuento|cop }}</dd></div>
+        {% endif %}
+        <div>
+          <dt>Envío</dt>
+          <dd>{% if carrito_ui.envio %}{% if carrito_ui.envio.gratis %}Gratis{% else %}{{ carrito_ui.envio.costo|cop }}{% endif %}{% else %}—{% endif %}</dd>
+        </div>
+        <div class="resumen__total"><dt>Total</dt><dd>{{ carrito_ui.total|cop }}</dd></div>
+      </dl>
+      <p class="resumen__nota">Todos los precios incluyen IVA.</p>
+      <p class="resumen__nota"><a href="{% url 'cart:pagina' %}">← Editar mi carrito</a></p>
+    </aside>
+  </div>
+</div>
+{% endblock contenido %}
+
+{% block scripts_extra %}
+<script>
+// Checkout en 3 pasos: cambia el paso visible sin recargar la página.
+(function () {
+  var form = document.getElementById("form-checkout");
+  if (!form) return;
+  var pasos = form.querySelectorAll(".paso-contenido");
+  var barras = document.querySelectorAll(".pasos .paso");
+
+  function ir(n) {
+    pasos.forEach(function (p) { p.hidden = p.dataset.paso !== String(n); });
+    barras.forEach(function (b, i) {
+      b.classList.toggle("paso--activo", i === n - 1);
+      b.classList.toggle("paso--listo", i < n - 1);
+      var num = b.querySelector(".paso__numero");
+      if (num) num.textContent = i < n - 1 ? "✓" : String(i + 1);
+    });
+    // Manda el foco al primer campo del paso (bueno para teclado y lectores)
+    var primero = form.querySelector('.paso-contenido:not([hidden]) input, .paso-contenido:not([hidden]) select');
+    if (primero) primero.focus({ preventScroll: false });
+  }
+
+  form.querySelectorAll("[data-ir]").forEach(function (b) {
+    b.addEventListener("click", function () { ir(parseInt(b.dataset.ir, 10)); });
+  });
+})();
+</script>
+{% endblock scripts_extra %}

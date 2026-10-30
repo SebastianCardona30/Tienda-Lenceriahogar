@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis datos · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta cuenta__tarjeta--ancha">
+    <h1>Mis datos</h1>
+    <p class="cuenta__bajada">Actualiza tu nombre, correo y celular. Estos datos se usan en tus pedidos.</p>
+
+    <form method="post" action="{% url 'accounts:datos' %}" novalidate>
+      {% csrf_token %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-primario btn-bloque">Guardar cambios</button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      <a href="{% url 'accounts:panel' %}">← Volver a mi cuenta</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

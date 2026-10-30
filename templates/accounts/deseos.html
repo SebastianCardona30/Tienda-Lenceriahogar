@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis deseos · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <header class="cuenta__cabecera">
+    <h1>Mi lista de deseos</h1>
+    <a class="btn btn-secundario" href="{% url 'accounts:panel' %}">← Mi cuenta</a>
+  </header>
+
+  {% if favoritos %}
+    <div class="grilla">
+      {% for producto in favoritos %}
+        {% include "catalog/partials/_tarjeta.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="cuenta__vacio">
+      <p>Tu lista de deseos está vacía. Toca el corazón ♥ de cualquier producto para guardarlo aquí.</p>
+      <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ir a la tienda</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock contenido %}

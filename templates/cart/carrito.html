@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Tu carrito · {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, tengo una duda con mi carrito de compras.{% endblock mensaje_whatsapp %}
+{% block meta_descripcion %}Revisa tu carrito de compras, aplica cupones y calcula el envío a tu municipio de Santander.{% endblock meta_descripcion %}
+
+{% block contenido %}
+<div class="contenedor carrito">
+  <h1 class="carrito__titulo">Tu carrito</h1>
+
+  {% if carrito_ui.avisos %}
+    <ul class="carrito__avisos" role="status">
+      {% for aviso in carrito_ui.avisos %}<li>{{ aviso }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if carrito_ui.vacio %}
+    <div class="carrito__vacio">
+      <p>Tu carrito está vacío. ¡Explora la tienda y encuentra algo bonito para tu hogar!</p>
+      <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ir a la tienda</a>
+    </div>
+  {% else %}
+    <div class="carrito__grid">
+      {# ---------------- Líneas del carrito ---------------- #}
+      <section class="carrito__lineas" aria-label="Productos en tu carrito">
+        {% for linea in carrito_ui.lineas %}
+          <article class="linea">
+            {% with foto=linea.variante.producto.portada %}
+              {% if foto %}
+                <img class="linea__foto"
+                     src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}"
+                     alt="{{ linea.variante.producto.nombre }}" width="88" height="88">
+              {% else %}
+                <span class="linea__foto linea__foto--sin" aria-hidden="true">🧵</span>
+              {% endif %}
+            {% endwith %}
+
+            <div class="linea__datos">
+              <a class="linea__nombre" href="{{ linea.variante.producto.get_absolute_url }}">
+                {{ linea.variante.producto.nombre }}
+              </a>
+              <span class="linea__variante">
+                {{ linea.variante.talla_label }}{% if linea.variante.color %} · {{ linea.variante.color }}{% endif %}
+                · Ref. {{ linea.variante.sku }}
+              </span>
+              {% for motivo in linea.motivos %}<span class="etiqueta-oferta">{{ motivo }}</span>{% endfor %}
+
+              <div class="linea__controles">
+                <form method="post" action="{% url 'cart:actualizar' %}" class="cantidad">
+                  {% csrf_token %}
+                  <input type="hidden" name="sku" value="{{ linea.variante.sku }}">
+                  <button type="submit" name="cantidad" value="{{ linea.cantidad|add:'-1' }}" aria-label="Quitar uno">−</button>
+                  <input type="number" name="cantidad_ingresada" value="{{ linea.cantidad }}" min="1"
+                         max="{{ linea.variante.stock }}" aria-label="Cantidad de {{ linea.variante.producto.nombre }}">
+                  <button type="submit" name="cantidad" value="{{ linea.cantidad|add:'1' }}" aria-label="Agregar uno">+</button>
+                </form>
+
+                <div class="linea__precios">
+                  {% if linea.descuento or linea.precio_base > linea.precio_unitario %}
+                    <s>{{ linea.subtotal_base|cop }}</s>
+                  {% endif %}
+                  <strong>{{ linea.subtotal|cop }}</strong>
+                </div>
+              </div>
+
+              <div class="linea__acciones">
+                <form method="post" action="{% url 'cart:guardar' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="sku" value="{{ linea.variante.sku }}">
+                  <button type="submit" class="btn-texto">♡ Guardar para después</button>
+                </form>
+                <form method="post" action="{% url 'cart:eliminar' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="sku" value="{{ linea.variante.sku }}">
+                  <button type="submit" class="btn-texto btn-texto--rojo">✕ Quitar</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+
+        {% for nd in carrito_ui.lineas_no_disponibles %}
+          <article class="linea linea--agotada">
+            <div class="linea__datos">
+              <p class="linea__nombre">
+                {% if nd.variante %}{{ nd.variante.producto.nombre }}{% else %}Referencia {{ nd.sku }}{% endif %}
+              </p>
+              <p class="linea__aviso">{{ nd.motivo|capfirst }} — no se incluye en el total.</p>
+              <form method="post" action="{% url 'cart:eliminar' %}">
+                {% csrf_token %}
+                <input type="hidden" name="sku" value="{{ nd.sku }}">
+                <button type="submit" class="btn-texto btn-texto--rojo">✕ Quitar del carrito</button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+
+        {% if carrito_ui.guardados %}
+          <section class="carrito__guardados" aria-label="Guardados para después">
+            <h2>Guardados para después</h2>
+            <ul>
+              {% for v in carrito_ui.guardados %}
+                <li class="guardado">
+                  <span class="guardado__datos">
+                    <a href="{{ v.producto.get_absolute_url }}">{{ v.producto.nombre }}</a>
+                    <small>{{ v.talla_label }}{% if v.color %} · {{ v.color }}{% endif %} · {{ v.precio_final|cop }}</small>
+                  </span>
+                  <form method="post" action="{% url 'cart:restaurar' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="sku" value="{{ v.sku }}">
+                    <button type="submit" class="btn btn-secundario btn-chico">Restaurar</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      </section>
+
+      {# ---------------- Resumen ---------------- #}
+      <aside class="resumen" aria-label="Resumen del pedido">
+        <h2>Resumen</h2>
+
+        {# Cupón #}
+        <form method="post" action="{% url 'cart:cupon' %}" class="resumen__bloque">
+          {% csrf_token %}
+          {% if carrito_ui.cupon_codigo %}
+            <span class="resumen__etiqueta">Tu cupón</span>
+            <div class="cupon-activo">
+              <strong>{{ carrito_ui.cupon_codigo }}</strong>
+              <button type="submit" name="codigo" value="" class="btn-texto">Quitar</button>
+            </div>
+          {% else %}
+            <label class="resumen__etiqueta" for="cupon-codigo">¿Tienes un cupón?</label>
+            <div class="campo-fila">
+              <input id="cupon-codigo" name="codigo" maxlength="30" autocomplete="off"
+                     placeholder="Ej.: BIENVENIDA10">
+              <button type="submit" class="btn btn-secundario btn-chico">Aplicar</button>
+            </div>
+          {% endif %}
+        </form>
+        {% if carrito_ui.cupon_error %}
+          <p class="resumen__error" role="alert">{{ carrito_ui.cupon_error }}</p>
+        {% endif %}
+        {% if carrito_ui.cupon_aviso %}
+          <p class="resumen__aviso" role="status">{{ carrito_ui.cupon_aviso }}</p>
+        {% endif %}
+
+        {# Envío por municipio #}
+        <form method="post" action="{% url 'cart:municipio' %}" class="resumen__bloque">
+          {% csrf_token %}
+          <label class="resumen__etiqueta" for="municipio">¿A qué municipio llegamos?</label>
+          <div class="campo-fila">
+            <select id="municipio" name="municipio" required>
+              <option value="">Elige tu municipio…</option>
+              {% for m in municipios %}
+                <option value="{{ m.nombre }}" {% if m.nombre == carrito_ui.municipio %}selected{% endif %}>{{ m.nombre }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-secundario btn-chico">Calcular</button>
+          </div>
+        </form>
+
+        {% if carrito_ui.envio %}
+          {% with envio=carrito_ui.envio %}
+            <div class="envio-resultado {% if envio.gratis %}envio-resultado--gratis{% endif %}">
+              {% if envio.gratis %}
+                <p><strong>¡Tu envío es gratis! 🚚</strong></p>
+              {% else %}
+                <p>Envío a {{ envio.municipio }}: <strong>{{ envio.costo|cop }}</strong></p>
+              {% endif %}
+              <p class="envio-tiempo">{{ envio.zona.tiempo_estimado }}</p>
+              {% if not envio.gratis and envio.falta %}
+                <p class="envio-falta">Te faltan <strong>{{ envio.falta|cop }}</strong> para tu envío gratis.</p>
+                <div class="barra-envio" role="img" aria-label="Progreso para el envío gratis">
+                  <span style="width: {{ envio.progreso }}%"></span>
+                </div>
+              {% endif %}
+            </div>
+          {% endwith %}
+        {% else %}
+          <p class="envio-sugerencia">Elige tu municipio para ver el costo de envío y el tiempo estimado.</p>
+        {% endif %}
+
+        {# Totales #}
+        <dl class="resumen__totales">
+          <div><dt>Subtotal</dt><dd>{{ carrito_ui.subtotal|cop }}</dd></div>
+          {% if carrito_ui.descuento_ofertas %}
+            <div class="es-descuento"><dt>Ofertas</dt><dd>−{{ carrito_ui.descuento_ofertas|cop }}</dd></div>
+          {% endif %}
+          {% if carrito_ui.cupon_descuento %}
+            <div class="es-descuento"><dt>Cupón {{ carrito_ui.cupon.codigo }}</dt><dd>−{{ carrito_ui.cupon_descuento|cop }}</dd></div>
+          {% endif %}
+          <div>
+            <dt>Envío</dt>
+            <dd>
+              {% if carrito_ui.envio %}
+                {% if carrito_ui.envio.gratis %}Gratis{% else %}{{ carrito_ui.envio.costo|cop }}{% endif %}
+              {% else %}—{% endif %}
+            </dd>
+          </div>
+          <div class="resumen__total"><dt>Total</dt><dd>{{ carrito_ui.total|cop }}</dd></div>
+        </dl>
+
+        {% if not carrito_ui.envio %}
+          <p class="resumen__nota">El total no incluye envío hasta que elijas tu municipio.</p>
+        {% endif %}
+
+        {% if site.whatsapp %}
+          <a class="btn btn-whatsapp btn-bloque"
+             href="https://wa.me/{{ site.whatsapp }}?text={{ carrito_ui.whatsapp_texto|urlencode }}"
+             target="_blank" rel="noopener">Enviar mi pedido por WhatsApp</a>
+        {% endif %}
+        <a class="btn btn-primario btn-bloque" href="{% url 'orders:checkout' %}">
+          Finalizar compra
+        </a>
+        <p class="resumen__nota">Todos los precios incluyen IVA.</p>
+      </aside>
+    </div>
+  {% endif %}
+</div>
+{% endblock contenido %}

@@ -42,11 +42,20 @@
     </div>
 
     <nav class="acciones" aria-label="Mi cuenta y carrito">
-      <a href="{% url 'core:pagina' 'cuenta' %}">
-        <span aria-hidden="true">👤</span><span class="texto">Mi cuenta</span>
-      </a>
-      <a href="{% url 'core:pagina' 'carrito' %}">
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:panel' %}">
+          <span aria-hidden="true">👤</span><span class="texto">{{ user.first_name|default:"Mi cuenta" }}</span>
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:ingreso' %}">
+          <span aria-hidden="true">👤</span><span class="texto">Mi cuenta</span>
+        </a>
+      {% endif %}
+      <a href="{% url 'cart:pagina' %}" {% if carrito_ui.items %}class="tiene-items"{% endif %}>
         <span aria-hidden="true">🛍️</span><span class="texto">Carrito</span>
+        {% if carrito_ui.items %}
+          <span class="encabezado__contador" aria-label="{{ carrito_ui.items }} productos en el carrito">{{ carrito_ui.items }}</span>
+        {% endif %}
       </a>
     </nav>
   </div>

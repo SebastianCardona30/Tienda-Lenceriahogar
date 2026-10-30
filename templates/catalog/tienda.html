@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block titulo %}{{ titulo }} — {{ site.nombre_negocio }}{% endblock titulo %}
+{% block titulo %}{{ titulo }} - {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, estoy viendo la tienda y quisiera recomendaciones.{% endblock mensaje_whatsapp %}
 
 {% block contenido %}
   {% include "catalog/partials/_listado.html" %}

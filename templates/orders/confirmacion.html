@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Pedido {{ pedido.numero }} · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor pedido">
+  <header class="pedido__cabecera">
+    <h1>¡Gracias, {{ pedido.nombre }}! 🎉</h1>
+    <p class="pedido__numero">Tu pedido <strong>{{ pedido.numero }}</strong> quedó confirmado.</p>
+    <p class="pedido__fecha">Fecha: {{ pedido.creado|date:"d \d\e F \d\e Y, H:i" }}</p>
+  </header>
+
+  <div class="pedido__grid">
+    <section class="pedido__detalle" aria-label="Detalle del pedido">
+      <h2>Tu compra</h2>
+      <ul class="pedido__lineas">
+        {% for item in pedido.items.all %}
+          <li>
+            <span>{{ item.cantidad }} × {{ item.producto_nombre }}
+              <small>{{ item.variante_label }} · Ref. {{ item.sku }}</small></span>
+            <strong>{{ item.subtotal|cop }}</strong>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <dl class="resumen__totales">
+        <div><dt>Subtotal</dt><dd>{{ pedido.subtotal|cop }}</dd></div>
+        {% if pedido.descuento_ofertas %}
+          <div class="es-descuento"><dt>Ofertas</dt><dd>−{{ pedido.descuento_ofertas|cop }}</dd></div>
+        {% endif %}
+        {% if pedido.descuento_cupon %}
+          <div class="es-descuento"><dt>Cupón {{ pedido.cupon_codigo }}</dt><dd>−{{ pedido.descuento_cupon|cop }}</dd></div>
+        {% endif %}
+        <div><dt>Envío a {{ pedido.municipio.nombre }}</dt>
+          <dd>{% if pedido.costo_envio %}{{ pedido.costo_envio|cop }}{% else %}Gratis{% endif %}</dd></div>
+        <div class="resumen__total"><dt>Total</dt><dd>{{ pedido.total|cop }}</dd></div>
+      </dl>
+
+      <h2>¿Qué sigue?</h2>
+      <ul class="pedido__siguiente">
+        {% if pedido.estado == "pendiente" and pedido.metodo_pago == "pasarela" %}
+          <li><strong>Pago en línea:</strong> aún no pagas; usa el botón «Pagar ahora»
+            para completar el pago de {{ pedido.total|cop }}.
+            {% if pedido.reserva_hasta %}
+              Reservamos tu producto hasta las {{ pedido.reserva_hasta|date:"H:i" }}
+              de hoy; después se libera el stock.
+            {% endif %}</li>
+        {% elif pedido.estado == "pendiente" %}
+          <li><strong>Transferencia:</strong> transfiere {{ pedido.total|cop }} y sube tu
+            comprobante con el botón de abajo (o envíanoslo por WhatsApp).
+            {% if pedido.reserva_hasta %}
+              Guardamos tu producto hasta el {{ pedido.reserva_hasta|date:"d \d\e F \d\e Y, H:i" }}.
+            {% endif %}</li>
+        {% elif pedido.estado == "por_verificar" %}
+          <li><strong>Pago por verificar:</strong> recibimos tu comprobante y lo estamos
+            revisando. Te avisamos por WhatsApp cuando quede aprobado.</li>
+        {% else %}
+          <li><strong>Preparación:</strong> estamos armando tu pedido con cuidado.</li>
+        {% endif %}
+        <li><strong>Entrega:</strong> llegamos a {{ pedido.direccion }}
+          {% if pedido.barrio %}({{ pedido.barrio }}){% endif %}, {{ pedido.municipio.nombre }}.
+        </li>
+        <li>Te avisamos por WhatsApp al {{ pedido.telefono }} cuando salga a reparto.</li>
+        {% if pedido.indicaciones %}<li>Indicaciones: {{ pedido.indicaciones }}</li>{% endif %}
+      </ul>
+
+      <p class="pedido__seguimiento">
+        <a href="{% url 'orders:seguimiento' %}">Consulta el estado cuando quieras</a>
+        con tu número de pedido <strong>{{ pedido.numero }}</strong> y tu celular.
+      </p>
+    </section>
+
+    <aside class="pedido__acciones" aria-label="Acciones">
+      {% if pedido.metodo_pago == "pasarela" and pedido.estado == "pendiente" %}
+        <a class="btn btn-primario btn-bloque" href="{% url 'payments:pagar' pedido.numero %}">Pagar ahora · {{ pedido.total|cop }}</a>
+      {% endif %}
+      {% if pedido.metodo_pago == "transferencia" and pedido.estado == "pendiente" or pedido.metodo_pago == "transferencia" and pedido.estado == "por_verificar" %}
+        <a class="btn btn-primario btn-bloque" href="{% url 'payments:comprobante' pedido.numero %}">Subir comprobante de pago</a>
+      {% endif %}
+      {% if site.whatsapp %}
+        <a class="btn btn-whatsapp btn-bloque"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, acabo de hacer el pedido '|add:pedido.numero|add:' en la tienda y quiero confirmar los datos de entrega.'|urlencode }}"
+           target="_blank" rel="noopener">Confirmar por WhatsApp</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <a class="btn btn-secundario btn-bloque" href="{% url 'orders:mis_pedidos' %}">Ver mis pedidos</a>
+      {% else %}
+        <a class="btn btn-secundario btn-bloque" href="{% url 'core:home' %}">Seguir comprando</a>
+      {% endif %}
+      <p class="resumen__nota">
+        Guardamos tu pedido; también te enviamos la confirmación a {{ pedido.email }}.
+      </p>
+      <p class="resumen__nota">Todos los precios incluyen IVA.</p>
+    </aside>
+  </div>
+</div>
+{% endblock contenido %}

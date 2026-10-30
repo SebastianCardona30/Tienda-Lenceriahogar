@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Mi cuenta · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <header class="cuenta__cabecera">
+    <div>
+      <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+      <p class="cuenta__bajada">{{ user.email }}</p>
+    </div>
+    <form method="post" action="{% url 'accounts:salir' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secundario">Cerrar sesión</button>
+    </form>
+  </header>
+
+  <div class="cuenta__rejilla">
+    <a class="cuenta__tarjeta" href="{% url 'orders:mis_pedidos' %}">
+      <h2>🛍️ Mis pedidos</h2>
+      <p>Revisa tus compras y vuelve a pedir lo que más te gustó.</p>
+      <span class="cuenta__ir">Ver mis pedidos →</span>
+    </a>
+
+    <a class="cuenta__tarjeta" href="{% url 'accounts:direcciones' %}">
+      <h2>📍 Mis direcciones</h2>
+      <p>
+        {% if total_direcciones %}
+          Tienes {{ total_direcciones }} guardada{{ total_direcciones|pluralize }}.
+        {% else %}
+          Aún no guardas direcciones.
+        {% endif %}
+      </p>
+      <span class="cuenta__ir">Ver direcciones →</span>
+    </a>
+
+    <a class="cuenta__tarjeta" href="{% url 'accounts:deseos' %}">
+      <h2>♥ Mis deseos</h2>
+      <p>
+        {% if total_deseos %}
+          {{ total_deseos }} producto{{ total_deseos|pluralize }} en tu lista.
+        {% else %}
+          Tu lista de deseos está vacía.
+        {% endif %}
+      </p>
+      <span class="cuenta__ir">Ver mi lista →</span>
+    </a>
+
+    <a class="cuenta__tarjeta" href="{% url 'accounts:datos' %}">
+      <h2>👤 Mis datos</h2>
+      <p>Nombre, correo, celular y cédula.</p>
+      <span class="cuenta__ir">Editar mis datos →</span>
+    </a>
+  </div>
+
+  <p class="cuenta__pie">
+    ¿Necesitas algo? <a href="{% url 'core:pagina' 'contacto' %}">Escríbenos</a> por WhatsApp
+    {% if site.whatsapp %}(<a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">{{ site.whatsapp }}</a>){% endif %}.
+    <br>
+    <a class="cuenta__borrar" href="{% url 'accounts:eliminar_cuenta' %}">Eliminar mi cuenta y mis datos</a>
+  </p>
+</div>
+{% endblock contenido %}

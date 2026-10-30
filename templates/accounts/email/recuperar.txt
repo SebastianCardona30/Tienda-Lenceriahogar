@@ -1,0 +1,12 @@
+Hola,
+
+Alguien (esperamos que tú) pidió restablecer la contraseña de tu cuenta en {{ site.nombre_negocio }}.
+
+Para crear una contraseña nueva, entra en este enlace (es válido por unas pocas horas):
+
+{{ protocol }}://{{ domain }}{% url 'accounts:recuperar_confirmar' uidb64=uid token=token %}
+
+Si no pediste esto, ignora este correo: no pasó nada y tu contraseña sigue siendo la misma.
+
+Gracias por confiar en nosotros.
+Lencería de Hogar Ciudad Bonita — Bucaramanga, Santander.

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load format_tags static %}
+
+{% block titulo %}Comprobante de pago · Pedido {{ pedido.numero }} · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block styles_extra %}<link rel="stylesheet" href="{% static 'css/pasarela.css' %}">{% endblock styles_extra %}
+
+{% block contenido %}
+<div class="contenedor pasarela">
+  <section class="pasarela__caja" aria-label="Pago por transferencia">
+    <header class="pasarela__cabecera">
+      <span class="pasarela__candado" aria-hidden="true">🏦</span>
+      <div>
+        <p class="pasarela__negocio">{{ site.nombre_negocio }}</p>
+        <p class="pasarela__subtitulo">Transferencia · Nequi · Daviplata</p>
+      </div>
+    </header>
+
+    <div class="pasarela__monto">
+      <span>Monto a transferir</span>
+      <strong>{{ pedido.total|cop }}</strong>
+    </div>
+
+    <dl class="pasarela__datos">
+      <div><dt>Pedido</dt><dd>{{ pedido.numero }}</dd></div>
+      <div><dt>A nombre de</dt><dd>{{ pedido.nombre }}</dd></div>
+    </dl>
+
+    <h2 class="comprobante__titulo">Paso 1 · Transfiere o paga desde tu app</h2>
+    <ul class="comprobante__medios">
+      {% for medio in medios %}
+        <li>
+          <strong>{{ medio.nombre }}</strong>
+          {# Los datos bancarios son marcadores configurables en el admin; nunca se inventan. #}
+          {% if medio.datos %}<pre class="comprobante__datos">{{ medio.datos }}</pre>{% endif %}
+        </li>
+      {% empty %}
+        <li>Aún no tenemos datos de cuenta publicados; escríbenos por WhatsApp.</li>
+      {% endfor %}
+    </ul>
+
+    {% if pago_actual %}
+      <h2 class="comprobante__titulo">Paso 2 · Comprobante recibido ✓</h2>
+      <p class="comprobante__estado comprobante__estado--recibido">
+        Ya nos enviaste el comprobante <strong>{{ pago_actual.comprobante_nombre }}</strong>.
+        Lo estamos revisando; puedes reemplazarlo si hubo un error.
+      </p>
+    {% else %}
+      <h2 class="comprobante__titulo">Paso 2 · Sube tu comprobante</h2>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="comprobante__form"
+          novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <p class="campo__error" role="alert">{{ form.non_field_errors|join:", " }}</p>
+      {% endif %}
+      {% for campo in form %}
+        <div class="campo{% if campo.errors %} campo--error{% endif %}">
+          {{ campo.label_tag }}
+          {{ campo }}
+          {% if campo.help_text %}<small class="campo__ayuda">{{ campo.help_text }}</small>{% endif %}
+          {% for error in campo.errors %}<small class="campo__error" role="alert">{{ error }}</small>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primario btn-bloque">
+        {% if pago_actual %}Reemplazar comprobante{% else %}Enviar comprobante{% endif %}
+      </button>
+    </form>
+
+    <p class="pasarela__pie">
+      Revisamos el pago a mano y te avisamos por WhatsApp al {{ pedido.telefono }}
+      cuando quede aprobado.
+    </p>
+    <p class="pasarela__pie">
+      <a href="{% url 'orders:confirmacion' pedido.numero %}">← Volver a mi pedido</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

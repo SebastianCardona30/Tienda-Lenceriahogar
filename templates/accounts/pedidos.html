@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load format_tags %}
+
+{% block titulo %}Mis pedidos · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <header class="cuenta__cabecera">
+    <h1>Mis pedidos</h1>
+    <a class="btn btn-secundario" href="{% url 'accounts:panel' %}">← Mi cuenta</a>
+  </header>
+
+  {% if pedidos %}
+    <ul class="lista-pedidos">
+      {% for pedido in pedidos %}
+        <li class="pedido-tarjeta">
+          <div class="pedido-tarjeta__cabecera">
+            <a class="pedido-tarjeta__numero" href="{% url 'orders:confirmacion' pedido.numero %}">
+              {{ pedido.numero }}
+            </a>
+            <span class="estado estado--{{ pedido.estado }}">{{ pedido.estado_label }}</span>
+          </div>
+          <p class="pedido-tarjeta__fecha">{{ pedido.creado|date:"d/m/Y" }} · {{ pedido.municipio.nombre }}</p>
+          <ul class="pedido-tarjeta__items">
+            {% for item in pedido.items.all|slice:":3" %}
+              <li>{{ item.cantidad }} × {{ item.producto_nombre }}</li>
+            {% endfor %}
+            {% if pedido.items.count > 3 %}
+              <li>y {{ pedido.items.count|add:"-3" }} más…</li>
+            {% endif %}
+          </ul>
+          <div class="pedido-tarjeta__pie">
+            <strong class="pedido-tarjeta__total">{{ pedido.total|cop }}</strong>
+            <form method="post" action="{% url 'orders:repetir' pedido.numero %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secundario btn-chico">🔁 Volver a comprar</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="cuenta__vacio">
+      <p>
+        Todavía no has hecho pedidos. ¡Empieza por la tienda y aquí verás tus compras
+        con el botón <strong>«Volver a comprar»</strong>!
+      </p>
+      <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ir a la tienda</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock contenido %}

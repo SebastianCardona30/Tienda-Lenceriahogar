@@ -1,0 +1,25 @@
+{% load format_tags %}Hola {{ pedido.nombre }},
+
+¡Gracias! Recibimos tu pedido {{ pedido.numero }} en {{ site.nombre_negocio }}.
+
+Tu compra:
+{% for item in items %}- {{ item.cantidad }} x {{ item.producto_nombre }} ({{ item.variante_label }}): {{ item.subtotal|cop }}
+{% endfor %}
+Total: {{ pedido.total|cop }}
+
+{% if pedido.metodo_pago == "pasarela" %}Pago en línea: si aún no pagas, entra a:
+{{ site_url }}{% url 'payments:pagar' pedido.numero %}
+
+{% elif pedido.metodo_pago == "transferencia" %}Transferencia: transfiere {{ pedido.total|cop }} y sube tu comprobante en:
+{{ site_url }}{% url 'payments:comprobante' pedido.numero %}
+
+{% else %}Contraentrega: pagas en efectivo al recibir tu pedido.
+{% endif %}
+Envío a: {{ pedido.direccion }}{% if pedido.barrio %} ({{ pedido.barrio }}){% endif %}, {{ pedido.municipio.nombre }}.
+
+Sigue tu pedido cuando quieras:
+{{ site_url }}{% url 'orders:seguimiento' %}
+(con tu número de pedido y tu celular).
+
+Gracias por confiar en nosotros.
+{{ site.nombre_negocio }} — {{ site.ciudad }}{% if site.whatsapp %} · WhatsApp {{ site.whatsapp }}{% endif %}

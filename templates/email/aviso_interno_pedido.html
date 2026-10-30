@@ -1,0 +1,58 @@
+{% extends "email/base_email.html" %}
+{% load format_tags %}
+
+{% block cuerpo %}
+  <h1 style="margin:0 0 12px; font-size:20px; color:#5B2A86;">
+    Nuevo pedido {{ pedido.numero }}
+  </h1>
+  <p style="margin:0 0 16px; line-height:1.5;">
+    <strong>{{ pedido.get_estado_display }}</strong> · {{ pedido.creado|date:"d/m/Y H:i" }}
+  </p>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="border:1px solid #E7DCEE; border-radius:8px; font-size:14px;">
+    <tr>
+      <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;"><strong>Cliente</strong></td>
+      <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+        {{ pedido.nombre }} · {{ pedido.telefono }} · {{ pedido.email }}
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;"><strong>Entrega</strong></td>
+      <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+        {{ pedido.direccion }}{% if pedido.barrio %} ({{ pedido.barrio }}){% endif %}, {{ pedido.municipio.nombre }}
+        {% if pedido.indicaciones %}<br><em>Indicaciones: {{ pedido.indicaciones }}</em>{% endif %}
+      </td>
+    </tr>
+    {% for item in items %}
+      <tr>
+        <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.cantidad }} × {{ item.producto_nombre }}
+          <span style="color:#6A6173;">({{ item.sku }})</span>
+        </td>
+        <td align="right" style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.subtotal|cop }}
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td style="padding:8px 16px;"><strong>Total</strong></td>
+      <td align="right" style="padding:8px 16px; color:#C2185B;">
+        <strong>{{ pedido.total|cop }}</strong>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:16px 0 0; line-height:1.5;">
+    <a href="{{ site_url }}{% url 'admin:orders_pedido_change' pedido.pk %}" style="color:#8A4FBF;">
+      Abrir el pedido en el panel
+    </a>
+  </p>
+
+  {% if site.whatsapp %}
+    <p style="margin:12px 0 0; line-height:1.5;">
+      <a href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola '|add:pedido.nombre|add:', confirmo tu pedido '|add:pedido.numero|urlencode }}"
+         style="color:#8A4FBF;">Confirmar con el cliente por WhatsApp</a>
+    </p>
+  {% endif %}
+{% endblock cuerpo %}

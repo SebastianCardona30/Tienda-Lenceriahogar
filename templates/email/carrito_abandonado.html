@@ -1,0 +1,44 @@
+{% extends "email/base_email.html" %}
+{% load format_tags %}
+
+{% block cuerpo %}
+  <h1 style="margin:0 0 12px; font-size:20px; color:#5B2A86;">
+    Te esperamos, {{ usuario.first_name|default:"bonita" }} 💜
+  </h1>
+  <p style="margin:0 0 16px; line-height:1.5;">
+    Dejaste unos productos en tu carrito y todavía no cerramos tu pedido.
+    Los guardamos por ahora; si quieres, sigue donde quedaste:
+  </p>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="border:1px solid #E7DCEE; border-radius:8px; font-size:14px;">
+    {% for linea in lineas %}
+      <tr>
+        <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ linea.cantidad }} × {{ linea.nombre }}
+        </td>
+        <td align="right" style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ linea.precio|cop }}
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td style="padding:8px 16px;"><strong>Subtotal</strong></td>
+      <td align="right" style="padding:8px 16px; color:#C2185B;">
+        <strong>{{ total|cop }}</strong>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:20px 0; text-align:center;">
+    <a href="{{ site_url }}{% url 'cart:pagina' %}"
+       style="background:#C2185B; color:#FFFFFF; padding:12px 24px; border-radius:8px;
+              text-decoration:none; font-weight:bold;">
+      Terminar mi pedido
+    </a>
+  </p>
+
+  <p style="margin:0; line-height:1.5; color:#6A6173; font-size:13px;">
+    Si ya compraste, discúlpanos: este es un recordatorio automático y no volverá a llegar.
+  </p>
+{% endblock cuerpo %}

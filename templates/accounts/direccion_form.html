@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Editar dirección · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <section class="cuenta__tarjeta cuenta__tarjeta--ancha">
+    <h1>Editar dirección</h1>
+    <p class="cuenta__bajada">{{ direccion.destinatario }} · {{ direccion.municipio.nombre }}</p>
+
+    <form method="post" action="{% url 'accounts:editar_direccion' direccion.pk %}" novalidate>
+      {% csrf_token %}
+      {% include "accounts/_formulario.html" %}
+      <button type="submit" class="btn btn-primario btn-bloque">Guardar cambios</button>
+    </form>
+
+    <p class="cuenta__enlaces">
+      <a href="{% url 'accounts:direcciones' %}">← Volver a mis direcciones</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

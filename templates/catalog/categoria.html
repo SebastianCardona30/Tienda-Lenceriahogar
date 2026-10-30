@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block titulo %}{{ pagina.titulo }} — {{ site.nombre_negocio }}{% endblock titulo %}
+{% block titulo %}{{ pagina.titulo }} - {{ site.nombre_negocio }}{% endblock titulo %}
+{% block mensaje_whatsapp %}Hola, estoy viendo la categoría «{{ pagina.titulo }}» y quisiera recomendaciones.{% endblock mensaje_whatsapp %}
 
 {% block metas_extra %}
   {% if categoria.meta_descripcion %}<meta name="description" content="{{ categoria.meta_descripcion }}">{% endif %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis direcciones · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block contenido %}
+<div class="contenedor cuenta">
+  <header class="cuenta__cabecera">
+    <h1>Mis direcciones</h1>
+    <a class="btn btn-secundario" href="{% url 'accounts:panel' %}">← Mi cuenta</a>
+  </header>
+
+  <div class="cuenta__rejilla cuenta__rejilla--invertida">
+    <section aria-label="Direcciones guardadas">
+      {% if direcciones %}
+        <ul class="lista-direcciones">
+          {% for d in direcciones %}
+            <li class="direccion {% if d.predeterminada %}direccion--principal{% endif %}">
+              <div>
+                <strong>{{ d.destinatario }}</strong>
+                {% if d.predeterminada %}<span class="etiqueta etiqueta-nuevo">Predeterminada</span>{% endif %}
+                <p>{{ d.direccion }}{% if d.barrio %}, {{ d.barrio }}{% endif %} · {{ d.municipio.nombre }}</p>
+                {% if d.indicaciones %}<p class="direccion__nota">{{ d.indicaciones }}</p>{% endif %}
+                {% if d.telefono %}<p class="direccion__nota">📞 {{ d.telefono }}</p>{% endif %}
+              </div>
+              <div class="direccion__acciones">
+                <a class="btn-texto" href="{% url 'accounts:editar_direccion' d.pk %}">Editar</a>
+                <form method="post" action="{% url 'accounts:eliminar_direccion' d.pk %}"
+                      onsubmit="return confirm('¿Eliminar esta dirección?')">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-texto btn-texto--rojo">Eliminar</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="cuenta__vacio">Aún no tienes direcciones guardadas. Agrega la primera aquí abajo.</p>
+      {% endif %}
+    </section>
+
+    <section class="cuenta__tarjeta" aria-label="Agregar dirección">
+      <h2>Agregar dirección</h2>
+      <form method="post" action="{% url 'accounts:direcciones' %}" novalidate>
+        {% csrf_token %}
+        {% include "accounts/_formulario.html" %}
+        <button type="submit" class="btn btn-primario btn-bloque">Guardar dirección</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock contenido %}

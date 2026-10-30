@@ -22,9 +22,10 @@
         <ul>
           <li><a href="{% url 'core:pagina' 'preguntas-frecuentes' %}">Preguntas frecuentes</a></li>
           <li><a href="{% url 'core:pagina' 'envios-y-cobertura' %}">Envíos y cobertura</a></li>
+          <li><a href="{% url 'orders:seguimiento' %}">Seguir mi pedido</a></li>
           <li><a href="{% url 'core:pagina' 'cambios-y-devoluciones' %}">Cambios y devoluciones</a></li>
           <li><a href="{% url 'core:pagina' 'contacto' %}">Contacto y PQRS</a></li>
-          <li><a href="{% url 'core:pagina' 'cuenta' %}">Mi cuenta</a></li>
+          <li><a href="{% if user.is_authenticated %}{% url 'accounts:panel' %}{% else %}{% url 'accounts:ingreso' %}{% endif %}">Mi cuenta</a></li>
         </ul>
       </div>
 
