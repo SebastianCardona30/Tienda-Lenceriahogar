@@ -48,6 +48,12 @@ class SiteConfigAdmin(ModelAdmin):
             "fields": ("ofertas_hasta",),
             "description": "Cuenta regresiva del inicio. Se muestran los productos con precio de oferta.",
         }),
+        (_("Medios de pago manuales (marcadores configurables)"), {
+            "fields": ("pago_nequi", "pago_daviplata", "pago_transferencia",
+                       "reserva_horas_transferencia"),
+            "description": "Datos que ve el cliente para transferir y subir el comprobante. "
+                           "Dejar en blanco un medio lo oculta del checkout.",
+        }),
         (_("Impuestos y moneda"), {
             "fields": ("iva_incluido", "iva_tasa"),
         }),

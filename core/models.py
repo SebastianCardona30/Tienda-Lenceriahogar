@@ -57,6 +57,28 @@ class SiteConfig(models.Model):
         "tasa de IVA (%)", max_digits=5, decimal_places=2, default=19.00,
     )
 
+    # Medios de pago manuales (Nequi / Daviplata / transferencia)
+    # Marcadores configurables: el agente nunca inventa números de cuenta.
+    pago_nequi = models.TextField(
+        "Nequi", blank=True,
+        help_text="Número Nequi y titular. Ej.: 300 111 2233 — Lencería de Hogar. "
+                  "Dejar en blanco si aún no se tiene.",
+    )
+    pago_daviplata = models.TextField(
+        "Daviplata", blank=True,
+        help_text="Número Daviplata y titular. Dejar en blanco si aún no se tiene.",
+    )
+    pago_transferencia = models.TextField(
+        "Transferencia bancaria", blank=True,
+        help_text="Banco, tipo de cuenta, número de cuenta y titular. "
+                  "Dejar en blanco si aún no se tiene.",
+    )
+    reserva_horas_transferencia = models.PositiveIntegerField(
+        "horas de reserva para transferencia", default=48,
+        help_text="Cuánto tiempo se reserva el stock esperando el comprobante "
+                  "(horas). Después el pedido se cancela solo.",
+    )
+
     # Redes sociales (opcionales)
     instagram = models.URLField("Instagram", blank=True)
     facebook = models.URLField("Facebook", blank=True)
@@ -84,6 +106,22 @@ class SiteConfig(models.Model):
     def delete(self, *args, **kwargs):
         # Evita borrar la configuración por accidente desde el admin.
         pass
+
+    def medios_pago_manuales(self):
+        """Medios manuales configurados (Nequi, Daviplata, transferencia).
+
+        Solo devuelve los que tengan datos; si ninguno está configurado, la
+        tienda no ofrece transferencia y el cliente debe usar otro método.
+        """
+        return [
+            {"clave": clave, "nombre": nombre, "datos": texto.strip()}
+            for clave, nombre, texto in (
+                ("nequi", "Nequi", self.pago_nequi),
+                ("daviplata", "Daviplata", self.pago_daviplata),
+                ("transferencia", "Transferencia bancaria", self.pago_transferencia),
+            )
+            if texto.strip()
+        ]
 
 
 class Suscripcion(models.Model):

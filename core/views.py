@@ -42,15 +42,6 @@ PAGINAS = {
         "bajada": "Usamos cookies necesarias para el carrito y, con tu consentimiento, "
                   "cookies de analítica opcionales.",
     },
-    # Placeholders temporales (se reemplazan en la Fase 2)
-    "carrito": {
-        "titulo": "Tu carrito",
-        "bajada": "El carrito se está construyendo. En la Fase 2 ya podrás agregar productos aquí.",
-    },
-    "cuenta": {
-        "titulo": "Mi cuenta",
-        "bajada": "El área de cliente se está construyendo. Siempre podrás comprar como invitado.",
-    },
 }
 
 
