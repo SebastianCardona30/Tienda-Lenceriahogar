@@ -1,7 +1,10 @@
 """Creación de pedidos desde el carrito (transacción, stock y cupón)."""
+from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 
 from cart import servicios as carrito_servicios
 from orders.models import HistorialPedido, ItemPedido, Pedido
@@ -12,15 +15,51 @@ class ErrorDeCompra(Exception):
 
 
 def cambiar_estado(pedido, estado, nota="", usuario=None):
-    """Cambia el estado del pedido y deja constancia en el historial."""
+    """Cambia el estado del pedido y deja constancia en el historial.
+
+    Al cancelar o devolver un pedido, el stock reservado se devuelve al
+    inventario (una sola vez; el pedido lleva la marca stock_devuelto).
+    """
     if pedido.estado == estado:
         return pedido
     pedido.estado = estado
-    pedido.save(update_fields=["estado", "actualizado"])
+    campos = ["estado", "actualizado"]
+    # Al confirmarse el pago (o salir a preparación) la reserva deja de contar
+    if estado in ("pagado", "preparacion", "enviado", "entregado"):
+        pedido.reserva_hasta = None
+        campos.append("reserva_hasta")
+    pedido.save(update_fields=campos)
     HistorialPedido.objects.create(
         pedido=pedido, estado=estado, nota=nota, usuario=usuario,
     )
+    if estado in ("cancelado", "devuelto"):
+        devolver_stock(pedido)
     return pedido
+
+
+def devolver_stock(pedido):
+    """Devuelve al inventario las unidades de un pedido (idempotente)."""
+    from catalog.models import Variante
+
+    if pedido.stock_devuelto:
+        return False
+    skus = list(pedido.items.values_list("sku", flat=True))
+    with transaction.atomic():
+        variantes = {
+            v.sku: v
+            for v in Variante.objects.select_for_update().filter(sku__in=skus)
+        }
+        for item in pedido.items.all():
+            variante = variantes.get(item.sku)
+            if variante:
+                variante.stock += item.cantidad
+                variante.save(update_fields=["stock"])
+        # Marca el pedido dentro de la misma transacción para no devolver dos veces
+        Pedido.objects.filter(pk=pedido.pk, stock_devuelto=False).update(
+            stock_devuelto=True
+        )
+    pedido.stock_devuelto = True
+    return True
 
 
 @transaction.atomic
@@ -82,6 +121,22 @@ def crear_pedido(request, datos):
     if metodo_pago not in ("pasarela", "contraentrega", "transferencia"):
         metodo_pago = "contraentrega"
 
+    # Reserva de stock: la pasarela espera 15 minutos (ajustable en settings);
+    # la transferencia, las horas configuradas en el admin del negocio.
+    ahora = timezone.now()
+    if metodo_pago == "pasarela":
+        reserva_hasta = ahora + timedelta(
+            minutes=getattr(settings, "RESERVA_MINUTOS_PASARELA", 15)
+        )
+    elif metodo_pago == "transferencia":
+        from core.models import SiteConfig
+
+        reserva_hasta = ahora + timedelta(
+            hours=SiteConfig.get().reserva_horas_transferencia
+        )
+    else:
+        reserva_hasta = None  # contraentrega: sin pago que esperar
+
     pedido = Pedido.objects.create(
         usuario=request.user if request.user.is_authenticated else None,
         nombre=datos["nombre"],
@@ -104,6 +159,7 @@ def crear_pedido(request, datos):
         metodo_pago=metodo_pago,
         # Contraentrega no espera pago; pasarela y transferencia sí
         estado="preparacion" if metodo_pago == "contraentrega" else "pendiente",
+        reserva_hasta=reserva_hasta,
     )
 
     for variante, linea in items:

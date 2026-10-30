@@ -73,6 +73,15 @@ class Pedido(models.Model):
         help_text="Solo para el equipo; no se muestran al cliente.",
     )
 
+    # ---------- Reserva de stock ----------
+    # El stock se descuenta al confirmar y queda reservado hasta esta fecha.
+    # Si no se paga a tiempo, cancel_expired_orders cancela y devuelve el stock.
+    reserva_hasta = models.DateTimeField(
+        "reserva de stock hasta", null=True, blank=True,
+        help_text="Vacío cuando el pedido no espera pago (contraentrega).",
+    )
+    stock_devuelto = models.BooleanField("stock devuelto", default=False)
+
     creado = models.DateTimeField("creado el", auto_now_add=True)
     actualizado = models.DateTimeField("actualizado el", auto_now=True)
 

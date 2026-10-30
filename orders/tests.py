@@ -1,4 +1,5 @@
 """Pruebas del checkout: 3 pasos, pedido, stock, cupón y volver a comprar."""
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -311,3 +312,161 @@ class HabeasDataPedidosTests(CheckoutTestCase):
         self.assertEqual(pedido.email, "")
         self.assertEqual(pedido.telefono, "")
         self.assertEqual(pedido.direccion, "")
+
+
+class ReservaDeStockTests(TestCase):
+    """La reserva de stock vence y el comando cancela y devuelve inventario."""
+
+    def setUp(self):
+        zona, _ = ZonaEnvio.objects.get_or_create(
+            nombre="Área metropolitana de Bucaramanga",
+            defaults={"tarifa": Decimal(8000),
+                      "envio_gratis_desde": Decimal(150000),
+                      "tiempo_estimado": "Mismo día"},
+        )
+        self.municipio, _ = MunicipioSantander.objects.get_or_create(
+            nombre="Bucaramanga", defaults={"zona": zona},
+        )
+        self.variante = crear_variante(stock=10)
+
+    def _datos(self, metodo):
+        return {
+            "nombre": "María Pérez", "email": "maria@ejemplo.com",
+            "telefono": "3001112233", "mayor_de_edad": "on",
+            "autoriza_datos": "on", "municipio": "Bucaramanga",
+            "direccion": "Cra 15 # 42-10", "metodo_pago": metodo,
+        }
+
+    def _comprar(self, metodo):
+        self.client.post(
+            reverse("cart:agregar"),
+            {"sku": self.variante.sku, "cantidad": 2},
+            HTTP_REFERER="/tienda/",
+        )
+        self.client.post(reverse("orders:checkout"), self._datos(metodo))
+        return Pedido.objects.latest("creado")
+
+    def test_pasarela_reserva_15_minutos(self):
+        pedido = self._comprar("pasarela")
+        self.assertIsNotNone(pedido.reserva_hasta)
+        resta = (pedido.reserva_hasta - pedido.creado).total_seconds()
+        self.assertAlmostEqual(resta, 15 * 60, delta=60)
+
+    def test_transferencia_reserva_las_horas_del_admin(self):
+        config = SiteConfig.get()
+        config.pago_nequi = "Nequi: 300 111 2233"
+        config.reserva_horas_transferencia = 48
+        config.save()
+        pedido = self._comprar("transferencia")
+        resta = (pedido.reserva_hasta - pedido.creado).total_seconds()
+        self.assertAlmostEqual(resta, 48 * 3600, delta=60)
+
+    def test_contraentrega_no_reserva(self):
+        pedido = self._comprar("contraentrega")
+        self.assertIsNone(pedido.reserva_hasta)
+        self.assertEqual(pedido.estado, "preparacion")
+
+    def test_pagar_libera_la_reserva(self):
+        from orders.servicios import cambiar_estado
+
+        pedido = self._comprar("pasarela")
+        cambiar_estado(pedido, "pagado", nota="Pago aprobado.")
+        pedido.refresh_from_db()
+        self.assertIsNone(pedido.reserva_hasta)
+
+    def test_cancelar_devuelve_el_stock(self):
+        from orders.servicios import cambiar_estado
+
+        pedido = self._comprar("pasarela")
+        self.variante.refresh_from_db()
+        self.assertEqual(self.variante.stock, 8)
+        cambiar_estado(pedido, "cancelado", nota="Vencida.")
+        self.variante.refresh_from_db()
+        pedido.refresh_from_db()
+        self.assertEqual(self.variante.stock, 10)
+        self.assertTrue(pedido.stock_devuelto)
+
+    def test_devolver_stock_es_idempotente(self):
+        from orders.servicios import cambiar_estado, devolver_stock
+
+        pedido = self._comprar("pasarela")
+        cambiar_estado(pedido, "cancelado", nota="Primera.")
+        self.assertFalse(devolver_stock(pedido))  # segunda vez no devuelve nada
+        self.variante.refresh_from_db()
+        self.assertEqual(self.variante.stock, 10)
+
+    def test_cancel_expired_cancela_pedidos_vencidos(self):
+        from django.core.management import call_command
+        from django.utils import timezone
+
+        pedido = self._comprar("pasarela")
+        Pedido.objects.filter(pk=pedido.pk).update(
+            reserva_hasta=timezone.now() - timedelta(hours=1),
+        )
+        call_command("cancel_expired_orders")
+        pedido.refresh_from_db()
+        self.variante.refresh_from_db()
+        self.assertEqual(pedido.estado, "cancelado")
+        self.assertEqual(self.variante.stock, 10)
+        self.assertTrue(
+            HistorialPedido.objects.filter(
+                pedido=pedido, estado="cancelado",
+                nota__icontains="reserva de stock venció",
+            ).exists()
+        )
+
+    def test_cancel_expired_no_toca_pagados_ni_a_tiempo(self):
+        from django.core.management import call_command
+        from django.utils import timezone
+
+        pagado = self._comprar("pasarela")
+        cambiar = pagado
+        from orders.servicios import cambiar_estado
+
+        cambiar_estado(cambiar, "pagado", nota="Pagado.")
+        # Otro pedido aún dentro de la ventana
+        session = self.client.session
+        session["carrito"] = {"lineas": {}, "cupon": "", "municipio": "",
+                              "guardados": []}
+        session.save()
+        a_tiempo = self._comprar("pasarela")
+        Pedido.objects.filter(pk=pagado.pk).update(
+            reserva_hasta=timezone.now() - timedelta(hours=1),
+        )
+        call_command("cancel_expired_orders")
+        pagado.refresh_from_db()
+        a_tiempo.refresh_from_db()
+        self.assertEqual(pagado.estado, "pagado")
+        self.assertEqual(a_tiempo.estado, "pendiente")
+
+    def test_simular_no_cancela(self):
+        from django.core.management import call_command
+        from django.utils import timezone
+
+        pedido = self._comprar("pasarela")
+        Pedido.objects.filter(pk=pedido.pk).update(
+            reserva_hasta=timezone.now() - timedelta(hours=1),
+        )
+        call_command("cancel_expired_orders", "--simular")
+        pedido.refresh_from_db()
+        self.variante.refresh_from_db()
+        self.assertEqual(pedido.estado, "pendiente")
+        self.assertEqual(self.variante.stock, 8)
+
+    def test_release_stock_reservations_devuelve_stock_huerfano(self):
+        from django.core.management import call_command
+
+        pedido = self._comprar("pasarela")
+        # Cancelado a mano desde el panel (sin pasar por cambiar_estado)
+        Pedido.objects.filter(pk=pedido.pk).update(
+            estado="cancelado", stock_devuelto=False,
+        )
+        call_command("release_stock_reservations")
+        self.variante.refresh_from_db()
+        pedido.refresh_from_db()
+        self.assertEqual(self.variante.stock, 10)
+        self.assertTrue(pedido.stock_devuelto)
+        # Correrlo otra vez no duplica la devolución
+        call_command("release_stock_reservations")
+        self.variante.refresh_from_db()
+        self.assertEqual(self.variante.stock, 10)

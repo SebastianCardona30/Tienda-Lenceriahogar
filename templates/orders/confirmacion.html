@@ -41,10 +41,17 @@
       <ul class="pedido__siguiente">
         {% if pedido.estado == "pendiente" and pedido.metodo_pago == "pasarela" %}
           <li><strong>Pago en línea:</strong> aún no pagas; usa el botón «Pagar ahora»
-            para completar el pago de {{ pedido.total|cop }}.</li>
+            para completar el pago de {{ pedido.total|cop }}.
+            {% if pedido.reserva_hasta %}
+              Reservamos tu producto hasta las {{ pedido.reserva_hasta|date:"H:i" }}
+              de hoy; después se libera el stock.
+            {% endif %}</li>
         {% elif pedido.estado == "pendiente" %}
           <li><strong>Transferencia:</strong> transfiere {{ pedido.total|cop }} y sube tu
-            comprobante con el botón de abajo (o envíanoslo por WhatsApp).</li>
+            comprobante con el botón de abajo (o envíanoslo por WhatsApp).
+            {% if pedido.reserva_hasta %}
+              Guardamos tu producto hasta el {{ pedido.reserva_hasta|date:"d \d\e F \d\e Y, H:i" }}.
+            {% endif %}</li>
         {% elif pedido.estado == "por_verificar" %}
           <li><strong>Pago por verificar:</strong> recibimos tu comprobante y lo estamos
             revisando. Te avisamos por WhatsApp cuando quede aprobado.</li>

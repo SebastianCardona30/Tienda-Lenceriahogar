@@ -73,6 +73,11 @@ class SiteConfig(models.Model):
         help_text="Banco, tipo de cuenta, número de cuenta y titular. "
                   "Dejar en blanco si aún no se tiene.",
     )
+    reserva_horas_transferencia = models.PositiveIntegerField(
+        "horas de reserva para transferencia", default=48,
+        help_text="Cuánto tiempo se reserva el stock esperando el comprobante "
+                  "(horas). Después el pedido se cancela solo.",
+    )
 
     # Redes sociales (opcionales)
     instagram = models.URLField("Instagram", blank=True)

@@ -37,7 +37,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 ## Fase 3 — Pagos y pedidos
 - [x] Pasarela simulada local (Aprobado/Rechazado/Pendiente) con misma interfaz que la real (Paso 1: app payments, pantalla con formato de monto + referencia, `orders.servicios.cambiar_estado`, admin de Pago, 13 pruebas; se oculta con PASARELA_SIMULADA=0 o con llaves WOMPI_* en .env)
 - [x] Transferencia/Nequi/Daviplata manual con comprobante (imagen/PDF validado), aprobación con un clic (Paso 2: datos de cuenta como marcadores en SiteConfig, subida con validación real Pillow/PDF y 5 MB, pedido pasa a "Pago por verificar", acciones del admin aprueban/rechazan en un clic, 12 pruebas; el medio se oculta del checkout si no tiene datos)
-- [ ] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations
+- [x] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations (Paso 3: Pedido.reserva_hasta + stock_devuelto, devolución idempotente en cambiar_estado, horas de reserva configurables en SiteConfig, comandos con --simular y margen de seguridad, 10 pruebas; al pagar se libera la reserva)
 - [ ] Estados de pedido con historial; seguimiento público por número + celular
 - [ ] Correos de marca por plantilla (consola en dev) + aviso interno por email/WhatsApp; send_abandoned_cart_emails
 - [ ] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves

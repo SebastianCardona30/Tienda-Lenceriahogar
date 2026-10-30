@@ -34,6 +34,10 @@ PASARELA_SIMULADA = (
     os.getenv("WOMPI_PUBLIC_KEY", "").strip()
     or os.getenv("WOMPI_PRIVATE_KEY", "").strip()
 )
+
+# Reserva de stock durante el pago en línea (minutos); la transferencia usa
+# SiteConfig.reserva_horas_transferencia (editable en el admin).
+RESERVA_MINUTOS_PASARELA = int(os.getenv("RESERVA_MINUTOS_PASARELA", "15") or 15)
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
 ]
