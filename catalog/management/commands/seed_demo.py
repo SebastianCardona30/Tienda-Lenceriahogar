@@ -3,7 +3,7 @@ Comando: python manage.py seed_demo
 
 Carga datos de demostración realistas (sin fotos con derechos de autor):
 8 categorías con subcategorías, proveedores, 40 productos con variantes,
-reseñas, combos, sinónimos de búsqueda, cupones y fecha de ofertas.
+reseñas, combos, sinónimos de búsqueda, cupones, ofertas de ejemplo y fecha de ofertas.
 
 Se puede ejecutar varias veces: no duplica datos (usa get_or_create).
 """
@@ -329,7 +329,55 @@ class Command(BaseCommand):
                 codigo=codigo,
                 defaults={"tipo": tipo, "valor": valor, "monto_minimo": Decimal(minimo)},
             )
+        # BIENVENIDA10 es la plantilla de la que se copian los cupones únicos de suscripción
+        Cupon.objects.filter(codigo="BIENVENIDA10").update(es_bienvenida=True)
         self.stdout.write(f"· {len(CUPONES)} cupones")
+
+        # ---------- Ofertas de ejemplo (idempotentes) ----------
+        from promotions.models import Descuento, PromoUnidades, PromoVolumen, VentaRelampago
+
+        # Venta relámpago: se renueva si venció, para que la demo siempre tenga una.
+        variante_relampago = Variante.objects.filter(stock__gt=0).order_by("id").first()
+        if variante_relampago:
+            ahora = timezone.now()
+            relampago, creado = VentaRelampago.objects.get_or_create(
+                variante=variante_relampago,
+                defaults={
+                    "precio": int(variante_relampago.precio_final * Decimal("0.7")),
+                    "desde": ahora - timedelta(hours=6),
+                    "hasta": ahora + timedelta(days=3),
+                },
+            )
+            if not creado and relampago.hasta < ahora:
+                relampago.desde = ahora - timedelta(hours=6)
+                relampago.hasta = ahora + timedelta(days=3)
+                relampago.save()
+
+        cat_toallas = Categoria.objects.filter(nombre="Toallas").first()
+        if cat_toallas:
+            Descuento.objects.get_or_create(
+                nombre="Toallas en sale",
+                defaults={"sobre": "categoria", "categoria": cat_toallas,
+                          "tipo": "porcentaje", "valor": Decimal("15")},
+            )
+
+        cat_sabanas = Categoria.objects.filter(nombre__startswith="Sábanas").first()
+        if cat_sabanas:
+            PromoUnidades.objects.get_or_create(
+                nombre="Sábanas 2x1",
+                defaults={"categoria": cat_sabanas, "llevar": 2, "pagar": 1},
+            )
+
+        prod_sabana = Producto.objects.filter(
+            nombre__icontains="juego de sábanas", estado="publicado"
+        ).first()
+        if prod_sabana:
+            PromoVolumen.objects.get_or_create(
+                nombre="3 juegos con 10% menos",
+                defaults={"producto": prod_sabana, "tipo": "porcentaje",
+                          "valor": Decimal("10"), "cantidad_minima": 3},
+            )
+        self.stdout.write("· ofertas de ejemplo: relámpago, descuento, 2x1 y volumen")
 
         # ---------- Configuración: ofertas de la semana (próximo domingo) ----------
         config = SiteConfig.get()
@@ -345,3 +393,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             "\nListo: datos de demostración cargados. Abre la tienda y el panel de administración."
         ))
+
+        # ---------- Envíos: zonas y municipios de Santander (idempotente) ----------
+        from django.core.management import call_command
+
+        call_command("seed_municipios", verbosity=0)
