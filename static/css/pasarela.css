@@ -1,0 +1,80 @@
+/* =========================================================
+   Pasarela de pago (pantalla simulada con formato de la real)
+   ========================================================= */
+
+.pasarela { padding-block: 32px 64px; display: flex; justify-content: center; }
+.pasarela__caja {
+  width: min(460px, 100%);
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-alta);
+  overflow: hidden;
+}
+.pasarela__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  background: var(--ciruela);
+  color: var(--blanco);
+}
+.pasarela__candado { font-size: 1.6rem; }
+.pasarela__negocio { margin: 0; font-weight: 700; font-family: var(--fuente-titulos); }
+.pasarela__subtitulo { margin: 2px 0 0; font-size: 0.82rem; opacity: 0.85; }
+
+.pasarela__monto {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 20px;
+  background: var(--lavanda);
+}
+.pasarela__monto span { color: var(--texto-2); font-size: 0.9rem; }
+.pasarela__monto strong { color: var(--ciruela); font-size: 1.6rem; }
+
+.pasarela__datos { margin: 0; padding: 16px 20px; display: grid; gap: 8px; }
+.pasarela__datos > div { display: flex; justify-content: space-between; gap: 12px; }
+.pasarela__datos dt { color: var(--texto-2); }
+.pasarela__datos dd { margin: 0; font-weight: 700; text-align: right; }
+
+.pasarela__aviso {
+  margin: 0 20px 16px;
+  padding: 12px;
+  background: #fef6e3;
+  border: 1px solid var(--aviso);
+  border-radius: var(--radio);
+  color: #6b4a05;
+  font-size: 0.88rem;
+}
+
+.pasarela__botones { display: grid; gap: 10px; padding: 0 20px 12px; }
+.pasarela__botones form { margin: 0; }
+.btn-pago { width: 100%; border: none; padding: 13px 16px; font-weight: 700; cursor: pointer; }
+.btn-pago--aprobado { background: var(--exito); color: var(--blanco); }
+.btn-pago--aprobado:hover { background: #237d54; }
+.btn-pago--rechazado { background: var(--error); color: var(--blanco); }
+.btn-pago--rechazado:hover { background: #a52a2a; }
+.btn-pago--pendiente { background: var(--aviso); color: #4a3203; }
+.btn-pago--pendiente:hover { background: #d9930f; }
+
+.pasarela__pie {
+  text-align: center;
+  color: var(--texto-2);
+  font-size: 0.8rem;
+  padding: 0 20px 16px;
+  margin: 0;
+}
+.pasarela__pie a { color: var(--purpura); font-weight: 700; }
+
+/* ---------- Comprobante de transferencia ---------- */
+.comprobante__titulo { margin: 8px 20px 6px; font-size: 1.02rem; color: var(--ciruela); }
+.comprobante__medios { margin: 0; padding: 0 20px 8px; list-style: none; display: grid; gap: 10px; }
+.comprobante__medios li { border: 1px solid var(--borde); border-radius: var(--radio); padding: 10px 12px; }
+.comprobante__datos {
+  margin: 6px 0 0; font-family: var(--fuente-texto, inherit); white-space: pre-wrap;
+  color: var(--texto); font-size: 0.9rem; line-height: 1.5;
+}
+.comprobante__estado { margin: 0 20px 12px; padding: 12px; border-radius: var(--radio); font-size: 0.88rem; }
+.comprobante__estado--recibido { background: #e8f7ef; border: 1px solid var(--exito); color: #1d6b47; }
+.comprobante__form { padding: 0 20px 8px; display: grid; gap: 12px; }

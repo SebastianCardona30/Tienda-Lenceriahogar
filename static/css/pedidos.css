@@ -1,0 +1,175 @@
+/* =========================================================
+   Checkout (3 pasos), confirmación y lista de pedidos
+   ========================================================= */
+
+/* ---------- Checkout ---------- */
+.checkout { padding-block: 24px 56px; }
+.checkout__titulo { margin-bottom: 18px; }
+
+.pasos {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  counter-reset: nada;
+}
+.paso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--texto-2);
+  font-size: 0.85rem;
+  padding-top: 10px;
+  border-top: 4px solid var(--borde);
+}
+.paso__numero {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--lavanda);
+  color: var(--ciruela);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.paso--activo { color: var(--ciruela); border-top-color: var(--rosa-cta); font-weight: 700; }
+.paso--activo .paso__numero { background: var(--rosa-cta); color: var(--blanco); }
+.paso--listo { color: var(--exito); border-top-color: var(--exito); }
+.paso--listo .paso__numero { background: var(--exito); color: var(--blanco); }
+
+.checkout__grid { display: grid; gap: 20px; }
+.paso-contenido {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--blanco);
+  padding: 20px;
+  display: grid;
+  gap: 4px;
+}
+.paso-contenido legend {
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 0 8px;
+  color: var(--ciruela);
+}
+.checkout__envio {
+  background: var(--lavanda);
+  border-radius: var(--radio);
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  margin: 6px 0;
+}
+.checkout__nota { color: var(--texto-2); font-size: 0.85rem; margin: 6px 0; }
+.checkout__botones { display: flex; gap: 10px; margin-top: 10px; }
+.checkout__botones .btn { flex: 1; }
+.checkout__lineas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 0.92rem; }
+.checkout__lineas li { display: flex; justify-content: space-between; gap: 10px; }
+.checkout__lineas small { display: block; color: var(--texto-2); }
+
+/* ---------- Confirmación del pedido ---------- */
+.pedido { padding-block: 28px 56px; max-width: 860px; }
+.pedido__cabecera {
+  background: #e8f7ef;
+  border: 1px solid var(--exito);
+  border-radius: var(--radio-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.pedido__cabecera h1 { margin: 0 0 6px; }
+.pedido__numero { font-size: 1.05rem; margin: 0; }
+.pedido__fecha { color: var(--texto-2); margin: 4px 0 0; font-size: 0.9rem; }
+.pedido__grid { display: grid; gap: 20px; }
+.pedido__detalle {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 20px;
+}
+.pedido__detalle h2 { font-size: 1.1rem; margin-top: 18px; }
+.pedido__lineas { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.pedido__lineas li { display: flex; justify-content: space-between; gap: 10px; }
+.pedido__lineas small { display: block; color: var(--texto-2); }
+.pedido__siguiente { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--texto-2); }
+.pedido__seguimiento {
+  background: var(--lavanda);
+  border-radius: var(--radio);
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 0.92rem;
+}
+.pedido__acciones {
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+/* ---------- Lista de pedidos (cuenta) ---------- */
+.lista-pedidos { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.pedido-tarjeta {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+.pedido-tarjeta__cabecera { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pedido-tarjeta__numero { font-weight: 700; color: var(--ciruela); }
+.pedido-tarjeta__fecha { color: var(--texto-2); font-size: 0.85rem; margin: 0; }
+.pedido-tarjeta__items { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 0.92rem; }
+.pedido-tarjeta__pie { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pedido-tarjeta__total { color: var(--ciruela); font-size: 1.1rem; }
+.pedido-tarjeta__pie form { margin: 0; }
+
+/* ---------- Estados del pedido ---------- */
+.estado {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--lavanda);
+  color: var(--ciruela);
+  white-space: nowrap;
+}
+.estado--pendiente { background: #FEF6E3; color: #6b4a05; }
+.estado--por_verificar { background: #FEF6E3; color: #6b4a05; }
+.estado--pagado { background: var(--lavanda); color: var(--ciruela); }
+.estado--preparacion { background: var(--lavanda); color: var(--ciruela); }
+.estado--enviado { background: #E3F0FB; color: #1c5c86; }
+.estado--entregado { background: #E8F7EF; color: #1c6c46; }
+.estado--cancelado,
+.estado--devuelto { background: #FDECEC; color: #8f2626; }
+
+/* ---------- Seguimiento público ---------- */
+.seguimiento__form { display: grid; gap: 14px; margin-bottom: 26px; }
+.seguimiento__campos { display: grid; gap: 12px; }
+.seguimiento__resultado {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 18px;
+  background: var(--blanco);
+}
+.seguimiento__resultado h2 { font-size: 1.05rem; margin: 18px 0 10px; }
+.seguimiento__linea { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.seguimiento__paso { display: flex; gap: 12px; align-items: flex-start; }
+.seguimiento__detalle time { color: var(--texto-2); font-size: 0.85rem; }
+.seguimiento__detalle p { margin: 2px 0 0; font-size: 0.92rem; }
+
+@media (min-width: 640px) {
+  .seguimiento__campos { grid-template-columns: 1fr 1fr; align-items: end; }
+  .seguimiento__form .btn { justify-self: start; }
+}
+
+/* ---------- Escritorio ---------- */
+@media (min-width: 960px) {
+  .checkout__grid { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+  .checkout__grid .resumen { position: sticky; top: 16px; }
+  .pedido__grid { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+}
