@@ -63,7 +63,8 @@ class Pedido(models.Model):
     )
     metodo_pago = models.CharField(
         "método de pago", max_length=30,
-        choices=[("contraentrega", "Contraentrega"),
+        choices=[("pasarela", "Pasarela en línea"),
+                 ("contraentrega", "Contraentrega"),
                  ("transferencia", "Transferencia / Nequi / Daviplata")],
         default="contraentrega",
     )

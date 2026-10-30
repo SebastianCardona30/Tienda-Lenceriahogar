@@ -11,6 +11,18 @@ class ErrorDeCompra(Exception):
     """Problema que impide confirmar el pedido (mensaje ya en español)."""
 
 
+def cambiar_estado(pedido, estado, nota="", usuario=None):
+    """Cambia el estado del pedido y deja constancia en el historial."""
+    if pedido.estado == estado:
+        return pedido
+    pedido.estado = estado
+    pedido.save(update_fields=["estado", "actualizado"])
+    HistorialPedido.objects.create(
+        pedido=pedido, estado=estado, nota=nota, usuario=usuario,
+    )
+    return pedido
+
+
 @transaction.atomic
 def crear_pedido(request, datos):
     """
@@ -67,7 +79,7 @@ def crear_pedido(request, datos):
         costo_envio = Decimal(0)  # envío gratis por umbral de la zona
 
     metodo_pago = datos.get("metodo_pago") or "contraentrega"
-    if metodo_pago not in ("contraentrega", "transferencia"):
+    if metodo_pago not in ("pasarela", "contraentrega", "transferencia"):
         metodo_pago = "contraentrega"
 
     pedido = Pedido.objects.create(
@@ -90,8 +102,8 @@ def crear_pedido(request, datos):
         costo_envio=costo_envio,
         total=ui["total"],
         metodo_pago=metodo_pago,
-        # Contraentrega no espera pago; transferencia queda esperando comprobante
-        estado="pendiente" if metodo_pago == "transferencia" else "preparacion",
+        # Contraentrega no espera pago; pasarela y transferencia sí
+        estado="preparacion" if metodo_pago == "contraentrega" else "pendiente",
     )
 
     for variante, linea in items:

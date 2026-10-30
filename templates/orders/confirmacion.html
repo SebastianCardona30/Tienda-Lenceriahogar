@@ -39,7 +39,10 @@
 
       <h2>¿Qué sigue?</h2>
       <ul class="pedido__siguiente">
-        {% if pedido.estado == "pendiente" %}
+        {% if pedido.estado == "pendiente" and pedido.metodo_pago == "pasarela" %}
+          <li><strong>Pago en línea:</strong> aún no pagas; usa el botón «Pagar ahora»
+            para completar el pago de {{ pedido.total|cop }}.</li>
+        {% elif pedido.estado == "pendiente" %}
           <li><strong>Transferencia:</strong> envíanos el comprobante por WhatsApp y
             revisamos el pago (suele tomar menos de un día hábil).</li>
         {% else %}
@@ -59,6 +62,9 @@
     </section>
 
     <aside class="pedido__acciones" aria-label="Acciones">
+      {% if pedido.metodo_pago == "pasarela" and pedido.estado == "pendiente" %}
+        <a class="btn btn-primario btn-bloque" href="{% url 'payments:pagar' pedido.numero %}">Pagar ahora · {{ pedido.total|cop }}</a>
+      {% endif %}
       {% if site.whatsapp %}
         <a class="btn btn-whatsapp btn-bloque"
            href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, acabo de hacer el pedido '|add:pedido.numero|add:' en la tienda y quiero confirmar los datos de entrega.'|urlencode }}"

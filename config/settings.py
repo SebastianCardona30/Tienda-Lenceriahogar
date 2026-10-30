@@ -23,6 +23,17 @@ EN_VERCEL = os.environ.get("VERCEL", "").strip() in ("1", "true", "yes")
 SECRET_KEY = os.getenv("SECRET_KEY", "clave-insegura-solo-para-desarrollo-local")
 # En Vercel se despliega siempre con DEBUG apagado (a menos que se pida lo contrario)
 DEBUG = os.getenv("DEBUG", "False" if EN_VERCEL else "True").strip().lower() in ("1", "true", "yes", "on")
+
+# Pasarela simulada local (Aprobado/Rechazado/Pendiente): activa por defecto en
+# desarrollo para probar todo el flujo sin internet ni costo. Se apaga con
+# PASARELA_SIMULADA=0 o cuando existan llaves reales de Wompi (WOMPI_* en .env).
+PASARELA_SIMULADA = (
+    os.getenv("PASARELA_SIMULADA", "1" if DEBUG else "0").strip().lower()
+    in ("1", "true", "yes", "on")
+) and not (
+    os.getenv("WOMPI_PUBLIC_KEY", "").strip()
+    or os.getenv("WOMPI_PRIVATE_KEY", "").strip()
+)
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
 ]

@@ -60,6 +60,9 @@ def checkout(request):
                         request,
                         f"¡Listo! Tu pedido {pedido.numero} quedó confirmado.",
                     )
+                    if pedido.metodo_pago == "pasarela":
+                        # Sigue a la pantalla de pago (simulada o real)
+                        return redirect("payments:pagar", numero=pedido.numero)
                     return redirect("orders:confirmacion", numero=pedido.numero)
     else:
         form = CheckoutForm(usuario=request.user)

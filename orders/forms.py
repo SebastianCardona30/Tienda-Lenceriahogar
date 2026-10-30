@@ -54,6 +54,14 @@ class CheckoutForm(forms.Form):
     def __init__(self, *args, usuario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.usuario = usuario
+        # La pasarela en línea solo aparece si está habilitada (ver settings)
+        from django.conf import settings
+
+        if getattr(settings, "PASARELA_SIMULADA", False):
+            self.fields["metodo_pago"].choices = [
+                ("pasarela", "Tarjeta, PSE o Nequi — pago en línea"),
+            ] + list(self.fields["metodo_pago"].choices)
+            self.fields["metodo_pago"].initial = "pasarela"
         municipios = MunicipioSantander.objects.order_by("nombre")
         self.fields["municipio"].choices = [("", "Elige tu municipio…")] + [
             (m.nombre, m.nombre) for m in municipios

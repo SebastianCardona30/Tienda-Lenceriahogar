@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load format_tags static %}
+
+{% block titulo %}Pagar pedido {{ pedido.numero }} · {{ site.nombre_negocio }}{% endblock titulo %}
+
+{% block styles_extra %}<link rel="stylesheet" href="{% static 'css/pasarela.css' %}">{% endblock styles_extra %}
+
+{% block contenido %}
+<div class="contenedor pasarela">
+  {# Esta pantalla imita a la pasarela real: mismo formato de monto y referencia.
+     Cuando se conecte una pasarela de verdad (Wompi), solo se cambia esta vista. #}
+  <section class="pasarela__caja" aria-label="Pago en línea">
+    <header class="pasarela__cabecera">
+      <span class="pasarela__candado" aria-hidden="true">🔒</span>
+      <div>
+        <p class="pasarela__negocio">{{ site.nombre_negocio }}</p>
+        <p class="pasarela__subtitulo">Pago en línea seguro</p>
+      </div>
+    </header>
+
+    <div class="pasarela__monto">
+      <span>Monto a pagar</span>
+      <strong>{{ pedido.total|cop }}</strong>
+    </div>
+
+    <dl class="pasarela__datos">
+      <div><dt>Pedido</dt><dd>{{ pedido.numero }}</dd></div>
+      <div><dt>Para</dt><dd>{{ pedido.nombre }}</dd></div>
+      <div><dt>Envío a</dt><dd>{{ pedido.municipio.nombre }}</dd></div>
+    </dl>
+
+    <p class="pasarela__aviso">
+      Esta es la <strong>pantalla de prueba</strong>: elige cómo debe responder el
+      pago para recorrer todo el flujo sin usar una tarjeta real.
+    </p>
+
+    <div class="pasarela__botones">
+      <form method="post" action="{% url 'payments:resultado' pedido.numero %}">
+        {% csrf_token %}
+        <input type="hidden" name="resultado" value="aprobado">
+        <button type="submit" class="btn btn-pago btn-pago--aprobado">✓ Aprobar pago</button>
+      </form>
+      <form method="post" action="{% url 'payments:resultado' pedido.numero %}">
+        {% csrf_token %}
+        <input type="hidden" name="resultado" value="rechazado">
+        <button type="submit" class="btn btn-pago btn-pago--rechazado">✕ Rechazar pago</button>
+      </form>
+      <form method="post" action="{% url 'payments:resultado' pedido.numero %}">
+        {% csrf_token %}
+        <input type="hidden" name="resultado" value="pendiente">
+        <button type="submit" class="btn btn-pago btn-pago--pendiente">… Dejar pendiente</button>
+      </form>
+    </div>
+
+    <p class="pasarela__pie">
+      No guardamos datos de tarjeta. Al volver te confirmamos el estado del pedido.
+    </p>
+    <p class="pasarela__pie">
+      <a href="{% url 'orders:confirmacion' pedido.numero %}">← Volver a mi pedido</a>
+    </p>
+  </section>
+</div>
+{% endblock contenido %}

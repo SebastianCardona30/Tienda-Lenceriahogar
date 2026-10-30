@@ -11,6 +11,7 @@ urlpatterns = [
     path("", include("cart.urls")),
     path("", include("accounts.urls")),
     path("", include("orders.urls")),
+    path("", include("payments.urls")),
     path("", include("core.urls")),  # contiene <slug>/ que atrapa todo lo demás
 ]
 
