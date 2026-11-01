@@ -34,6 +34,10 @@ def cambiar_estado(pedido, estado, nota="", usuario=None):
     )
     if estado in ("cancelado", "devuelto"):
         devolver_stock(pedido)
+    # Aviso al cliente por correo en los estados que le importan (on_commit)
+    from core import correos
+
+    transaction.on_commit(lambda: correos.cambio_estado_pedido(pedido))
     return pedido
 
 
@@ -193,6 +197,13 @@ def crear_pedido(request, datos):
         nota="Pedido confirmado por el cliente.",
         usuario=request.user if request.user.is_authenticated else None,
     )
+
+    # Correos de marca: se envían solo si la transacción se confirma (on_commit)
+    # y nunca rompen la compra (fail_silently dentro de core.correos).
+    from core import correos
+
+    transaction.on_commit(lambda: correos.confirmacion_pedido(pedido))
+    transaction.on_commit(lambda: correos.aviso_interno_pedido(pedido))
 
     # El carrito queda limpio (sesión y cuenta)
     vacio = carrito_servicios.VACIO

@@ -1,0 +1,12 @@
+{% load format_tags %}Hola {{ usuario.first_name|default:usuario.username }},
+
+Dejaste estos productos en tu carrito y todavía no cerramos tu pedido:
+{% for linea in lineas %}- {{ linea.cantidad }} x {{ linea.nombre }}: {{ linea.precio|cop }}
+{% endfor %}
+Subtotal: {{ total|cop }}
+
+Termina tu pedido aquí:
+{{ site_url }}{% url 'cart:pagina' %}
+
+Si ya compraste, discúlpanos: este es un recordatorio automático.
+{{ site.nombre_negocio }} — {{ site.ciudad }}{% if site.whatsapp %} · WhatsApp {{ site.whatsapp }}{% endif %}

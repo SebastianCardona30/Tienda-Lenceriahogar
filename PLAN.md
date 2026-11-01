@@ -39,7 +39,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Transferencia/Nequi/Daviplata manual con comprobante (imagen/PDF validado), aprobación con un clic (Paso 2: datos de cuenta como marcadores en SiteConfig, subida con validación real Pillow/PDF y 5 MB, pedido pasa a "Pago por verificar", acciones del admin aprueban/rechazan en un clic, 12 pruebas; el medio se oculta del checkout si no tiene datos)
 - [x] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations (Paso 3: Pedido.reserva_hasta + stock_devuelto, devolución idempotente en cambiar_estado, horas de reserva configurables en SiteConfig, comandos con --simular y margen de seguridad, 10 pruebas; al pagar se libera la reserva)
 - [x] Estados de pedido con historial; seguimiento público por número + celular (Paso 4: vista pública /seguimiento/ que valida número + últimos 10 dígitos del celular sin cuenta, línea de tiempo del historial, enlace desde confirmación y pie de página, 6 pruebas; HistorialPedido ya existía desde Fase 2)
-- [ ] Correos de marca por plantilla (consola en dev) + aviso interno por email/WhatsApp; send_abandoned_cart_emails
+- [x] Correos de marca por plantilla (consola en dev) + aviso interno por email/WhatsApp; send_abandoned_cart_emails (Paso 5: core/correos.py con plantillas HTML+texto en templates/email/, confirmación al cliente y aviso interno al negocio en on_commit, correo en cambios a pagado/enviado/cancelado/devuelto, comando con --horas y --simular, 11 pruebas; SITE_URL en .env para enlaces absolutos)
 - [ ] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves
 
 ## Fase 4 — Administración

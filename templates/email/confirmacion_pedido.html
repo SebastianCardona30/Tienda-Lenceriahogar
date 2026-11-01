@@ -1,0 +1,56 @@
+{% extends "email/base_email.html" %}
+{% load format_tags %}
+
+{% block cuerpo %}
+  <h1 style="margin:0 0 12px; font-size:20px; color:#5B2A86;">¡Gracias, {{ pedido.nombre }}! 🎉</h1>
+  <p style="margin:0 0 16px; line-height:1.5;">
+    Recibimos tu pedido <strong>{{ pedido.numero }}</strong> y ya lo estamos
+    preparando. Te avisamos por WhatsApp al {{ pedido.telefono }} en cada paso.
+  </p>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="border:1px solid #E7DCEE; border-radius:8px; font-size:14px;">
+    <tr>
+      <td style="padding:12px 16px; border-bottom:1px solid #E7DCEE;">
+        <strong style="color:#5B2A86;">Tu compra</strong>
+      </td>
+    </tr>
+    {% for item in items %}
+      <tr>
+        <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.cantidad }} × {{ item.producto_nombre }}
+          <span style="color:#6A6173;">({{ item.variante_label }})</span>
+        </td>
+        <td align="right" style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.subtotal|cop }}
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td style="padding:8px 16px;"><strong>Total</strong></td>
+      <td align="right" style="padding:8px 16px; color:#C2185B;">
+        <strong>{{ pedido.total|cop }}</strong>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:16px 0 0; line-height:1.5;">
+    {% if pedido.metodo_pago == "pasarela" %}
+      <strong>Pago en línea:</strong> si aún no pagas, entra a
+      <a href="{{ site_url }}{% url 'payments:pagar' pedido.numero %}" style="color:#8A4FBF;">pagar tu pedido</a>.
+    {% elif pedido.metodo_pago == "transferencia" %}
+      <strong>Transferencia:</strong> transfiere {{ pedido.total|cop }} y sube tu comprobante en
+      <a href="{{ site_url }}{% url 'payments:comprobante' pedido.numero %}" style="color:#8A4FBF;">esta página</a>.
+    {% else %}
+      <strong>Contraentrega:</strong> pagas en efectivo al recibir tu pedido.
+    {% endif %}
+    <br>
+    Enviamos a {{ pedido.direccion }}{% if pedido.barrio %} ({{ pedido.barrio }}){% endif %}, {{ pedido.municipio.nombre }}.
+  </p>
+
+  <p style="margin:16px 0 0; line-height:1.5;">
+    Sigue tu pedido cuando quieras en
+    <a href="{{ site_url }}{% url 'orders:seguimiento' %}" style="color:#8A4FBF;">seguimiento en línea</a>
+    con tu número y celular.
+  </p>
+{% endblock cuerpo %}

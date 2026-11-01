@@ -1,0 +1,19 @@
+{% load format_tags %}Hola {{ pedido.nombre }},
+
+Tu pedido {{ pedido.numero }} cambió de estado: ahora está en
+«{{ pedido.get_estado_display }}».
+
+{% if pedido.estado == "pagado" %}Confirmamos tu pago; ya estamos armando tu pedido.
+{% elif pedido.estado == "enviado" %}Tu pedido salió a reparto hacia {{ pedido.direccion }}, {{ pedido.municipio.nombre }}.
+{% elif pedido.estado == "cancelado" %}Tu pedido quedó cancelado. Si ya pagaste o quieres reactivarlo, escríbenos por WhatsApp.
+{% elif pedido.estado == "devuelto" %}Registramos la devolución; el reembolso sigue los plazos de nuestra política.
+{% endif %}
+Tu compra:
+{% for item in items %}- {{ item.cantidad }} x {{ item.producto_nombre }}: {{ item.subtotal|cop }}
+{% endfor %}
+Total: {{ pedido.total|cop }}
+
+Estado y historial:
+{{ site_url }}{% url 'orders:seguimiento' %}
+
+{{ site.nombre_negocio }} — {{ site.ciudad }}{% if site.whatsapp %} · WhatsApp {{ site.whatsapp }}{% endif %}

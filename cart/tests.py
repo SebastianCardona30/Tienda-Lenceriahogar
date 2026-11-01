@@ -1,15 +1,23 @@
 """Pruebas del carrito: sesión, stock, cupones, envío, WhatsApp y fusión."""
+from datetime import timedelta
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
+from django.core import mail
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from cart import servicios
 from catalog.models import Producto, Variante
 from core.models import SiteConfig
+from orders.models import Pedido
 from promotions.models import Cupon
+from shipping.models import MunicipioSantander, ZonaEnvio
+
+Usuario = get_user_model()
 
 
 def crear_variante(nombre="Sábanas dobles", precio=100000, stock=10, **kwargs):
@@ -319,3 +327,76 @@ class FusionTests(TestCase):
             servicios.fusionar_carrito({}, {"lineas": {"A": 1}})["lineas"],
             {"A": 1},
         )
+
+
+class CarritoAbandonadoTests(TestCase):
+    """send_abandoned_cart_emails: recordario amable a quien dejó el carrito."""
+
+    def setUp(self):
+        self.variante = crear_variante()
+        self.usuario = Usuario.objects.create_user(
+            username="maria@ejemplo.com", email="maria@ejemplo.com",
+            password="clave-segura-123",
+        )
+
+    def _carrito_lleno(self, hace_horas=30):
+        desde = timezone.now() - timedelta(hours=hace_horas)
+        Usuario.objects.filter(pk=self.usuario.pk).update(
+            carrito={"lineas": {self.variante.sku: 2}, "cupon": "",
+                     "municipio": "", "guardados": []},
+            carrito_actualizado=desde,
+        )
+
+    def test_envia_recordatorio_a_carrito_viejo(self):
+        self._carrito_lleno()
+        call_command("send_abandoned_cart_emails")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("maria@ejemplo.com", mail.outbox[0].to)
+        self.assertIn(self.variante.producto.nombre, mail.outbox[0].body)
+        self.usuario.refresh_from_db()
+        self.assertIsNotNone(self.usuario.aviso_carrito)
+
+    def test_no_envia_si_el_carrito_es_reciente(self):
+        self._carrito_lleno(hace_horas=1)
+        call_command("send_abandoned_cart_emails")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_no_repite_el_aviso(self):
+        self._carrito_lleno()
+        call_command("send_abandoned_cart_emails")
+        call_command("send_abandoned_cart_emails")
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_no_envia_si_compro_despues_del_carrito(self):
+        self._carrito_lleno()
+        zona, _ = ZonaEnvio.objects.get_or_create(
+            nombre="Área metropolitana de Bucaramanga",
+            defaults={"tarifa": Decimal(8000),
+                      "envio_gratis_desde": Decimal(150000),
+                      "tiempo_estimado": "Mismo día"},
+        )
+        municipio, _ = MunicipioSantander.objects.get_or_create(
+            nombre="Bucaramanga", defaults={"zona": zona},
+        )
+        Pedido.objects.create(
+            usuario=self.usuario, nombre="María", email=self.usuario.email,
+            telefono="3001112233", municipio=municipio, direccion="Cra 15",
+            total=Decimal(200000),
+        )
+        call_command("send_abandoned_cart_emails")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_carrito_vacio_no_genera_correo(self):
+        Usuario.objects.filter(pk=self.usuario.pk).update(
+            carrito={"lineas": {}, "cupon": "", "municipio": "", "guardados": []},
+            carrito_actualizado=timezone.now() - timedelta(hours=48),
+        )
+        call_command("send_abandoned_cart_emails")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_simular_no_envia(self):
+        self._carrito_lleno()
+        call_command("send_abandoned_cart_emails", "--simular")
+        self.assertEqual(len(mail.outbox), 0)
+        self.usuario.refresh_from_db()
+        self.assertIsNone(self.usuario.aviso_carrito)

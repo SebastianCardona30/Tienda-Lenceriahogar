@@ -227,6 +227,10 @@ DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL", "Lenceria Ciudad Bonita <no-responder@ejemplo.com>"
 )
 
+# URL pública del sitio: los correos de marca la usan para armar enlaces absolutos
+# (seguimiento, carrito). En producción va en .env con el dominio real.
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000").rstrip("/")
+
 # Correo: consola en desarrollo; SMTP opcional por .env en producción
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"

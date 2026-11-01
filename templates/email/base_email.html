@@ -1,0 +1,49 @@
+{# Plantilla base de los correos de marca. Estilos inline: los clientes de correo (Gmail, Outlook) no aplican <style>. #}
+{% load format_tags %}<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ asunto }}</title>
+</head>
+<body style="margin:0; padding:0; background:#F6F1F8; font-family:Arial, Helvetica, sans-serif; color:#2A2230;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F1F8; padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="max-width:560px; background:#FFFFFF; border-radius:12px; overflow:hidden;">
+          <tr>
+            <td style="background:#5B2A86; padding:18px 24px;">
+              <p style="margin:0; font-size:18px; font-weight:bold; color:#FFFFFF;">
+                {{ site.nombre_negocio }}
+              </p>
+              {% if site.lema %}
+                <p style="margin:4px 0 0; font-size:12px; color:#F1E8FA;">{{ site.lema }}</p>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              {% block cuerpo %}{% endblock cuerpo %}
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#F1E8FA; padding:16px 24px; font-size:12px; color:#6A6173;">
+              <p style="margin:0;">
+                {% if site.ciudad %}{{ site.ciudad }}{% endif %}
+                {% if site.whatsapp %} · WhatsApp {{ site.whatsapp }}{% endif %}
+                {% if site.horario %} · {{ site.horario }}{% endif %}
+              </p>
+              <p style="margin:6px 0 0;">
+                ¿Dudas con tu pedido?
+                <a href="{{ site_url }}{% url 'orders:seguimiento' %}" style="color:#8A4FBF;">Síguelo en línea</a>
+                con tu número y celular.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

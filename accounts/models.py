@@ -11,6 +11,15 @@ class Usuario(AbstractUser):
         "carrito guardado", default=dict, blank=True,
         help_text="Copia del carrito al cerrar sesión; se fusiona al volver a entrar.",
     )
+    carrito_actualizado = models.DateTimeField(
+        "carrito actualizado el", null=True, blank=True,
+        help_text="Última vez que se tocó el carrito; lo usa el recordatorio "
+                  "de carrito abandonado.",
+    )
+    aviso_carrito = models.DateTimeField(
+        "aviso de carrito enviado el", null=True, blank=True,
+        help_text="Evita repetir el correo de carrito abandonado.",
+    )
 
     class Meta:
         verbose_name = "usuario"

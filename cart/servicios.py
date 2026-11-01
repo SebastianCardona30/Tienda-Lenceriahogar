@@ -38,12 +38,16 @@ def leer(request):
 
 def guardar(request, datos):
     """Escribe el carrito en la sesión y, si hay sesión de cliente, en la cuenta."""
+    from django.utils import timezone
+
     request.session[CLAVE] = datos
     request.session.modified = True
     usuario = getattr(request, "user", None)
     if usuario is not None and usuario.is_authenticated:
         usuario.carrito = datos
-        usuario.save(update_fields=["carrito"])
+        # Marca la hora para el recordatorio de carrito abandonado
+        usuario.carrito_actualizado = timezone.now()
+        usuario.save(update_fields=["carrito", "carrito_actualizado"])
 
 
 def agregar_linea(request, sku, cantidad):

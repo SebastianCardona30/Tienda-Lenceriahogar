@@ -9,6 +9,7 @@ from django.urls import reverse
 from catalog.models import Producto, Variante
 from core.models import SiteConfig
 from orders.models import HistorialPedido, ItemPedido, Pedido
+from orders.servicios import cambiar_estado
 from promotions.models import Cupon, UsoCupon
 from shipping.models import MunicipioSantander, ZonaEnvio
 
@@ -532,3 +533,90 @@ class SeguimientoTests(TestCase):
         r = self.client.get(reverse("orders:seguimiento"))
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Seguimiento")
+
+
+class CorreosDePedidoTests(TestCase):
+    """Los correos de marca salen al confirmar, al cambiar estado y al equipo."""
+
+    def setUp(self):
+        zona, _ = ZonaEnvio.objects.get_or_create(
+            nombre="Área metropolitana de Bucaramanga",
+            defaults={"tarifa": Decimal(8000),
+                      "envio_gratis_desde": Decimal(150000),
+                      "tiempo_estimado": "Mismo día"},
+        )
+        self.municipio, _ = MunicipioSantander.objects.get_or_create(
+            nombre="Bucaramanga", defaults={"zona": zona},
+        )
+        self.variante = crear_variante(stock=10)
+        self.config = SiteConfig.get()
+        self.config.email_contacto = "tienda@ejemplo.com"
+        self.config.save()
+
+    def _datos(self, metodo="contraentrega"):
+        return {
+            "nombre": "María Pérez", "email": "maria@ejemplo.com",
+            "telefono": "3001112233", "mayor_de_edad": "on",
+            "autoriza_datos": "on", "municipio": "Bucaramanga",
+            "direccion": "Cra 15 # 42-10", "metodo_pago": metodo,
+        }
+
+    def _comprar(self, metodo="contraentrega"):
+        self.client.post(
+            reverse("cart:agregar"),
+            {"sku": self.variante.sku, "cantidad": 1},
+            HTTP_REFERER="/tienda/",
+        )
+        # Los correos salen en on_commit: en pruebas hay que "confirmar" a mano
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(reverse("orders:checkout"), self._datos(metodo))
+        return Pedido.objects.get()
+
+    def test_confirmacion_y_aviso_interno(self):
+        from django.core import mail
+
+        pedido = self._comprar()
+        # Dos correos: confirmación al cliente y aviso al negocio
+        self.assertEqual(len(mail.outbox), 2)
+        asuntos = [c.subject for c in mail.outbox]
+        self.assertTrue(any(pedido.numero in a for a in asuntos))
+        destinatarios = [c.to[0] for c in mail.outbox]
+        self.assertIn("maria@ejemplo.com", destinatarios)
+        self.assertIn("tienda@ejemplo.com", destinatarios)
+
+    def test_confirmacion_incluye_enlace_de_pago_para_pasarela(self):
+        from django.core import mail
+
+        pedido = self._comprar("pasarela")
+        cliente = [c for c in mail.outbox if "maria@ejemplo.com" in c.to][0]
+        self.assertIn(f"/pago/{pedido.numero}/", cliente.body)
+
+    def test_cambio_a_pagado_avisa_al_cliente(self):
+        from django.core import mail
+
+        pedido = self._comprar()
+        mail.outbox.clear()
+        with self.captureOnCommitCallbacks(execute=True):
+            cambiar_estado(pedido, "pagado", nota="Pago aprobado.")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("maria@ejemplo.com", mail.outbox[0].to)
+        self.assertIn("pagado", mail.outbox[0].subject.lower())
+
+    def test_cambio_a_preparacion_no_envia_correo(self):
+        from django.core import mail
+
+        pedido = self._comprar()
+        mail.outbox.clear()
+        with self.captureOnCommitCallbacks(execute=True):
+            cambiar_estado(pedido, "preparacion", nota="Armando.")
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_sin_email_de_contacto_no_envia_aviso(self):
+        from django.core import mail
+
+        self.config.email_contacto = ""
+        self.config.save()
+        self._comprar()
+        destinatarios = [c.to[0] for c in mail.outbox]
+        self.assertNotIn("", destinatarios)
+        self.assertEqual(len(mail.outbox), 1)  # solo la confirmación al cliente

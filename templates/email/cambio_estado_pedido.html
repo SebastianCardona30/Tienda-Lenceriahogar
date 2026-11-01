@@ -1,0 +1,56 @@
+{% extends "email/base_email.html" %}
+{% load format_tags %}
+
+{% block cuerpo %}
+  <h1 style="margin:0 0 12px; font-size:20px; color:#5B2A86;">
+    Tu pedido {{ pedido.numero }}: {{ pedido.get_estado_display }}
+  </h1>
+
+  {% if pedido.estado == "pagado" %}
+    <p style="margin:0 0 16px; line-height:1.5;">
+      ¡Confirmamos tu pago! Ya estamos armando tu pedido con cuidado.
+      Te avisamos apenas salga a reparto.
+    </p>
+  {% elif pedido.estado == "enviado" %}
+    <p style="margin:0 0 16px; line-height:1.5;">
+      Tu pedido salió a reparto. Llega a {{ pedido.direccion }},
+      {{ pedido.municipio.nombre }}. Si no estás en casa, avísanos por WhatsApp.
+    </p>
+  {% elif pedido.estado == "cancelado" %}
+    <p style="margin:0 0 16px; line-height:1.5;">
+      Tu pedido quedó cancelado. Si ya pagaste o quieres reactivarlo,
+      escríbenos por WhatsApp y lo resolvemos rápido.
+    </p>
+  {% elif pedido.estado == "devuelto" %}
+    <p style="margin:0 0 16px; line-height:1.5;">
+      Registramos la devolución de tu pedido. El reembolso sigue los plazos
+      que te explicamos en cambios y devoluciones.
+    </p>
+  {% endif %}
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+         style="border:1px solid #E7DCEE; border-radius:8px; font-size:14px;">
+    {% for item in items %}
+      <tr>
+        <td style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.cantidad }} × {{ item.producto_nombre }}
+        </td>
+        <td align="right" style="padding:8px 16px; border-bottom:1px solid #F1E8FA;">
+          {{ item.subtotal|cop }}
+        </td>
+      </tr>
+    {% endfor %}
+    <tr>
+      <td style="padding:8px 16px;"><strong>Total</strong></td>
+      <td align="right" style="padding:8px 16px; color:#C2185B;">
+        <strong>{{ pedido.total|cop }}</strong>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:16px 0 0; line-height:1.5;">
+    Estado actual: <strong>{{ pedido.get_estado_display }}</strong>.
+    Sigue tu pedido en
+    <a href="{{ site_url }}{% url 'orders:seguimiento' %}" style="color:#8A4FBF;">seguimiento en línea</a>.
+  </p>
+{% endblock cuerpo %}
