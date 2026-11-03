@@ -206,3 +206,205 @@ class SuscripcionTests(TestCase):
         r = self.client.post(reverse("catalog:suscribir"), {"email": "no-es-correo"})
         self.assertEqual(r.status_code, 302)
         self.assertEqual(Cupon.objects.count(), 0)
+
+
+class CsvImportTests(TestCase):
+    """Importar/exportar CSV: una fila por SKU, validación y nada si hay errores."""
+
+    def test_plantilla_tiene_encabezados_y_ejemplo(self):
+        from catalog import csv_io
+
+        texto = csv_io.plantilla_csv()
+        primera = texto.splitlines()[0]
+        self.assertIn("sku", primera)
+        self.assertIn("producto", primera)
+        self.assertIn("precio", primera)
+        # Una fila de ejemplo con precio
+        self.assertIn("89900", texto)
+
+    def test_importar_crea_producto_y_variante(self):
+        from catalog import csv_io
+
+        csv_texto = (
+            "sku;producto;categoria;estado;talla;medida;color;material;"
+            "precio;precio_oferta;costo;stock;umbral_stock_bajo;activo\n"
+            "SAB-001;Sábanas dobles;Dormitorio;publicado;Doble;;Blanco;Algodón;"
+            "89900;;55000;10;3;sí\n"
+        )
+        resultado = csv_io.importar_csv(csv_texto.encode("utf-8"))
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(resultado["creados"], 1)
+        variante = Variante.objects.get(sku="SAB-001")
+        self.assertEqual(variante.precio, Decimal(89900))
+        self.assertEqual(variante.stock, 10)  # entró por la bitácora (0 + 10)
+        self.assertEqual(variante.producto.estado, "publicado")
+        self.assertEqual(variante.producto.categorias.get().nombre, "Dormitorio")
+        # El stock quedó registrado en la bitácora de inventario
+        from inventory.models import MovimientoStock
+
+        mov = MovimientoStock.objects.get(variante=variante)
+        self.assertEqual(mov.cantidad, 10)
+        self.assertEqual(mov.motivo, "ajuste")
+        self.assertIn("CSV", mov.nota)
+
+    def test_importar_actualiza_por_sku(self):
+        from catalog import csv_io
+
+        prod = Producto.objects.create(nombre="Sábanas dobles", estado="borrador")
+        variante = Variante.objects.create(
+            producto=prod, sku="SAB-001", precio=Decimal(80000), stock=5,
+        )
+        csv_texto = (
+            "sku;producto;precio;stock\n"
+            "SAB-001;Sábanas dobles;95000;8\n"
+        )
+        resultado = csv_io.importar_csv(csv_texto)
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(resultado["creados"], 0)
+        self.assertEqual(resultado["actualizados"], 1)
+        variante.refresh_from_db()
+        self.assertEqual(variante.precio, Decimal(95000))
+        self.assertEqual(variante.stock, 8)
+        # El cambio de stock quedó en la bitácora
+        from inventory.models import MovimientoStock
+
+        self.assertEqual(MovimientoStock.objects.get().cantidad, 3)
+
+    def test_errores_por_fila_no_importa_nada(self):
+        from catalog import csv_io
+
+        csv_texto = (
+            "sku;producto;precio;stock\n"
+            "OK-1;Producto bueno;50000;5\n"
+            "MAL-1;;50000;5\n"        # sin producto
+            "MAL-2;Sin precio;;5\n"   # sin precio
+            "MAL-3;Precio raro;abc;5\n"
+            "MAL-4;Stock negativo;50000;-2\n"
+        )
+        resultado = csv_io.importar_csv(csv_texto)
+        filas = [f for f, _ in resultado["errores"]]
+        self.assertEqual(filas, [3, 4, 5, 6])
+        self.assertEqual(resultado["creados"], 0)
+        # La fila válida NO se importó (todo o nada)
+        self.assertEqual(Variante.objects.count(), 0)
+        self.assertEqual(Producto.objects.count(), 0)
+
+    def test_sku_repetido_en_el_archivo_es_error(self):
+        from catalog import csv_io
+
+        csv_texto = (
+            "sku;producto;precio\n"
+            "DUP-1;Uno;10000\n"
+            "DUP-1;Dos;20000\n"
+        )
+        resultado = csv_io.importar_csv(csv_texto)
+        self.assertEqual(len(resultado["errores"]), 1)
+        self.assertIn("ya apareció", resultado["errores"][0][1])
+
+    def test_precio_con_puntos_de_miles(self):
+        from catalog import csv_io
+
+        csv_texto = "sku;producto;precio\nP-1;Producto;1.234.567\n"
+        resultado = csv_io.importar_csv(csv_texto)
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(Variante.objects.get().precio, Decimal(1234567))
+
+    def test_separador_coma_tambien_se_acepta(self):
+        from catalog import csv_io
+
+        csv_texto = "sku,producto,precio\nC-1,Producto,50000\n"
+        resultado = csv_io.importar_csv(csv_texto)
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(Variante.objects.get().sku, "C-1")
+
+    def test_columna_obligatoria_faltante(self):
+        from catalog import csv_io
+
+        with self.assertRaises(csv_io.ErroresDeCSV) as ctx:
+            csv_io.importar_csv("sku;categoria\nX-1;Ropa\n")
+        self.assertIn("producto", str(ctx.exception))
+
+    def test_talla_invalida_es_error(self):
+        from catalog import csv_io
+
+        csv_texto = "sku;producto;talla;precio\nT-1;Ropa;Gigante;50000\n"
+        resultado = csv_io.importar_csv(csv_texto)
+        self.assertEqual(len(resultado["errores"]), 1)
+        self.assertIn("talla", resultado["errores"][0][1])
+
+    def test_exportar_y_reimportar_no_cambia_nada(self):
+        from catalog import csv_io
+
+        csv_io.importar_csv(
+            "sku;producto;precio;stock\nSAB-001;Sábanas;89900;7\n"
+        )
+        exportado = csv_io.exportar_csv()
+        self.assertIn("SAB-001", exportado)
+        # Reimportar el exportado debe actualizar sin errores
+        resultado = csv_io.importar_csv(exportado)
+        self.assertEqual(resultado["errores"], [])
+        self.assertEqual(Variante.objects.get().stock, 7)
+
+
+class CsvAdminTests(TestCase):
+    """Las vistas del admin: requieren sesión y responden el archivo."""
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        Usuario = get_user_model()
+        self.duena = Usuario.objects.create_user(
+            username="duena", email="duena@ejemplo.com",
+            password="clave-segura-123", is_staff=True, is_superuser=True,
+        )
+
+    def test_sin_sesion_redirige(self):
+        for url in ("/admin/catalog/producto/csv/",
+                    "/admin/catalog/producto/csv/exportar/",
+                    "/admin/catalog/producto/csv/plantilla/"):
+            r = self.client.get(url)
+            self.assertEqual(r.status_code, 302, url)
+
+    def test_plantilla_y_exportar_descargan_csv(self):
+        self.client.force_login(self.duena)
+        r = self.client.get("/admin/catalog/producto/csv/plantilla/")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/csv", r["Content-Type"])
+        self.assertIn("attachment", r["Content-Disposition"])
+        r = self.client.get("/admin/catalog/producto/csv/exportar/")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("sku", r.content.decode("utf-8-sig").splitlines()[0])
+
+    def test_importar_desde_el_admin(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        self.client.force_login(self.duena)
+        contenido = b"sku;producto;precio\nADM-1;Desde admin;45000\n"
+        archivo = SimpleUploadedFile("catalogo.csv", contenido,
+                                     content_type="text/csv")
+        r = self.client.post(
+            "/admin/catalog/producto/csv/", {"archivo": archivo}, follow=True,
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Variante.objects.get().sku, "ADM-1")
+
+    def test_importar_con_errores_muestra_las_filas(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        self.client.force_login(self.duena)
+        contenido = b"sku;producto;precio\nMAL-1;;50000\n"
+        archivo = SimpleUploadedFile("catalogo.csv", contenido,
+                                     content_type="text/csv")
+        r = self.client.post("/admin/catalog/producto/csv/", {"archivo": archivo})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Variante.objects.count(), 0)
+        html = r.content.decode()
+        self.assertIn("no se importó nada", html)
+        self.assertIn("falta", html)
+
+    def test_botones_visibles_en_la_lista(self):
+        self.client.force_login(self.duena)
+        r = self.client.get("/admin/catalog/producto/")
+        self.assertContains(r, "Importar CSV")
+        self.assertContains(r, "Exportar CSV")
+        self.assertContains(r, "Plantilla de ejemplo")

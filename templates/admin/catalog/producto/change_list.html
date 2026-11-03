@@ -1,0 +1,21 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+    <li>
+        <a href="{% url 'admin:catalog_producto_csv' %}" class="button">
+            Importar CSV
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin:catalog_producto_csv_exportar' %}" class="button">
+            Exportar CSV
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin:catalog_producto_csv_plantilla' %}" class="button">
+            Plantilla de ejemplo
+        </a>
+    </li>
+    {{ block.super }}
+{% endblock %}

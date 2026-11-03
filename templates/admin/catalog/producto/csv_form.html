@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Importar CSV | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .cb-tarjeta { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1.25rem; }
+    .cb-rotulo { font-size: .8rem; color: #6A6173; text-transform: uppercase; letter-spacing: .04em; }
+    .cb-tabla { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    .cb-tabla th { text-align: left; color: #6A6173; font-weight: 600; padding: .4rem .5rem; border-bottom: 1px solid #E7DCEE; }
+    .cb-tabla td { padding: .45rem .5rem; border-bottom: 1px solid #F1E8FA; color: #2A2230; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cb-panel" style="max-width: 760px;">
+    <div class="cb-tarjeta">
+        <div class="cb-rotulo">Importar catálogo</div>
+        <h1 style="font-size: 1.25rem; font-weight: 700; color: #5B2A86; margin: .25rem 0 .5rem;">
+            {{ titulo }}
+        </h1>
+        <p style="font-size: .9rem; color: #6A6173; margin-bottom: 1rem;">
+            Sube un archivo <strong>CSV</strong> con una fila por variante (SKU).
+            Si el SKU ya existe se actualiza; si no, se crea el producto y su variante.
+            Si alguna fila tiene errores, <strong>no se importa nada</strong> y verás
+            cuáles corregir. Descarga primero la plantilla de ejemplo.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="id_archivo" style="display:block; font-size:.85rem; font-weight:600; color:#2A2230; margin-bottom:.35rem;">
+                Archivo CSV
+            </label>
+            <input type="file" name="archivo" id="id_archivo" accept=".csv,text/csv"
+                   required
+                   style="width:100%; padding:.6rem; border:1px solid #E7DCEE; border-radius:10px; background:#FFF8FB;">
+            <div style="display:flex; gap:.75rem; margin-top:1rem; flex-wrap:wrap;">
+                <button type="submit"
+                        style="background:#C2185B; color:#fff; border:0; border-radius:10px; padding:.6rem 1.25rem; font-weight:700; cursor:pointer;">
+                    Importar
+                </button>
+                <a href="{% url 'admin:catalog_producto_csv_plantilla' %}"
+                   style="background:#F1E8FA; color:#5B2A86; border-radius:10px; padding:.6rem 1.25rem; font-weight:700; text-decoration:none;">
+                    Descargar plantilla
+                </a>
+                <a href="{% url 'admin:catalog_producto_csv_exportar' %}"
+                   style="background:#F1E8FA; color:#5B2A86; border-radius:10px; padding:.6rem 1.25rem; font-weight:700; text-decoration:none;">
+                    Exportar el catálogo actual
+                </a>
+                <a href="{% url 'admin:catalog_producto_changelist' %}"
+                   style="color:#6A6173; padding:.6rem .5rem; text-decoration:none; font-weight:600;">
+                    Volver
+                </a>
+            </div>
+        </form>
+
+        {% if errores %}
+        <div style="margin-top:1.25rem; border:1px solid #D93F3F; border-radius:10px; padding:1rem; background:#FDECEC;">
+            <strong style="color:#D93F3F;">Filas con errores (no se importó nada):</strong>
+            <table class="cb-tabla" style="margin-top:.5rem;">
+                <thead>
+                    <tr><th>Fila</th><th>Problema</th></tr>
+                </thead>
+                <tbody>
+                    {% for fila, motivo in errores %}
+                    <tr>
+                        <td><strong>{{ fila }}</strong></td>
+                        <td>{{ motivo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1.25rem; font-size:.85rem; color:#6A6173;">
+            <strong>Columnas:</strong> sku, producto, categoria, estado, talla,
+            medida, color, material, precio, precio_oferta, costo, stock,
+            umbral_stock_bajo, activo.
+            Obligatorias: <em>producto</em> y <em>precio</em>. Separador
+            <strong>;</strong> o <strong>,</strong>; precios con o sin puntos de miles.
+        </div>
+    </div>
+</div>
+{% endblock %}
