@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+
+{% load i18n dashboard_tags %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+    {# Panel con las métricas del negocio (ventas, estados, stock, gráficas) #}
+    {% dashboard_panel %}
+
+    {# Navegación de modelos del admin (viene de django-unfold) #}
+    {% include "unfold/helpers/dashboard_default.html" %}
+{% endblock %}

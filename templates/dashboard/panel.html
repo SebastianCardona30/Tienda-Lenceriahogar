@@ -1,0 +1,221 @@
+{% load static format_tags %}
+{# Panel de administración: métricas del negocio + gráficas con Chart.js local #}
+<style>
+    .cb-panel { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .cb-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .cb-tarjeta { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1rem 1.25rem; }
+    .cb-tarjeta .cb-rotulo { font-size: 0.8rem; color: #6A6173; text-transform: uppercase; letter-spacing: .04em; }
+    .cb-tarjeta .cb-valor { font-size: 1.6rem; font-weight: 700; color: #5B2A86; margin-top: .25rem; }
+    .cb-tarjeta .cb-nota { font-size: 0.8rem; color: #6A6173; margin-top: .25rem; }
+    .cb-tarjeta.cb-alerta .cb-valor { color: #D93F3F; }
+    .cb-tarjeta.cb-accion .cb-valor { color: #C2185B; }
+    .cb-grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+    @media (max-width: 900px) { .cb-grid2 { grid-template-columns: 1fr; } }
+    .cb-grafica { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1rem 1.25rem; }
+    .cb-grafica h3 { font-size: .95rem; font-weight: 700; color: #2A2230; margin: 0 0 .75rem; }
+    .cb-lienzo { position: relative; height: 240px; }
+    .cb-tabla { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    .cb-tabla th { text-align: left; color: #6A6173; font-weight: 600; padding: .4rem .5rem; border-bottom: 1px solid #E7DCEE; }
+    .cb-tabla td { padding: .45rem .5rem; border-bottom: 1px solid #F1E8FA; color: #2A2230; }
+    .cb-tabla tr:last-child td { border-bottom: 0; }
+    .cb-lista-vacia { color: #6A6173; font-size: .875rem; padding: .5rem 0; }
+    .cb-chip { display: inline-block; background: #F1E8FA; color: #5B2A86; border-radius: 999px; padding: .1rem .6rem; font-size: .75rem; font-weight: 600; }
+    .cb-seccion-titulo { font-size: 1rem; font-weight: 700; color: #2A2230; }
+</style>
+
+<div class="cb-panel">
+    {# ---------- KPIs ---------- #}
+    <div class="cb-kpis">
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Ventas de hoy</div>
+            <div class="cb-valor">{{ ventas.hoy.monto|cop }}</div>
+            <div class="cb-nota">{{ ventas.hoy.pedidos }} pedido{{ ventas.hoy.pedidos|pluralize }}</div>
+        </div>
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Últimos 7 días</div>
+            <div class="cb-valor">{{ ventas.semana.monto|cop }}</div>
+            <div class="cb-nota">{{ ventas.semana.pedidos }} pedido{{ ventas.semana.pedidos|pluralize }}</div>
+        </div>
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Mes en curso</div>
+            <div class="cb-valor">{{ ventas.mes.monto|cop }}</div>
+            <div class="cb-nota">{{ ventas.mes.pedidos }} pedido{{ ventas.mes.pedidos|pluralize }}</div>
+        </div>
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Margen del mes (estimado)</div>
+            <div class="cb-valor">{{ margen.margen|cop }}</div>
+            <div class="cb-nota">
+                {% if margen.porcentaje is not None %}{{ margen.porcentaje }}% sobre {{ margen.ingresos|cop }}{% else %}Aún sin ventas del mes{% endif %}
+                {% if margen.estimado %}<span class="cb-chip" title="Algunos productos no tienen costo cargado">estimado</span>{% endif %}
+            </div>
+        </div>
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Clientes nuevos (30 días)</div>
+            <div class="cb-valor">{{ clientes_nuevos }}</div>
+        </div>
+    </div>
+
+    {# ---------- Requieren acción ---------- #}
+    <div class="cb-kpis">
+        <div class="cb-tarjeta cb-accion">
+            <div class="cb-rotulo">Pagos por verificar</div>
+            <div class="cb-valor">{{ accion.por_verificar }}</div>
+            <div class="cb-nota"><a href="/admin/orders/pedido/?estado__exact=por_verificar">Ver pedidos</a></div>
+        </div>
+        <div class="cb-tarjeta cb-accion">
+            <div class="cb-rotulo">Esperando pago</div>
+            <div class="cb-valor">{{ accion.pendiente_pago }}</div>
+            <div class="cb-nota"><a href="/admin/orders/pedido/?estado__exact=pendiente">Ver pedidos</a></div>
+        </div>
+        <div class="cb-tarjeta cb-accion">
+            <div class="cb-rotulo">Por enviar</div>
+            <div class="cb-valor">{{ accion.por_enviar }}</div>
+            <div class="cb-nota"><a href="/admin/orders/pedido/?estado__exact=pagado">Ver pagados</a> · <a href="/admin/orders/pedido/?estado__exact=preparacion">en preparación</a></div>
+        </div>
+        <div class="cb-tarjeta {% if accion.stock_bajo %}cb-alerta{% endif %}">
+            <div class="cb-rotulo">Stock bajo</div>
+            <div class="cb-valor">{{ accion.stock_bajo }}</div>
+            <div class="cb-nota">variantes por reponer</div>
+        </div>
+    </div>
+
+    {# ---------- Gráficas ---------- #}
+    <div class="cb-grid2">
+        <div class="cb-grafica">
+            <h3>Ventas de los últimos 14 días</h3>
+            <div class="cb-lienzo"><canvas id="cb-grafica-ventas"></canvas></div>
+        </div>
+        <div class="cb-grafica">
+            <h3>Pedidos por estado</h3>
+            <div class="cb-lienzo"><canvas id="cb-grafica-estados"></canvas></div>
+        </div>
+    </div>
+
+    {# ---------- Listas ---------- #}
+    <div class="cb-grid2">
+        <div class="cb-grafica">
+            <h3>Más vendidos</h3>
+            {% if mas_vendidos %}
+            <table class="cb-tabla">
+                <thead><tr><th>Producto</th><th>Unidades</th><th>Monto</th></tr></thead>
+                <tbody>
+                {% for fila in mas_vendidos %}
+                    <tr>
+                        <td>{{ fila.producto_nombre }}</td>
+                        <td>{{ fila.unidades }}</td>
+                        <td>{{ fila.monto|cop }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="cb-lista-vacia">Todavía no hay ventas registradas.</div>
+            {% endif %}
+        </div>
+
+        <div class="cb-grafica">
+            <h3>Stock bajo</h3>
+            {% if stock_bajo %}
+            <table class="cb-tabla">
+                <thead><tr><th>Producto</th><th>Stock</th></tr></thead>
+                <tbody>
+                {% for variante in stock_bajo %}
+                    <tr>
+                        <td>{{ variante.producto.nombre }}{% if variante.talla_label %} · {{ variante.talla_label }}{% endif %}{% if variante.color %} · {{ variante.color }}{% endif %}</td>
+                        <td><strong>{{ variante.stock }}</strong> / {{ variante.umbral_stock_bajo }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="cb-lista-vacia">Todo el stock está por encima del umbral. 👌</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="cb-grid2">
+        <div class="cb-grafica">
+            <h3>Cupones más usados</h3>
+            {% if cupones %}
+            <table class="cb-tabla">
+                <thead><tr><th>Cupón</th><th>Usos</th></tr></thead>
+                <tbody>
+                {% for fila in cupones %}
+                    <tr><td>{{ fila.cupon__codigo }}</td><td>{{ fila.n }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="cb-lista-vacia">Ningún cupón usado todavía.</div>
+            {% endif %}
+        </div>
+
+        <div class="cb-grafica">
+            <h3>Busquedas sin resultados</h3>
+            {% if busquedas %}
+            <table class="cb-tabla">
+                <thead><tr><th>Lo que buscaban</th><th>Fecha</th></tr></thead>
+                <tbody>
+                {% for busqueda in busquedas %}
+                    <tr>
+                        <td>{{ busqueda.consulta }}</td>
+                        <td>{{ busqueda.fecha|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="cb-lista-vacia">Nadie ha buscado algo que no encuentre. ✨</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+<script>
+(function () {
+    const serie = {{ serie_ventas_json|safe }};
+    const estados = {{ estados_json|safe }};
+
+    const ctxVentas = document.getElementById("cb-grafica-ventas");
+    if (ctxVentas && window.Chart) {
+        new Chart(ctxVentas, {
+            type: "bar",
+            data: {
+                labels: serie.etiquetas,
+                datasets: [{
+                    label: "Ventas (COP)",
+                    data: serie.montos,
+                    backgroundColor: "#8A4FBF",
+                    borderRadius: 6,
+                }],
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: (v) => "$" + v.toLocaleString("es-CO") } },
+                },
+            },
+        });
+    }
+
+    const ctxEstados = document.getElementById("cb-grafica-estados");
+    if (ctxEstados && window.Chart) {
+        const conDatos = estados.filter((e) => e.cantidad > 0);
+        new Chart(ctxEstados, {
+            type: "doughnut",
+            data: {
+                labels: conDatos.map((e) => e.nombre),
+                datasets: [{
+                    data: conDatos.map((e) => e.cantidad),
+                    backgroundColor: ["#5B2A86", "#8A4FBF", "#C2185B", "#F2A516", "#2E9E6B", "#6A6173", "#E0245E"],
+                    borderWidth: 0,
+                }],
+            },
+            options: {
+                plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+            },
+        });
+    }
+})();
+</script>

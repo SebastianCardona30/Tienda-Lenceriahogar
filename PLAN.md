@@ -43,7 +43,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [ ] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves
 
 ## Fase 4 — Administración
-- [ ] Dashboard con métricas y gráficas (Chart.js local)
+- [x] Dashboard con métricas y gráficas (Chart.js local) (Paso 1: dashboard/servicios.py con ventas hoy/semana/mes, estados, requieren acción, stock bajo, más vendidos, margen estimado, clientes nuevos, cupones, búsquedas sin resultados y serie de 14 días; tag dashboard_panel pintado en templates/admin/index.html con Chart.js local, 20 pruebas)
 - [ ] Inventario: movimientos, alertas, valorizado, órdenes de compra
 - [ ] Importar/exportar CSV de productos con plantilla y validación por fila
 - [ ] Reportes exportables a CSV (ventas, producto, categoría, proveedor, municipio, cupones, inventario)
