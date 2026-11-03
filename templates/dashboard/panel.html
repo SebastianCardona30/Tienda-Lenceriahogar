@@ -53,6 +53,14 @@
             <div class="cb-rotulo">Clientes nuevos (30 días)</div>
             <div class="cb-valor">{{ clientes_nuevos }}</div>
         </div>
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">Inventario valorizado</div>
+            <div class="cb-valor">{{ valorizado.valor_venta|cop }}</div>
+            <div class="cb-nota">
+                {{ valorizado.unidades }} unidades a precio · costo {{ valorizado.valor_costo|cop }}
+                {% if valorizado.sin_costo %}<span class="cb-chip" title="Variantes sin costo cargado">{{ valorizado.sin_costo }} sin costo</span>{% endif %}
+            </div>
+        </div>
     </div>
 
     {# ---------- Requieren acción ---------- #}

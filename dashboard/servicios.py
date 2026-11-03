@@ -187,6 +187,8 @@ def ventas_por_dia(dias=14):
 
 def panel_completo():
     """Todas las métricas del dashboard en un solo diccionario."""
+    from inventory.servicios import valorizar_inventario
+
     return {
         "ventas": ventas_por_periodo(),
         "estados": pedidos_por_estado(),
@@ -198,4 +200,5 @@ def panel_completo():
         "cupones": cupones_mas_usados(),
         "busquedas": busquedas_sin_resultados(),
         "serie_ventas": ventas_por_dia(),
+        "valorizado": valorizar_inventario(),
     }

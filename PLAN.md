@@ -44,7 +44,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 
 ## Fase 4 — Administración
 - [x] Dashboard con métricas y gráficas (Chart.js local) (Paso 1: dashboard/servicios.py con ventas hoy/semana/mes, estados, requieren acción, stock bajo, más vendidos, margen estimado, clientes nuevos, cupones, búsquedas sin resultados y serie de 14 días; tag dashboard_panel pintado en templates/admin/index.html con Chart.js local, 20 pruebas)
-- [ ] Inventario: movimientos, alertas, valorizado, órdenes de compra
+- [x] Inventario: movimientos, alertas, valorizado, órdenes de compra (Paso 2: inventory con MovimientoStock (bitácora inmutable con motivo, referencia y usuario), registrar_movimiento/anotar_ajuste/recibir_orden/valorizar_inventario, ventas y devoluciones quedan en la bitácora, admin de variantes con filtro de alerta de stock bajo + valor en stock y ajuste con registro, órdenes de compra con recepción que suma stock una sola vez, tarjeta de inventario valorizado en el panel; 21 pruebas)
 - [ ] Importar/exportar CSV de productos con plantilla y validación por fila
 - [ ] Reportes exportables a CSV (ventas, producto, categoría, proveedor, municipio, cupones, inventario)
 - [ ] Roles (Administradora/Empleado/Solo lectura), auditoría y 2FA con django-otp

@@ -221,7 +221,7 @@ class OtrasMetricasTests(TestCase):
         datos = servicios.panel_completo()
         for clave in ("ventas", "estados", "accion", "stock_bajo",
                       "mas_vendidos", "margen", "clientes_nuevos",
-                      "cupones", "busquedas", "serie_ventas"):
+                      "cupones", "busquedas", "serie_ventas", "valorizado"):
             self.assertIn(clave, datos)
 
 
@@ -246,6 +246,7 @@ class PanelAdminTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         html = respuesta.content.decode()
         self.assertIn("Ventas de hoy", html)
+        self.assertIn("Inventario valorizado", html)
         self.assertIn("cb-grafica-ventas", html)
         self.assertIn("cb-grafica-estados", html)
         self.assertIn("chart.umd.min.js", html)  # Chart.js local, sin CDN

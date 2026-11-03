@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from cart import servicios as carrito_servicios
+from inventory.servicios import registrar_movimiento
 from orders.models import HistorialPedido, ItemPedido, Pedido
 
 
@@ -33,7 +34,7 @@ def cambiar_estado(pedido, estado, nota="", usuario=None):
         pedido=pedido, estado=estado, nota=nota, usuario=usuario,
     )
     if estado in ("cancelado", "devuelto"):
-        devolver_stock(pedido)
+        devolver_stock(pedido, usuario=usuario)
     # Aviso al cliente por correo en los estados que le importan (on_commit)
     from core import correos
 
@@ -41,9 +42,10 @@ def cambiar_estado(pedido, estado, nota="", usuario=None):
     return pedido
 
 
-def devolver_stock(pedido):
+def devolver_stock(pedido, usuario=None):
     """Devuelve al inventario las unidades de un pedido (idempotente)."""
     from catalog.models import Variante
+    from inventory.servicios import registrar_movimiento
 
     if pedido.stock_devuelto:
         return False
@@ -56,8 +58,11 @@ def devolver_stock(pedido):
         for item in pedido.items.all():
             variante = variantes.get(item.sku)
             if variante:
-                variante.stock += item.cantidad
-                variante.save(update_fields=["stock"])
+                # Cada devolución queda en la bitácora de inventario
+                registrar_movimiento(
+                    variante, item.cantidad, "devolucion",
+                    referencia=pedido.numero, usuario=usuario,
+                )
         # Marca el pedido dentro de la misma transacción para no devolver dos veces
         Pedido.objects.filter(pk=pedido.pk, stock_devuelto=False).update(
             stock_devuelto=True
@@ -179,8 +184,12 @@ def crear_pedido(request, datos):
             precio_base=linea.precio_base,
             descuento=linea.descuento,
         )
-        variante.stock -= linea.cantidad
-        variante.save(update_fields=["stock"])
+        # La venta queda en la bitácora de inventario (motivo "venta")
+        registrar_movimiento(
+            variante, -linea.cantidad, "venta",
+            referencia=pedido.numero,
+            usuario=request.user if request.user.is_authenticated else None,
+        )
 
     # Deja constancia del cupón usado (respeta los límites de uso)
     if ui["cupon"]:
