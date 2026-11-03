@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
 
-from core.models import SiteConfig, Suscripcion
+from core.models import PaginaLegal, SiteConfig, Suscripcion
 
 
 @admin.register(Suscripcion)
@@ -60,8 +60,24 @@ class SiteConfigAdmin(ModelAdmin):
         (_("Redes sociales (opcionales)"), {
             "fields": ("instagram", "facebook", "tiktok"),
         }),
+        (_("Analítica opcional (costo $0)"), {
+            "fields": ("ga4_id", "meta_pixel_id"),
+            "description": "Identificadores de Google Analytics 4 o Meta Pixel. Dejar en blanco si no se usan.",
+            "classes": ("collapse",),
+        }),
     )
 
     def has_delete_permission(self, request, obj=None):
         # La configuración no se puede borrar.
         return False
+
+
+@admin.register(PaginaLegal)
+class PaginaLegalAdmin(ModelAdmin):
+    """Administración de páginas institucionales y textos legales."""
+
+    list_display = ("titulo", "slug", "publicada", "actualizada")
+    list_filter = ("publicada",)
+    search_fields = ("titulo", "bajada", "contenido")
+    list_editable = ("publicada",)
+

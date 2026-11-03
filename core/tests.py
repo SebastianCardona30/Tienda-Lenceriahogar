@@ -75,3 +75,46 @@ class WhatsAppFlotanteTests(TestCase):
         config.save()
         r = self.client.get(reverse("core:home"))
         self.assertNotContains(r, "whatsapp-flotante")
+
+
+class PaginaLegalTests(TestCase):
+    """Páginas institucionales y legales editables desde el admin."""
+
+    def test_pagina_legal_desde_base_de_datos(self):
+        from core.models import PaginaLegal
+
+        PaginaLegal.objects.create(
+            slug="terminos",
+            titulo="Términos y Condiciones Ciudad Bonita 2026",
+            bajada="Términos vigentes para compras en Santander.",
+            contenido="<p>Todos los productos tienen garantía legal de 3 meses.</p>",
+            publicada=True,
+        )
+        r = self.client.get(reverse("core:pagina", args=["terminos"]))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Términos y Condiciones Ciudad Bonita 2026")
+        self.assertContains(r, "garantía legal de 3 meses")
+
+    def test_pagina_legal_despublicada_hace_fallback(self):
+        from core.models import PaginaLegal
+
+        PaginaLegal.objects.create(
+            slug="quienes-somos",
+            titulo="Título Despublicado",
+            contenido="Contenido oculto",
+            publicada=False,
+        )
+        r = self.client.get(reverse("core:pagina", args=["quienes-somos"]))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Quiénes somos")  # fallback del diccionario
+        self.assertNotContains(r, "Título Despublicado")
+
+    def test_siteconfig_analitica_opcional(self):
+        config = SiteConfig.get()
+        config.ga4_id = "G-TEST12345"
+        config.meta_pixel_id = "987654321"
+        config.save()
+        config.refresh_from_db()
+        self.assertEqual(config.ga4_id, "G-TEST12345")
+        self.assertEqual(config.meta_pixel_id, "987654321")
+

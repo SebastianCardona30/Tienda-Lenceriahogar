@@ -430,3 +430,131 @@ class HabeasDataTests(BaseCuentas):
         # El mensaje de confirmación se muestra en el inicio
         pagina = self.client.get(reverse("core:home"))
         self.assertContains(pagina, "fueron eliminados")
+
+
+class RolesYAuditoriaTests(TestCase):
+    """Pruebas de roles (Administradora, Empleado, Solo lectura), auditoría y 2FA."""
+
+    def setUp(self):
+        self.admin_user = Usuario.objects.create_user(
+            username="admin@ejemplo.com", email="admin@ejemplo.com",
+            password="clave-segura-123", is_staff=True,
+        )
+        self.empleado_user = Usuario.objects.create_user(
+            username="empleado@ejemplo.com", email="empleado@ejemplo.com",
+            password="clave-segura-123",
+        )
+        self.lectura_user = Usuario.objects.create_user(
+            username="lectura@ejemplo.com", email="lectura@ejemplo.com",
+            password="clave-segura-123",
+        )
+
+    def test_configurar_roles_es_idempotente(self):
+        from accounts.roles import (
+            ROL_ADMINISTRADORA, ROL_EMPLEADO, ROL_SOLO_LECTURA, configurar_roles,
+        )
+        from django.contrib.auth.models import Group
+
+        g1 = configurar_roles()
+        g2 = configurar_roles()
+        self.assertEqual(Group.objects.filter(name__in=[
+            ROL_ADMINISTRADORA, ROL_EMPLEADO, ROL_SOLO_LECTURA,
+        ]).count(), 3)
+        self.assertGreater(g2[ROL_ADMINISTRADORA].permissions.count(), 100)
+        self.assertGreater(g2[ROL_EMPLEADO].permissions.count(), 20)
+        self.assertGreater(g2[ROL_SOLO_LECTURA].permissions.count(), 20)
+
+    def test_asignar_rol_administradora(self):
+        from accounts.roles import (
+            ROL_ADMINISTRADORA, asignar_rol, es_administradora, obtener_rol,
+        )
+
+        asignar_rol(self.admin_user, ROL_ADMINISTRADORA)
+        self.assertTrue(self.admin_user.is_staff)
+        self.assertEqual(obtener_rol(self.admin_user), ROL_ADMINISTRADORA)
+        self.assertTrue(es_administradora(self.admin_user))
+        self.assertTrue(self.admin_user.has_perm("orders.change_pedido"))
+        self.assertTrue(self.admin_user.has_perm("orders.delete_pedido"))
+        self.assertTrue(self.admin_user.has_perm("catalog.add_producto"))
+
+    def test_asignar_rol_empleado_permisos_acotados(self):
+        from accounts.roles import (
+            ROL_EMPLEADO, asignar_rol, es_empleado, obtener_rol,
+        )
+
+        asignar_rol(self.empleado_user, ROL_EMPLEADO)
+        self.assertTrue(self.empleado_user.is_staff)
+        self.assertEqual(obtener_rol(self.empleado_user), ROL_EMPLEADO)
+        self.assertTrue(es_empleado(self.empleado_user))
+        # Puede ver y editar pedidos e inventario
+        self.assertTrue(self.empleado_user.has_perm("orders.view_pedido"))
+        self.assertTrue(self.empleado_user.has_perm("orders.change_pedido"))
+        self.assertTrue(self.empleado_user.has_perm("inventory.add_movimientostock"))
+        self.assertTrue(self.empleado_user.has_perm("catalog.change_variante"))
+        # NO puede borrar pedidos ni productos ni tocar configuración
+        self.assertFalse(self.empleado_user.has_perm("orders.delete_pedido"))
+        self.assertFalse(self.empleado_user.has_perm("catalog.delete_producto"))
+        self.assertFalse(self.empleado_user.has_perm("core.change_siteconfig"))
+
+    def test_asignar_rol_solo_lectura(self):
+        from accounts.roles import (
+            ROL_SOLO_LECTURA, asignar_rol, es_solo_lectura, obtener_rol,
+        )
+
+        asignar_rol(self.lectura_user, ROL_SOLO_LECTURA)
+        self.assertTrue(self.lectura_user.is_staff)
+        self.assertEqual(obtener_rol(self.lectura_user), ROL_SOLO_LECTURA)
+        self.assertTrue(es_solo_lectura(self.lectura_user))
+        # Puede ver
+        self.assertTrue(self.lectura_user.has_perm("orders.view_pedido"))
+        self.assertTrue(self.lectura_user.has_perm("catalog.view_producto"))
+        self.assertTrue(self.lectura_user.has_perm("inventory.view_movimientostock"))
+        # NO puede editar ni borrar
+        self.assertFalse(self.lectura_user.has_perm("orders.change_pedido"))
+        self.assertFalse(self.lectura_user.has_perm("orders.add_pedido"))
+        self.assertFalse(self.lectura_user.has_perm("orders.delete_pedido"))
+        self.assertFalse(self.lectura_user.has_perm("catalog.change_producto"))
+
+    def test_asignar_rol_invalido_lanza_error(self):
+        from accounts.roles import asignar_rol
+
+        with self.assertRaises(ValueError):
+            asignar_rol(self.admin_user, "Inexistente")
+
+    def test_auditoria_logentry_admin(self):
+        from django.contrib.admin.models import ADDITION, LogEntry
+        from django.contrib.contenttypes.models import ContentType
+
+        ct = ContentType.objects.get_for_model(Usuario)
+        registro = LogEntry.objects.create(
+            user=self.admin_user,
+            content_type=ct,
+            object_id=str(self.empleado_user.pk),
+            object_repr=str(self.empleado_user),
+            action_flag=ADDITION,
+            change_message="Usuario creado para pruebas",
+        )
+        self.assertEqual(registro.action_flag, ADDITION)
+        # El admin de auditoría está registrado y es de solo lectura
+        from django.contrib import admin
+
+        admin_auditoria = admin.site._registry[LogEntry]
+        self.assertFalse(admin_auditoria.has_add_permission(None))
+        self.assertFalse(admin_auditoria.has_change_permission(None))
+        self.assertFalse(admin_auditoria.has_delete_permission(None))
+
+    def test_2fa_deteccion_dispositivo(self):
+        from django_otp import user_has_device
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        self.assertFalse(user_has_device(self.admin_user))
+        TOTPDevice.objects.create(user=self.admin_user, name="Mi Celular", confirmed=True)
+        self.assertTrue(user_has_device(self.admin_user))
+
+    def test_otp_middleware_activo(self):
+        self.client.force_login(self.admin_user)
+        r = self.client.get(reverse("accounts:panel"))
+        self.assertEqual(r.status_code, 200)
+        # request.user tiene el método is_verified gracias a OTPMiddleware
+        self.assertTrue(hasattr(r.wsgi_request.user, "is_verified"))
+

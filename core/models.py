@@ -84,6 +84,16 @@ class SiteConfig(models.Model):
     facebook = models.URLField("Facebook", blank=True)
     tiktok = models.URLField("TikTok", blank=True)
 
+    # Analítica opcional (costo $0, requiere consentimiento de cookies)
+    ga4_id = models.CharField(
+        "Google Analytics 4 ID", max_length=30, blank=True,
+        help_text="Ejemplo: G-XXXXXXXXXX. Opcional; dejar en blanco si no se usa.",
+    )
+    meta_pixel_id = models.CharField(
+        "Meta Pixel ID", max_length=30, blank=True,
+        help_text="Ejemplo: 123456789012345. Opcional; dejar en blanco si no se usa.",
+    )
+
     class Meta:
         verbose_name = "configuración del negocio"
         verbose_name_plural = "configuración del negocio"
@@ -138,3 +148,36 @@ class Suscripcion(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class PaginaLegal(models.Model):
+    """Página institucional o legal editable desde el panel de administración."""
+
+    SLUGS = [
+        ("quienes-somos", "Quiénes somos"),
+        ("contacto", "Contacto y PQRS"),
+        ("preguntas-frecuentes", "Preguntas frecuentes"),
+        ("envios-y-cobertura", "Envíos y cobertura en Santander"),
+        ("cambios-y-devoluciones", "Cambios, devoluciones y retracto"),
+        ("terminos", "Términos y condiciones"),
+        ("privacidad", "Política de privacidad y tratamiento de datos"),
+        ("cookies", "Política de cookies"),
+    ]
+
+    slug = models.SlugField("enlace (slug)", max_length=80, unique=True, choices=SLUGS)
+    titulo = models.CharField("título de la página", max_length=160)
+    bajada = models.CharField("bajada o resumen", max_length=300, blank=True)
+    contenido = models.TextField(
+        "contenido", blank=True,
+        help_text="Texto o HTML simple con los párrafos de la página legal.",
+    )
+    publicada = models.BooleanField("publicada", default=True)
+    actualizada = models.DateTimeField("actualizada el", auto_now=True)
+
+    class Meta:
+        verbose_name = "página institucional o legal"
+        verbose_name_plural = "páginas institucionales y legales"
+        ordering = ["titulo"]
+
+    def __str__(self):
+        return self.titulo

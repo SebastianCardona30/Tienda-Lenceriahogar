@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from catalog.models import Producto, Variante
+from catalog.models import Categoria, Producto, Variante
 from dashboard import servicios
 from orders.models import ItemPedido, Pedido
 from promotions.models import Cupon, UsoCupon
@@ -258,3 +258,209 @@ class PanelAdminTests(TestCase):
         html = self.client.get(reverse("admin:index")).content.decode()
         self.assertIn('"etiquetas"', html)
         self.assertIn('"montos"', html)
+
+
+class ReportesTests(TestCase):
+    """Reportes CSV: tipos, contenido, fechas y descarga desde el admin."""
+
+    def setUp(self):
+        self.zona, _ = ZonaEnvio.objects.get_or_create(
+            nombre="Área metropolitana de Bucaramanga",
+            defaults={"tarifa": Decimal(8000),
+                      "envio_gratis_desde": Decimal(150000),
+                      "tiempo_estimado": "Mismo día"},
+        )
+        self.municipio, _ = MunicipioSantander.objects.get_or_create(
+            nombre="Bucaramanga", defaults={"zona": self.zona},
+        )
+
+    def _pedido(self, estado="pagado", total=Decimal(100000), hace_dias=0):
+        pedido = Pedido.objects.create(
+            nombre="María Pérez", email="maria@ejemplo.com",
+            telefono="3001112233", municipio=self.municipio,
+            direccion="Cra 15 # 42-10", subtotal=total, total=total,
+            metodo_pago="pasarela", estado=estado,
+        )
+        if hace_dias:
+            Pedido.objects.filter(pk=pedido.pk).update(
+                creado=timezone.now() - timedelta(days=hace_dias)
+            )
+            pedido.refresh_from_db()
+        return pedido
+
+    def _item(self, pedido, nombre="Sábanas dobles", cantidad=1,
+              precio=Decimal(100000), descuento=Decimal(0)):
+        return ItemPedido.objects.create(
+            pedido=pedido, producto_nombre=nombre, sku="SKU-1",
+            cantidad=cantidad, precio_unitario=precio, descuento=descuento,
+        )
+
+    def test_todos_los_tipos_generan_encabezados(self):
+        from dashboard import reportes
+
+        for clave in reportes.TIPOS:
+            titulo, encabezados, filas = reportes.generar_reporte(clave)
+            self.assertTrue(titulo)
+            self.assertTrue(encabezados)
+            self.assertIsInstance(filas, list)
+
+    def test_ventas_por_periodo_trae_las_ventas(self):
+        from dashboard import reportes
+
+        pedido = self._pedido()
+        self._pedido(estado="cancelado")  # no cuenta
+        _e, filas = reportes.ventas_por_periodo()
+        self.assertEqual(len(filas), 1)
+        self.assertTrue(filas[0][0].startswith("CB-"))  # número aleatorio
+        self.assertEqual(filas[0][0], pedido.numero)
+        self.assertEqual(filas[0][-1], 100000)  # total
+
+    def test_ventas_por_periodo_respeta_las_fechas(self):
+        from dashboard import reportes
+
+        self._pedido(hace_dias=60)
+        _e, filas = reportes.ventas_por_periodo()
+        self.assertEqual(filas, [])  # fuera de los últimos 30 días
+        hace60 = (timezone.localtime().date() - timedelta(days=65)).isoformat()
+        _e, filas = reportes.ventas_por_periodo(desde=hace60)
+        self.assertEqual(len(filas), 1)
+
+    def test_ventas_por_producto_suma_unidades_y_monto(self):
+        from dashboard import reportes
+
+        pedido = self._pedido()
+        self._item(pedido, cantidad=2, precio=Decimal(50000),
+                   descuento=Decimal(10000))
+        _e, filas = reportes.ventas_por_producto()
+        self.assertEqual(filas[0][0], "Sábanas dobles")
+        self.assertEqual(filas[0][1], 2)   # unidades
+        self.assertEqual(filas[0][3], 90000)  # 50.000×2 − 10.000
+
+    def test_ventas_por_categoria_y_proveedor(self):
+        from catalog.models import Proveedor
+        from dashboard import reportes
+
+        prod = Producto.objects.create(nombre="Sábanas", estado="publicado")
+        cat = Categoria.objects.create(nombre="Dormitorio")
+        proveedor = Proveedor.objects.create(nombre="Textiles Andes")
+        prod.categorias.add(cat)
+        prod.proveedor = proveedor
+        prod.save()
+        variante = Variante.objects.create(
+            producto=prod, precio=Decimal(100000), stock=5,
+        )
+        pedido = self._pedido()
+        ItemPedido.objects.create(
+            pedido=pedido, variante=variante, producto_nombre="Sábanas",
+            sku=variante.sku, cantidad=1, precio_unitario=Decimal(100000),
+        )
+        _e, filas = reportes.ventas_por_categoria()
+        self.assertEqual(filas[0][0], "Dormitorio")
+        _e, filas = reportes.ventas_por_proveedor()
+        self.assertEqual(filas[0][0], "Textiles Andes")
+
+    def test_ventas_por_municipio(self):
+        from dashboard import reportes
+
+        self._pedido(total=Decimal(80000))
+        _e, filas = reportes.ventas_por_municipio()
+        self.assertEqual(filas[0][0], "Bucaramanga")
+        self.assertEqual(filas[0][1], 1)
+        self.assertEqual(filas[0][2], 80000)
+
+    def test_reporte_de_cupones(self):
+        from dashboard import reportes
+        from promotions.models import Cupon, UsoCupon
+
+        cupon = Cupon.objects.create(codigo="AHORRO10", tipo="valor",
+                                     valor=Decimal(5000))
+        UsoCupon.objects.create(cupon=cupon, email="a@ejemplo.com")
+        pedido = self._pedido()
+        Pedido.objects.filter(pk=pedido.pk).update(
+            cupon_codigo="AHORRO10", descuento_cupon=Decimal(5000)
+        )
+        _e, filas = reportes.cupones_usados()
+        self.assertEqual(filas[0][0], "AHORRO10")
+        self.assertEqual(filas[0][1], 1)
+        self.assertEqual(filas[0][2], 5000)
+
+    def test_inventario_valorizado(self):
+        from dashboard import reportes
+
+        prod = Producto.objects.create(nombre="Toallas", estado="publicado")
+        Variante.objects.create(
+            producto=prod, precio=Decimal(40000), costo=Decimal(25000),
+            stock=6,
+        )
+        _e, filas = reportes.inventario_valorizado()
+        fila = next(f for f in filas if f[1] == "Toallas")
+        self.assertEqual(fila[4], 6)          # stock
+        self.assertEqual(fila[6], 25000)      # costo unitario
+        self.assertEqual(fila[7], 150000)     # valor a costo
+        self.assertEqual(fila[9], 240000)     # valor a venta
+
+    def test_a_csv_usa_punto_y_coma_y_bom(self):
+        from dashboard import reportes
+
+        texto = reportes.a_csv(["a", "b"], [[1, "ñ"]])
+        self.assertTrue(texto.startswith("﻿"))
+        self.assertIn("a;b", texto)
+        self.assertIn("1;ñ", texto)
+
+
+class VistasReportesTests(TestCase):
+    """La página y la descarga requieren sesión de personal."""
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        Usuario = get_user_model()
+        self.duena = Usuario.objects.create_user(
+            username="duena", email="duena@ejemplo.com",
+            password="clave-segura-123", is_staff=True, is_superuser=True,
+        )
+        self.cliente = Usuario.objects.create_user(
+            username="cliente", email="cliente@ejemplo.com",
+            password="clave-segura-123",
+        )
+
+    def test_sin_sesion_redirige_al_login(self):
+        for url in ("/admin/reportes/", "/admin/reportes/csv/?tipo=cupones"):
+            r = self.client.get(url)
+            self.assertEqual(r.status_code, 302, url)
+
+    def test_cliente_normal_no_ve_reportes(self):
+        self.client.force_login(self.cliente)
+        r = self.client.get("/admin/reportes/")
+        # admin_view redirige a /admin/login/ si el usuario no es staff
+        self.assertIn(r.status_code, (302, 404))
+        r = self.client.get("/admin/reportes/csv/?tipo=inventario")
+        self.assertIn(r.status_code, (302, 404))
+
+    def test_pagina_lista_todos_los_tipos(self):
+        from dashboard import reportes
+
+        self.client.force_login(self.duena)
+        r = self.client.get("/admin/reportes/")
+        self.assertEqual(r.status_code, 200)
+        for clave, (titulo, _f, _u) in reportes.TIPOS.items():
+            self.assertContains(r, titulo)
+
+    def test_descarga_el_csv_elegido(self):
+        self.client.force_login(self.duena)
+        r = self.client.get("/admin/reportes/csv/?tipo=inventario")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/csv", r["Content-Type"])
+        self.assertIn("attachment", r["Content-Disposition"])
+        cuerpo = r.content.decode("utf-8-sig")
+        self.assertIn("sku", cuerpo.splitlines()[0])
+
+    def test_tipo_desconocido_da_404(self):
+        self.client.force_login(self.duena)
+        r = self.client.get("/admin/reportes/csv/?tipo=inexistente")
+        self.assertEqual(r.status_code, 404)
+
+    def test_el_panel_enlaza_a_los_reportes(self):
+        self.client.force_login(self.duena)
+        r = self.client.get(reverse("admin:index"))
+        self.assertContains(r, "Descargar reportes CSV")

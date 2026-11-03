@@ -4,7 +4,20 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from dashboard import vistas as vistas_dashboard
+
 urlpatterns = [
+    # Reportes del negocio: ANTES de admin/ para que no los atrape el AdminSite
+    path(
+        "admin/reportes/",
+        admin.site.admin_view(vistas_dashboard.pagina_reportes),
+        name="admin_reportes",
+    ),
+    path(
+        "admin/reportes/csv/",
+        admin.site.admin_view(vistas_dashboard.descargar_reporte),
+        name="admin_reporte_csv",
+    ),
     path("admin/", admin.site.urls),
     # El orden importa: las apps específicas ANTES del catch-all de core
     path("", include("catalog.urls")),

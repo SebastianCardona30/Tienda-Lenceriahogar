@@ -71,10 +71,23 @@ def home(request):
 
 
 def pagina(request, slug):
-    """Página institucional simple por slug."""
+    """Página institucional o legal por slug (desde BD o diccionario base)."""
+    from core.models import PaginaLegal
+    from django.http import Http404
+
+    # 1. Buscar en BD si está publicada
+    obj = PaginaLegal.objects.filter(slug=slug, publicada=True).first()
+    if obj:
+        info = {
+            "titulo": obj.titulo,
+            "bajada": obj.bajada,
+            "contenido": obj.contenido,
+        }
+        return render(request, "core/pagina.html", {"pagina": info})
+
+    # 2. Fallback a diccionario base
     info = PAGINAS.get(slug)
     if info is None:
-        from django.http import Http404
         raise Http404("Página no encontrada")
     return render(request, "core/pagina.html", {"pagina": info})
 

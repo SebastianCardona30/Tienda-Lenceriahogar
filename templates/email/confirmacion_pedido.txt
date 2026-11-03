@@ -2,7 +2,9 @@
 
 ¡Gracias! Recibimos tu pedido {{ pedido.numero }} en {{ site.nombre_negocio }}.
 
-Tu compra:
+{% if mensaje_personalizado %}{{ mensaje_personalizado }}
+
+{% endif %}Tu compra:
 {% for item in items %}- {{ item.cantidad }} x {{ item.producto_nombre }} ({{ item.variante_label }}): {{ item.subtotal|cop }}
 {% endfor %}
 Total: {{ pedido.total|cop }}

@@ -1,0 +1,76 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Reportes | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .cb-grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .cb-tarjeta { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1.25rem; }
+    .cb-rotulo { font-size: .8rem; color: #6A6173; text-transform: uppercase; letter-spacing: .04em; }
+    .cb-titulo { font-size: 1.05rem; font-weight: 700; color: #5B2A86; margin: .25rem 0 .5rem; }
+    .cb-nota { font-size: .85rem; color: #6A6173; margin-bottom: .9rem; }
+    .cb-boton { display: inline-block; background: #C2185B; color: #fff; border: 0;
+        border-radius: 10px; padding: .55rem 1.1rem; font-weight: 700; cursor: pointer;
+        text-decoration: none; font-size: .9rem; }
+    .cb-campo { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .75rem; }
+    .cb-campo label { font-size: .8rem; font-weight: 600; color: #2A2230; }
+    .cb-campo input { padding: .5rem .6rem; border: 1px solid #E7DCEE; border-radius: 10px;
+        background: #FFF8FB; font-size: .9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 960px;">
+    <div class="cb-tarjeta" style="margin-bottom: 1.25rem;">
+        <div class="cb-rotulo">Reportes</div>
+        <h1 class="cb-titulo">Descarga los números de tu negocio</h1>
+        <p class="cb-nota" style="margin-bottom: 0;">
+            Elige un reporte y el período. Se descarga un archivo
+            <strong>CSV</strong> que se abre en Excel o Google Sheets.
+            Sin período, los últimos 30 días.
+        </p>
+    </div>
+
+    <div class="cb-grilla">
+        {% for tipo in tipos %}
+        <div class="cb-tarjeta">
+            <div class="cb-rotulo">
+                {% if tipo.usa_fechas %}Con fechas{% else %}Siempre actual{% endif %}
+            </div>
+            <div class="cb-titulo">{{ tipo.titulo }}</div>
+            <p class="cb-nota">
+                {% if tipo.usa_fechas %}
+                Filtra por el período que elijas abajo.
+                {% else %}
+                Stock actual de cada variante con costos y valores.
+                {% endif %}
+            </p>
+            <form method="get" action="{% url 'admin_reporte_csv' %}">
+                <input type="hidden" name="tipo" value="{{ tipo.clave }}">
+                {% if tipo.usa_fechas %}
+                <div class="cb-campo">
+                    <label for="desde-{{ tipo.clave }}">Desde</label>
+                    <input type="date" id="desde-{{ tipo.clave }}" name="desde"
+                           value="{{ desde }}">
+                </div>
+                <div class="cb-campo">
+                    <label for="hasta-{{ tipo.clave }}">Hasta</label>
+                    <input type="date" id="hasta-{{ tipo.clave }}" name="hasta"
+                           value="{{ hasta }}">
+                </div>
+                {% endif %}
+                <button type="submit" class="cb-boton">Descargar CSV</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <p style="margin-top: 1.25rem;">
+        <a href="{% url 'admin:index' %}" style="color:#5B2A86; font-weight:600;">
+            ← Volver al panel
+        </a>
+    </p>
+</div>
+{% endblock %}
