@@ -14,5 +14,6 @@ urlpatterns = [
     path("categoria/<slug:slug>/", views.categoria, name="categoria"),
     path("producto/<slug:slug>/", views.producto, name="producto"),
     path("producto/<slug:slug>/resena/", views.enviar_resena, name="enviar_resena"),
+    path("catalogo/feed.csv", views.feed_whatsapp, name="feed_whatsapp"),
     path("suscribir/", views.suscribir, name="suscribir"),
 ]

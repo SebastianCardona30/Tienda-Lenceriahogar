@@ -306,3 +306,60 @@ def enviar_resena(request, slug):
         )
         messages.success(request, "¡Gracias por tu reseña! La publicaremos apenas la revisemos.")
     return redirect(prod.get_absolute_url())
+
+
+def feed_whatsapp(request):
+    """Feed CSV para catálogo de WhatsApp Business / Meta Commerce Manager."""
+    import csv
+    import io
+
+    from django.conf import settings
+    from django.http import HttpResponse
+
+    from core.models import SiteConfig
+
+    config = SiteConfig.get()
+    base_url = settings.SITE_URL.rstrip("/")
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, delimiter=",", lineterminator="\r\n")
+
+    # Encabezados estándar requeridos por Meta / WhatsApp Catalog
+    writer.writerow([
+        "id", "title", "description", "availability", "condition",
+        "price", "link", "image_link", "brand",
+    ])
+
+    variantes = Variante.objects.filter(
+        producto__estado="publicado", activa=True,
+    ).select_related("producto").prefetch_related("producto__fotos")
+
+    for v in variantes:
+        prod = v.producto
+        titulo = f"{prod.nombre} - {v.talla}" if v.talla else prod.nombre
+        if v.color:
+            titulo += f" ({v.color})"
+
+        desc = (prod.descripcion_corta or prod.descripcion_larga or prod.nombre).replace("\n", " ").strip()
+        disp = "in stock" if v.stock > 0 else "out of stock"
+        precio_str = f"{int(v.precio_final)} COP"
+        link = f"{base_url}{prod.get_absolute_url()}"
+
+        img_url = ""
+        if v.foto:
+            img_url = f"{base_url}{v.foto.url}"
+        elif prod.portada:
+            img_url = f"{base_url}{prod.portada.imagen.url}"
+        elif config.logo:
+            img_url = f"{base_url}{config.logo.url}"
+
+        marca = prod.marca or config.nombre_negocio
+
+        writer.writerow([
+            v.sku, titulo, desc, disp, "new",
+            precio_str, link, img_url, marca,
+        ])
+
+    contenido = "\ufeff" + buffer.getvalue()
+    respuesta = HttpResponse(contenido, content_type="text/csv; charset=utf-8")
+    respuesta["Content-Disposition"] = 'attachment; filename="whatsapp_catalog.csv"'
+    return respuesta

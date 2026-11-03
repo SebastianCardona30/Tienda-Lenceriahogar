@@ -1,7 +1,11 @@
 from django.contrib import admin
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import path, reverse
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, StackedInline, TabularInline
 
+from catalog import csv_io
 from catalog.models import (
     BusquedaSinResultados, Categoria, Combo, ComboItem, FotoProducto,
     Producto, Proveedor, Resena, Sinonimo, Variante,
@@ -64,6 +68,7 @@ class ProductoAdmin(ModelAdmin):
     filter_horizontal = ("categorias",)
     list_editable = ("estado", "destacado")
     inlines = (FotoInline, VarianteInline)
+    change_list_template = "admin/catalog/producto/change_list.html"
     fieldsets = (
         ("Producto", {
             "fields": ("nombre", "slug", "estado", "destacado", "es_bordado"),
@@ -91,6 +96,75 @@ class ProductoAdmin(ModelAdmin):
     def precio_min(self, obj):
         precio = obj.precio_minimo
         return precio if precio is not None else "—"
+
+    # ---------- Importar / exportar CSV ----------
+    def get_urls(self):
+        urls = super().get_urls()
+        propias = [
+            path(
+                "csv/",
+                self.admin_site.admin_view(self.vista_csv),
+                name="catalog_producto_csv",
+            ),
+            path(
+                "csv/exportar/",
+                self.admin_site.admin_view(self.vista_exportar_csv),
+                name="catalog_producto_csv_exportar",
+            ),
+            path(
+                "csv/plantilla/",
+                self.admin_site.admin_view(self.vista_plantilla_csv),
+                name="catalog_producto_csv_plantilla",
+            ),
+        ]
+        return propias + urls
+
+    def vista_csv(self, request):
+        """Página de importación: sube el archivo y muestra los errores por fila."""
+        from django.contrib import messages
+
+        contexto = {"titulo": "Importar catálogo desde CSV"}
+        if request.method == "POST":
+            archivo = request.FILES.get("archivo")
+            if not archivo:
+                messages.error(request, "Elige un archivo CSV primero.")
+            else:
+                resultado = csv_io.importar_csv(archivo.read())
+                if resultado["errores"]:
+                    messages.warning(
+                        request,
+                        f"El archivo tiene {len(resultado['errores'])} error(es); "
+                        "no se importó nada. Corrige las filas marcadas.",
+                    )
+                    contexto["errores"] = resultado["errores"]
+                else:
+                    messages.success(
+                        request,
+                        f"Listo: {resultado['creados']} producto(s) nuevo(s) y "
+                        f"{resultado['actualizados']} variante(s) actualizada(s).",
+                    )
+                    return HttpResponseRedirect(
+                        reverse("admin:catalog_producto_changelist")
+                    )
+        return render(
+            request, "admin/catalog/producto/csv_form.html", contexto
+        )
+
+    def vista_exportar_csv(self, request):
+        respuesta = HttpResponse(
+            csv_io.exportar_csv(), content_type="text/csv; charset=utf-8",
+        )
+        respuesta["Content-Disposition"] = 'attachment; filename="catalogo.csv"'
+        return respuesta
+
+    def vista_plantilla_csv(self, request):
+        respuesta = HttpResponse(
+            csv_io.plantilla_csv(), content_type="text/csv; charset=utf-8",
+        )
+        respuesta["Content-Disposition"] = (
+            'attachment; filename="plantilla_catalogo.csv"'
+        )
+        return respuesta
 
 
 @admin.register(Resena)

@@ -398,3 +398,8 @@ class Command(BaseCommand):
         from django.core.management import call_command
 
         call_command("seed_municipios", verbosity=0)
+
+        # ---------- Roles y permisos de administración (idempotente) ----------
+        from accounts.roles import configurar_roles
+
+        configurar_roles()
