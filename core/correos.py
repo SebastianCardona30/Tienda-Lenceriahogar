@@ -22,6 +22,21 @@ def _enviar(para, asunto, plantilla, contexto):
     if not para:
         return False
     contexto = {"site": SiteConfig.get(), "site_url": settings.SITE_URL, **contexto}
+
+    # Revisar si hay plantilla personalizada en base de datos
+    try:
+        from django.template import Context, Template
+        from notifications.models import PlantillaCorreo
+
+        p_obj = PlantillaCorreo.objects.filter(clave=plantilla, activo=True).first()
+        if p_obj:
+            if p_obj.asunto:
+                asunto = Template(p_obj.asunto).render(Context(contexto))
+            if p_obj.cuerpo:
+                contexto["mensaje_personalizado"] = Template(p_obj.cuerpo).render(Context(contexto))
+    except Exception:
+        pass
+
     asunto_completo = f"{asunto} · {contexto['site'].nombre_negocio}"
     try:
         texto = render_to_string(f"email/{plantilla}.txt", contexto)

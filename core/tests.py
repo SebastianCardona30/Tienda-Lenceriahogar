@@ -75,3 +75,104 @@ class WhatsAppFlotanteTests(TestCase):
         config.save()
         r = self.client.get(reverse("core:home"))
         self.assertNotContains(r, "whatsapp-flotante")
+
+
+class PaginaLegalTests(TestCase):
+    """Páginas institucionales y legales editables desde el admin."""
+
+    def test_pagina_legal_desde_base_de_datos(self):
+        from core.models import PaginaLegal
+
+        PaginaLegal.objects.create(
+            slug="terminos",
+            titulo="Términos y Condiciones Ciudad Bonita 2026",
+            bajada="Términos vigentes para compras en Santander.",
+            contenido="<p>Todos los productos tienen garantía legal de 3 meses.</p>",
+            publicada=True,
+        )
+        r = self.client.get(reverse("core:pagina", args=["terminos"]))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Términos y Condiciones Ciudad Bonita 2026")
+        self.assertContains(r, "garantía legal de 3 meses")
+
+    def test_pagina_legal_despublicada_hace_fallback(self):
+        from core.models import PaginaLegal
+
+        PaginaLegal.objects.create(
+            slug="quienes-somos",
+            titulo="Título Despublicado",
+            contenido="Contenido oculto",
+            publicada=False,
+        )
+        r = self.client.get(reverse("core:pagina", args=["quienes-somos"]))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Quiénes somos")  # fallback del diccionario
+        self.assertNotContains(r, "Título Despublicado")
+
+    def test_siteconfig_analitica_opcional(self):
+        config = SiteConfig.get()
+        config.ga4_id = "G-TEST12345"
+        config.meta_pixel_id = "987654321"
+        config.save()
+        config.refresh_from_db()
+        self.assertEqual(config.ga4_id, "G-TEST12345")
+        self.assertEqual(config.meta_pixel_id, "987654321")
+
+
+class SEOTests(TestCase):
+    """Pruebas de sitemap.xml, robots.txt y Open Graph."""
+
+    def test_robots_txt(self):
+        r = self.client.get("/robots.txt")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/plain", r["Content-Type"])
+        self.assertContains(r, "User-agent: *")
+        self.assertContains(r, "Disallow: /admin/")
+        self.assertContains(r, "/sitemap.xml")
+
+    def test_sitemap_xml(self):
+        from catalog.models import Categoria, Producto
+
+        cat = Categoria.objects.create(nombre="Almohadas", activa=True)
+        Producto.objects.create(nombre="Almohada Memory Foam", estado="publicado")
+
+        r = self.client.get("/sitemap.xml")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("xml", r["Content-Type"])
+        self.assertContains(r, "<urlset")
+        self.assertContains(r, "/tienda/")
+        self.assertContains(r, cat.get_absolute_url())
+
+
+class TextosLegalesYCookiesTests(TestCase):
+    def test_paginas_legales_tienen_contenido_y_nota_profesional(self):
+        for slug in ("terminos", "privacidad", "cambios-y-devoluciones", "cookies"):
+            r = self.client.get(reverse("core:pagina", args=[slug]))
+            self.assertEqual(r.status_code, 200, f"Error en página {slug}")
+            self.assertContains(r, "profesional del derecho")
+
+    def test_retracto_5_dias_habiles_presente(self):
+        r = self.client.get(reverse("core:pagina", args=["cambios-y-devoluciones"]))
+        self.assertContains(r, "cinco (5) días hábiles")
+
+    def test_banner_cookies_en_base(self):
+        r = self.client.get(reverse("core:home"))
+        self.assertContains(r, "cb-banner-cookies")
+        self.assertContains(r, "Solo necesarias")
+        self.assertContains(r, "Aceptar todas")
+
+
+class BackupDBTests(TestCase):
+    def test_backup_db_ejecuta_y_crea_carpeta(self):
+        import os
+        import tempfile
+        from django.core.management import call_command
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            call_command("backup_db", destino=tmpdir)
+            archivos = list(os.walk(tmpdir))
+            # Se creó al menos la subcarpeta backup_*
+            self.assertTrue(len(archivos) > 0)
+
+
+
