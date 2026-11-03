@@ -380,3 +380,106 @@ class AccionesDelAdminTests(TestCase):
             ).exists()
         )
 
+
+class WompiSandboxTests(TestCase):
+    """Pruebas de la integración con Wompi: firma, URL y webhook idempotente."""
+
+    def setUp(self):
+        self.pedido = crear_pedido(estado="pendiente", metodo="pasarela")
+
+    def test_monto_en_centavos(self):
+        from payments import wompi
+
+        self.assertEqual(wompi.monto_en_centavos(Decimal("120000")), 12000000)
+        self.assertEqual(wompi.monto_en_centavos(89900), 8990000)
+
+    def test_calcular_firma_integridad(self):
+        import os
+        from payments import wompi
+
+        os.environ["WOMPI_INTEGRITY_SECRET"] = "secreto_test_123"
+        firma = wompi.calcular_firma_integridad("CB-000001", 12000000, "COP")
+        self.assertTrue(len(firma), 64)  # SHA-256 hex string
+
+    def test_url_checkout_wompi_incluye_parametros(self):
+        import os
+        from payments import wompi
+
+        os.environ["WOMPI_PUBLIC_KEY"] = "pub_test_123"
+        os.environ["WOMPI_INTEGRITY_SECRET"] = "secreto_test_123"
+        url = wompi.url_checkout_wompi(self.pedido, redirect_url="http://localhost:8000/retorno/")
+        self.assertIn("https://checkout.wompi.co/p/?", url)
+        self.assertIn("public-key=pub_test_123", url)
+        self.assertIn(f"reference={self.pedido.numero}", url)
+        self.assertIn("signature%3Aintegrity=", url)
+
+    def test_webhook_aprobado_actualiza_pedido_y_es_idempotente(self):
+        import json
+        import os
+        from payments import wompi
+
+        os.environ["WOMPI_EVENTS_KEY"] = "events_secret_test"
+        tx_id = "tx_abc123"
+        payload = {
+            "event": "transaction.updated",
+            "data": {
+                "transaction": {
+                    "id": tx_id,
+                    "status": "APPROVED",
+                    "reference": self.pedido.numero,
+                    "amount_in_cents": 20000000,
+                    "currency": "COP",
+                }
+            },
+            "timestamp": 1600000000,
+            "signature": {
+                "properties": ["transaction.id", "transaction.status", "transaction.amount_in_cents"],
+            },
+        }
+        # Calcular checksum válido
+        import hashlib
+        cadena = f"{tx_id}APPROVED200000001600000000events_secret_test"
+        checksum = hashlib.sha256(cadena.encode("utf-8")).hexdigest()
+        payload["signature"]["checksum"] = checksum
+
+        # Primer envío
+        r = self.client.post(
+            reverse("payments:webhook_wompi"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(r.status_code, 200)
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.estado, "pagado")
+        self.assertEqual(Pago.objects.filter(pedido=self.pedido, referencia=f"wompi_{tx_id}").count(), 1)
+        pago = Pago.objects.get(pedido=self.pedido, referencia=f"wompi_{tx_id}")
+        self.assertEqual(pago.estado, "aprobado")
+
+        # Segundo envío (idempotencia)
+        r2 = self.client.post(
+            reverse("payments:webhook_wompi"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(r2.status_code, 200)
+        self.assertEqual(Pago.objects.filter(pedido=self.pedido, referencia=f"wompi_{tx_id}").count(), 1)
+
+    def test_webhook_firma_invalida_da_400(self):
+        import json
+        import os
+
+        os.environ["WOMPI_EVENTS_KEY"] = "events_secret_test"
+        payload = {
+            "event": "transaction.updated",
+            "data": {"transaction": {"id": "1", "status": "APPROVED", "reference": self.pedido.numero}},
+            "timestamp": 123456,
+            "signature": {"properties": ["transaction.id"], "checksum": "invalido"},
+        }
+        r = self.client.post(
+            reverse("payments:webhook_wompi"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(r.status_code, 400)
+
+

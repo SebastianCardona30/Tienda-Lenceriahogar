@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}{{ site.nombre_negocio }}{% endblock titulo %}</title>
   <meta name="description" content="{% block meta_descripcion %}Sábanas, edredones, toallas, cortinas y más para tu hogar en Bucaramanga. Envíos en Santander y pagos con Nequi, PSE y contraentrega.{% endblock meta_descripcion %}">
+  <!-- Open Graph / Redes sociales (WhatsApp, Facebook) -->
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ site.nombre_negocio }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Sábanas, edredones, toallas, cortinas y más para tu hogar en Bucaramanga. Envíos en Santander y pagos con Nequi, PSE y contraentrega.{% endblock %}">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:site_name" content="{{ site.nombre_negocio }}">
+  {% block og_extra %}{% endblock %}
   <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -34,6 +41,7 @@
 
   {% include "includes/footer.html" %}
   {% include "includes/drawer_carrito.html" %}
+  {% include "includes/banner_cookies.html" %}
 
   {% if site.whatsapp %}
     <a class="whatsapp-flotante"

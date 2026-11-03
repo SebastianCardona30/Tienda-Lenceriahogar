@@ -408,3 +408,18 @@ class CsvAdminTests(TestCase):
         self.assertContains(r, "Importar CSV")
         self.assertContains(r, "Exportar CSV")
         self.assertContains(r, "Plantilla de ejemplo")
+
+
+class FeedWhatsAppTests(TestCase):
+    def test_feed_whatsapp_csv(self):
+        prod = crear_producto("Juego de sábanas premium", precio=129900, talla="Queen", color="Perla")
+        r = self.client.get(reverse("catalog:feed_whatsapp"))
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/csv", r["Content-Type"])
+        self.assertIn("whatsapp_catalog.csv", r["Content-Disposition"])
+        cuerpo = r.content.decode("utf-8-sig")
+        self.assertIn("id,title,description,availability,condition,price,link,image_link,brand", cuerpo)
+        self.assertIn(prod.variantes.first().sku, cuerpo)
+        self.assertIn("129900 COP", cuerpo)
+        self.assertIn("in stock", cuerpo)
+

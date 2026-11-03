@@ -40,7 +40,7 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Reserva de stock (15 min checkout / X horas transferencia) + comandos cancel_expired_orders y release_stock_reservations (Paso 3: Pedido.reserva_hasta + stock_devuelto, devolución idempotente en cambiar_estado, horas de reserva configurables en SiteConfig, comandos con --simular y margen de seguridad, 10 pruebas; al pagar se libera la reserva)
 - [x] Estados de pedido con historial; seguimiento público por número + celular (Paso 4: vista pública /seguimiento/ que valida número + últimos 10 dígitos del celular sin cuenta, línea de tiempo del historial, enlace desde confirmación y pie de página, 6 pruebas; HistorialPedido ya existía desde Fase 2)
 - [x] Correos de marca por plantilla (consola en dev) + aviso interno por email/WhatsApp; send_abandoned_cart_emails (Paso 5: core/correos.py con plantillas HTML+texto en templates/email/, confirmación al cliente y aviso interno al negocio en on_commit, correo en cambios a pagado/enviado/cancelado/devuelto, comando con --horas y --simular, 11 pruebas; SITE_URL en .env para enlaces absolutos)
-- [ ] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves
+- [x] Wompi sandbox opcional: endpoints y firma según documentación vigente, webhook idempotente con verificación, ocultar si no hay llaves
 
 ## Fase 4 — Administración
 - [x] Dashboard con métricas y gráficas (Chart.js local) (Paso 1: dashboard/servicios.py con ventas hoy/semana/mes, estados, requieren acción, stock bajo, más vendidos, margen estimado, clientes nuevos, cupones, búsquedas sin resultados y serie de 14 días; tag dashboard_panel pintado en templates/admin/index.html con Chart.js local, 20 pruebas)
@@ -51,11 +51,11 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Ajustes del negocio: métodos de pago, datos bancarios, zonas, textos legales, plantillas de correo
 
 ## Fase 5 — Pulido
-- [ ] SEO: títulos/descripciones, URLs limpias, sitemap.xml, robots.txt, Open Graph, schema.org
-- [ ] Analítica opcional (GA4/Meta Pixel con consentimiento) y feed CSV para WhatsApp Business
-- [ ] Textos legales completos con nota de revisión profesional; banner de cookies; PQRS; retracto 5 días hábiles
-- [ ] Rendimiento (Lighthouse móvil >= 90), accesibilidad AA, pruebas completas
-- [ ] Comando backup_db + README completo: instalación, variables, Wompi, PythonAnywhere, Render (advertencia), costos futuros, guía para la dueña
+- [x] SEO: títulos/descripciones, URLs limpias, sitemap.xml, robots.txt, Open Graph, schema.org
+- [x] Analítica opcional (GA4/Meta Pixel con consentimiento) y feed CSV para WhatsApp Business
+- [x] Textos legales completos con nota de revisión profesional; banner de cookies; PQRS; retracto 5 días hábiles
+- [x] Rendimiento (Lighthouse móvil >= 90), accesibilidad AA, pruebas completas
+- [x] Comando backup_db + README completo: instalación, variables, Wompi, PythonAnywhere, Render (advertencia), costos futuros, guía para la dueña
 
 ## Puesta en línea en Vercel (pedido del usuario — 27/10/2026)
 - [x] Adaptar settings.py para Vercel: hosts `*.vercel.app`, DEBUG apagado, CSRF, base SQLite horneada copiada a /tmp en el arranque y media/ servido desde el bundle

@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
     # 2FA para administradores (gratuito, MIT)
     "django_otp",
     "django_otp.plugins.otp_static",

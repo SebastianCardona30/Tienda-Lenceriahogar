@@ -2,11 +2,28 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from catalog.sitemaps import CategoriaSitemap, PaginasSitemap, ProductoSitemap
+from core import views as vistas_core
 from dashboard import vistas as vistas_dashboard
 
+sitemaps = {
+    "productos": ProductoSitemap,
+    "categorias": CategoriaSitemap,
+    "paginas": PaginasSitemap,
+}
+
 urlpatterns = [
+    # SEO: robots.txt y sitemap.xml
+    path("robots.txt", vistas_core.robots_txt, name="robots_txt"),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
     # Reportes del negocio: ANTES de admin/ para que no los atrape el AdminSite
     path(
         "admin/reportes/",

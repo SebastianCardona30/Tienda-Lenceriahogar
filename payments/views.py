@@ -5,24 +5,30 @@ resultados posibles: Aprobado, Rechazado o Pendiente. No toca internet ni
 guarda datos de tarjeta. Con una llave real (Wompi) se cambia la vista y
 esta pantalla se oculta.
 """
+import json
+
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from core.models import SiteConfig
 from orders.models import Pedido
 from orders.servicios import cambiar_estado
+from payments import wompi
 from payments.forms import ComprobanteForm
 
 
 def activa():
-    """La pasarela simulada está disponible donde se pida (desarrollo o pruebas)."""
-    return getattr(settings, "PASARELA_SIMULADA", False)
+    """La pasarela simulada o real está disponible."""
+    return getattr(settings, "PASARELA_SIMULADA", False) or wompi.esta_configurado()
 
 
 def pagar(request, numero):
-    """Pantalla de pago (simulada). Muestra el resumen y espera el resultado."""
+    """Pantalla de pago: Wompi Checkout si hay llaves, o simulada si estamos en dev."""
     if not activa():
         messages.info(request, "El pago en línea no está habilitado todavía.")
         return redirect("orders:confirmacion", numero=numero)
@@ -34,7 +40,19 @@ def pagar(request, numero):
         messages.info(request, f"El pedido {pedido.numero} ya está pagado.")
         return redirect("orders:confirmacion", numero=pedido.numero)
 
-    return render(request, "payments/pagar.html", {"pedido": pedido})
+    contexto = {
+        "pedido": pedido,
+        "wompi_activo": wompi.esta_configurado(),
+        "pasarela_simulada": getattr(settings, "PASARELA_SIMULADA", False),
+    }
+
+    if wompi.esta_configurado():
+        url_retorno = request.build_absolute_uri(
+            reverse("orders:confirmacion", kwargs={"numero": pedido.numero})
+        )
+        contexto["wompi_url"] = wompi.url_checkout_wompi(pedido, redirect_url=url_retorno)
+
+    return render(request, "payments/pagar.html", contexto)
 
 
 @require_POST
@@ -137,3 +155,24 @@ def comprobante(request, numero):
         "form": form,
         "pago_actual": pago_actual,
     })
+
+
+@csrf_exempt
+@require_POST
+def webhook_wompi(request):
+    """Webhook de eventos de Wompi con verificación de firma checksum (idempotente)."""
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return HttpResponseBadRequest("JSON inválido")
+
+    signature = payload.get("signature", {})
+    checksum = signature.get("checksum")
+    timestamp = payload.get("timestamp")
+
+    if checksum and timestamp:
+        if not wompi.verificar_firma_webhook(payload, timestamp, checksum):
+            return HttpResponseBadRequest("Firma de webhook inválida")
+
+    resultado = wompi.procesar_webhook(payload)
+    return JsonResponse({"status": "ok", "resultado": resultado})

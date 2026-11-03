@@ -29,6 +29,18 @@
       <div><dt>Envío a</dt><dd>{{ pedido.municipio.nombre }}</dd></div>
     </dl>
 
+    {% if wompi_activo and wompi_url %}
+    <div style="margin: 1.5rem 0; text-align: center;">
+      <a href="{{ wompi_url }}" class="btn btn-principal" style="background:#8A4FBF; color:#fff; display:inline-block; padding:0.8rem 1.6rem; border-radius:10px; font-weight:700; text-decoration:none;">
+        Pagar con Wompi (Tarjetas, PSE, Nequi, DaviPlata) →
+      </a>
+      <p style="font-size:0.8rem; color:#6A6173; margin-top:0.5rem;">
+        Transacción segura procesada por Wompi Bancolombia.
+      </p>
+    </div>
+    {% endif %}
+
+    {% if pasarela_simulada %}
     <p class="pasarela__aviso">
       Esta es la <strong>pantalla de prueba</strong>: elige cómo debe responder el
       pago para recorrer todo el flujo sin usar una tarjeta real.
@@ -51,6 +63,7 @@
         <button type="submit" class="btn btn-pago btn-pago--pendiente">… Dejar pendiente</button>
       </form>
     </div>
+    {% endif %}
 
     <p class="pasarela__pie">
       No guardamos datos de tarjeta. Al volver te confirmamos el estado del pedido.

@@ -1,0 +1,131 @@
+{% comment %}
+Banner de consentimiento de cookies y analítica (Habeas Data / Ley 1581).
+Solo carga GA4 o Meta Pixel si la clienta da su consentimiento explícito.
+{% endcomment %}
+<div id="cb-banner-cookies"
+     class="cb-banner-cookies"
+     style="display:none;"
+     role="region"
+     aria-label="Consentimiento de cookies"
+     x-data="{
+       mostrar: !localStorage.getItem('cb_cookies_consent'),
+       aceptar() {
+         localStorage.setItem('cb_cookies_consent', 'aceptado');
+         this.mostrar = false;
+         window.cargarAnalitica && window.cargarAnalitica();
+       },
+       rechazar() {
+         localStorage.setItem('cb_cookies_consent', 'rechazado');
+         this.mostrar = false;
+       }
+     }"
+     x-show="mostrar"
+     x-transition>
+  <div class="cb-banner-cookies__caja">
+    <div class="cb-banner-cookies__texto">
+      <strong>Tu privacidad es importante</strong> 🍪
+      <p>
+        Usamos cookies necesarias para que el carrito funcione y, con tu autorización,
+        cookies de analítica para mejorar tu experiencia en la tienda.
+        Consulta nuestra <a href="{% url 'core:pagina' 'cookies' %}" target="_blank" rel="noopener">política de cookies</a>.
+      </p>
+    </div>
+    <div class="cb-banner-cookies__acciones">
+      <button type="button" @click="rechazar()" class="btn btn-secundario btn-sm">
+        Solo necesarias
+      </button>
+      <button type="button" @click="aceptar()" class="btn btn-principal btn-sm">
+        Aceptar todas
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.cb-banner-cookies {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #FFF8FB;
+  border: 1px solid #E7DCEE;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(42, 34, 48, 0.12);
+  padding: 1rem 1.25rem;
+  z-index: 9999;
+  font-family: inherit;
+}
+.cb-banner-cookies__caja {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.cb-banner-cookies__texto {
+  flex: 1 1 300px;
+  font-size: 0.9rem;
+  color: #2A2230;
+  line-height: 1.4;
+}
+.cb-banner-cookies__texto strong {
+  color: #5B2A86;
+}
+.cb-banner-cookies__texto p {
+  margin: 0.25rem 0 0;
+  color: #6A6173;
+}
+.cb-banner-cookies__texto a {
+  color: #8A4FBF;
+  text-decoration: underline;
+}
+.cb-banner-cookies__acciones {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+</style>
+
+<script>
+window.cargarAnalitica = function() {
+  var consent = localStorage.getItem('cb_cookies_consent');
+  if (consent !== 'aceptado') return;
+
+  {% if site.ga4_id %}
+  // Google Analytics 4
+  var gaScript = document.createElement('script');
+  gaScript.async = true;
+  gaScript.src = 'https://www.googletagmanager.com/gtag/js?id={{ site.ga4_id }}';
+  document.head.appendChild(gaScript);
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ site.ga4_id }}', { 'anonymize_ip': true });
+  {% endif %}
+
+  {% if site.meta_pixel_id %}
+  // Meta Pixel
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '{{ site.meta_pixel_id }}');
+  fbq('track', 'PageView');
+  {% endif %}
+};
+
+// Si ya fue aceptado previamente, inicializa la analítica
+if (localStorage.getItem('cb_cookies_consent') === 'aceptado') {
+  window.cargarAnalitica();
+}
+</script>

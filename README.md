@@ -1,176 +1,237 @@
-# Lencería de Hogar Ciudad Bonita — Tienda online
+# Lencería de Hogar Ciudad Bonita — Tienda Online
 
 Tienda online de lencería y ropa de cama para Bucaramanga, Santander (Colombia).
-Django + SQLite, 100 % con **costo $0**: solo herramientas gratuitas y de código abierto.
-Todo el texto visible está en español de Colombia y los precios en pesos colombianos sin decimales ($89.900).
+Desarrollada con **Python 3.12+ / Django 5.x**, arquitectura limpia con plantillas en servidor (sin SPA, sin paso de compilación de frontend) y **100 % costo $0**: solo librerías y herramientas gratuitas y de código abierto.
 
-> Estado actual: **Fase 1 completa** (catálogo, búsqueda, filtros, ficha de producto e inicio).
-> Sigue la Fase 2: carrito, ofertas, checkout y cuentas. Ver `PLAN.md`.
+Todo el texto visible para las clientas está en español de Colombia (tuteo), con precios en pesos colombianos sin decimales (**$89.900**) con IVA incluido.
 
----
-
-## Contenido rápido
-
-1. [Ejecutar la tienda en tu PC](#ejecutar-la-tienda-en-tu-pc)
-2. [Publicarla en Vercel (gratis)](#publicarla-en-vercel-gratis)
-3. [Estructura del proyecto](#estructura-del-proyecto)
-4. [Comandos útiles](#comandos-útiles)
-5. [Variables de entorno (.env)](#variables-de-entorno-env)
-6. [Avisos sobre la demo en Vercel](#avisos-sobre-la-demo-en-vercel)
-7. [Dependencias y licencias (costo $0)](#dependencias-y-licencias-costo-0)
+> **Estado del proyecto:** ✅ **Completo (Fases 0 a 5 terminadas)**.
+> Incluye catálogo, carrito, promociones, checkout, zonas de Santander, pagos (simulado, transferencia y Wompi sandbox), panel de administración, inventario, reportes CSV, roles de usuario, auditoría, 2FA, SEO completo y copias de seguridad.
 
 ---
 
-## Ejecutar la tienda en tu PC
+## Contenido
 
-**Requisitos:** Windows con Python 3.12 o superior ([python.org](https://www.python.org/downloads/), gratis — al instalar marca *Add Python to PATH*).
+1. [Puesta en marcha local en tu PC](#puesta-en-marcha-local-en-tu-pc)
+2. [Guía rápida para la dueña del negocio](#guía-rápida-para-la-dueña-del-negocio)
+3. [Comandos de administración y mantenimiento](#comandos-de-administración-y-mantenimiento)
+4. [Pasarelas de pago y Wompi](#pasarelas-de-pago-y-wompi)
+5. [Opciones de publicación gratuita (Hosting $0)](#opciones-de-publicación-gratuita-hosting-0)
+6. [Variables de entorno (.env)](#variables-de-entorno-env)
+7. [Copias de seguridad (Backups)](#copias-de-seguridad-backups)
+8. [Costos futuros al crecer el negocio](#costos-futuros-al-crecer-el-negocio)
+9. [Dependencias y licencias (costo $0)](#dependencias-y-licencias-costo-0)
 
-**Opción A — con un doble clic:** ejecuta `iniciar.bat`.
-La primera vez crea el entorno virtual, instala las dependencias, prepara la base con datos
-demo y abre la tienda en el navegador.
+---
 
-**Opción B — manual (igual en Mac/Linux):**
+## Puesta en marcha local en tu PC
+
+**Requisitos:** Windows, Mac o Linux con Python 3.12 o superior.
+
+### Opción A — En Windows con un clic
+Ejecuta el archivo `iniciar.bat`.
+Crea el entorno virtual, instala las dependencias, aplica las migraciones, carga los datos de demostración y abre la tienda en tu navegador.
+
+### Opción B — Manual en consola (Windows / Mac / Linux)
 
 ```bash
+# 1. Crear y activar el entorno virtual
 python -m venv venv
-venv\Scripts\activate          # Mac/Linux: source venv/bin/activate
+.\venv\Scripts\Activate.ps1       # En Windows PowerShell
+# En Mac/Linux: source venv/bin/activate
+
+# 2. Instalar dependencias gratuitas
 pip install -r requirements.txt
+
+# 3. Aplicar migraciones y crear datos de prueba
 python manage.py migrate
-python manage.py seed_demo     # carga 40 productos de ejemplo
+python manage.py setup_roles     # Configura los 3 roles de administración
+python manage.py seed_demo       # Carga 40 productos realistas, cupones y municipios
+
+# 4. Crear usuario administrador
+python manage.py createsuperuser
+
+# 5. Arrancar el servidor
 python manage.py runserver
 ```
 
-- Tienda: <http://127.0.0.1:8000/>
-- Panel de administración: <http://127.0.0.1:8000/admin/> (crea tu usuario con `python manage.py createsuperuser`)
-- Para borrar todo y empezar de cero: borra `db.sqlite3` y la carpeta `media/`, y repite `migrate` + `seed_demo`.
+- **Tienda pública:** <http://127.0.0.1:8000/>
+- **Panel de administración:** <http://127.0.0.1:8000/admin/>
+- **Sitemap para buscadores:** <http://127.0.0.1:8000/sitemap.xml>
+- **Feed CSV para catálogo de WhatsApp:** <http://127.0.0.1:8000/catalogo/feed.csv>
 
 ---
 
-## Publicarla en Vercel (gratis)
+## Guía rápida para la dueña del negocio
 
-Vercel sirve la tienda en internet con el **plan Hobby ($0)**. El proyecto ya trae la
-configuración necesaria (`build.py`, `pyproject.toml`, `.python-version`).
+El panel de administración está diseñado en español, claro y accesible desde cualquier computador o celular:
 
-**Pasos (solo la primera vez):**
+### 1. ¿Cómo crear o editar un producto?
+1. Entra a `/admin/` con tu usuario y contraseña.
+2. En la sección **Catálogo**, haz clic en **Productos** → *Añadir producto*.
+3. Completa el nombre, categoría, descripción y fotos.
+4. En la parte inferior, añade las **Variantes** (tallas: Sencilla, Semidoble, Doble, Queen, King; color, precio de venta, costo y stock disponible).
+5. Guarda los cambios. El producto aparecerá de inmediato en la tienda y en el buscador.
 
-1. Instala **Node.js** desde <https://nodejs.org> (gratuito; es necesario solo para la herramienta de publicación).
-2. Crea tu cuenta gratuita en <https://vercel.com/signup>.
-3. En una terminal, dentro de la carpeta del proyecto, inicia sesión una vez:
-   ```bash
-   npx vercel login
-   ```
+### 2. Cargar catálogos masivos con Excel (CSV)
+- Entra a **Productos** en el panel y haz clic en el botón superior **Plantilla de ejemplo**.
+- Llena las filas en Excel con los productos y variantes de tus proveedores.
+- Usa el botón **Importar CSV** para subir el archivo. El sistema valida fila por fila antes de guardar, indicándote si hay algún error.
 
-**Publicar (cualquier vez):** ejecuta `publicar-vercel.bat` — o desde la terminal:
+### 3. ¿Cómo gestionar y despachar pedidos?
+1. En el menú, ve a **Pedidos**.
+2. Verás los pedidos ordenados del más reciente al más antiguo con su estado:
+   - **Pendiente de pago:** esperando que el cliente pague en línea o transfiera.
+   - **Pago por verificar:** el cliente subió su comprobante de Nequi/Daviplata/banco.
+   - **Pagado / En preparación:** listo para alistar en bodega y empacar.
+   - **Enviado:** despachado con la transportadora o mensajero.
+3. Para aprobar una transferencia: abre el pedido o la sección **Pagos**, revisa la foto/PDF del comprobante y presiona el botón **✓ Aprobar pago**. El pedido pasa automáticamente a *Pagado* y se notifica a la clienta por correo y WhatsApp.
 
-```bash
-npx vercel deploy --prod
-```
-
-Vercel instala las dependencias, ejecuta `build.py` (que migra, carga los datos demo,
-recopila los estáticos y copia las imágenes) y te devuelve una dirección tipo
-`https://tu-tienda.vercel.app`.
-
-**Secretos en Vercel:** las variables se configuran en <https://vercel.com> → tu proyecto →
-*Settings → Environment Variables*. La más importante es `SECRET_KEY` (una clave larga y aleatoria).
-Las demás (correo SMTP, llaves de Wompi, etc.) son opcionales y llegan en fases posteriores.
-
----
-
-## Estructura del proyecto
-
-```
-config/          Configuración de Django (settings, urls, wsgi/asgi)
-core/            Configuración del negocio (SiteConfig), páginas institucionales, inicio
-catalog/         Catálogo: categorías, productos, variantes, búsqueda, filtros, reseñas, combos
-cart/            Carrito (en la Fase 2 quedará completo)
-orders/ payments/ shipping/   Pedidos, pagos y envíos (Fases 2 y 3)
-promotions/      Cupones y promociones
-accounts/        Clientes y personal (Fase 2)
-inventory/ notifications/ dashboard/   Inventario, avisos y panel (Fase 4)
-templates/       Plantillas HTML (español)
-static/          CSS propio, JavaScript (HTMX + Alpine.js locales), fuentes, imágenes
-media/           Imágenes subidas (se ignora en git)
-docs/            Especificación completa del proyecto
-build.py         Construcción automática para Vercel
-iniciar.bat      Arranque rápido en Windows
-publicar-vercel.bat  Publicación en Vercel en un clic
-PLAN.md          Avance por fases
-```
+### 4. Consultar métricas y reportes
+- En la página principal del panel tienes el **Dashboard** con ventas del día, semana, mes, pedidos pendientes y alerta de stock bajo.
+- Para descargar los números en Excel, ve a **Descargar reportes CSV** y elige el tipo (ventas por período, por producto, por categoría, por municipio, cupones usados o inventario valorizado).
 
 ---
 
-## Comandos útiles
+## Comandos de administración y mantenimiento
 
-| Comando | Para qué |
+| Comando | Descripción |
 |---|---|
-| `python manage.py runserver` | Arrancar la tienda en local |
-| `python manage.py migrate` | Aplicar cambios de base de datos |
-| `python manage.py seed_demo` | Cargar/actualizar datos demo (no duplica) |
-| `python manage.py test` | Ejecutar las pruebas automáticas |
-| `python manage.py check` | Revisar que todo esté bien conectado |
-| `python manage.py createsuperuser` | Crear usuario del panel admin |
-| `python build.py` | Simular la construcción que corre Vercel al desplegar |
+| `python manage.py runserver` | Inicia el servidor local de desarrollo |
+| `python manage.py test` | Ejecuta la batería de más de 280 pruebas automáticas |
+| `python manage.py check` | Verifica la integridad y configuración del sistema |
+| `python manage.py seed_demo` | Carga o refresca datos de prueba realistas (idempotente) |
+| `python manage.py setup_roles` | Crea o actualiza los roles Administradora, Empleado y Solo lectura |
+| `python manage.py backup_db` | Realiza una copia de seguridad fechada de la BD y la carpeta media/ |
+| `python manage.py cancel_expired_orders` | Cancela pedidos con reserva vencida y devuelve el stock al inventario |
+| `python manage.py send_abandoned_cart_emails` | Envía recordatorios por correo a carritos abandonados |
+
+---
+
+## Pasarelas de pago y Wompi
+
+El sistema cuenta con 3 modalidades de pago:
+
+1. **Pasarela simulada local (para desarrollo y pruebas):**
+   Activa por defecto (`PASARELA_SIMULADA=True`). Permite probar pagos Aprobados, Rechazados o Pendientes sin conexión a internet ni cobros reales.
+2. **Transferencia manual / Nequi / Daviplata:**
+   Muestra los datos bancarios configurados en el panel. La clienta sube su comprobante y el equipo lo aprueba con un solo clic.
+3. **Wompi Bancolombia (opcional):**
+   - **Sandbox gratuito:** Wompi ofrece credenciales de prueba gratuitas para simular tarjetas, PSE, Nequi y DaviPlata.
+   - **Producción:** En producción Wompi descuenta una comisión por cada transacción exitosa.
+   - **Configuración:** Para activar Wompi, basta con definir en el archivo `.env`:
+     ```env
+     WOMPI_PUBLIC_KEY=pub_prod_... (o pub_test_...)
+     WOMPI_PRIVATE_KEY=prv_prod_... (o prv_test_...)
+     WOMPI_EVENTS_KEY=...
+     WOMPI_INTEGRITY_SECRET=...
+     ```
+   - Si no se configuran llaves de Wompi, la tienda oculta automáticamente el botón de Wompi y opera sin errores. Nunca se almacenan números de tarjetas en la base de datos.
+
+---
+
+## Opciones de publicación gratuita (Hosting $0)
+
+### Opción 1: PythonAnywhere (Recomendada para producción con SQLite)
+- **Plan gratuito:** Ofrece 512 MB de almacenamiento y **disco persistente**. La base SQLite y las fotos subidas a `media/` no se borran al reiniciar.
+- **Configuración:**
+  1. Crea una cuenta gratuita en [pythonanywhere.com](https://www.pythonanywhere.com).
+  2. Sube el código mediante git o archivo comprimido.
+  3. Crea un virtualenv con Python 3.12 e instala `requirements.txt`.
+  4. Configura el archivo WSGI apuntando a `config.wsgi.application`.
+  5. En la pestaña *Tasks*, puedes programar `python manage.py cancel_expired_orders` diariamente a costo $0.
+
+### Opción 2: Vercel (Excelente para demostraciones de catálogo)
+- Despliegue con `publicar-vercel.bat` o `npx vercel --prod`.
+- La tienda queda en `https://tu-proyecto.vercel.app`.
+- **Nota técnica:** Vercel usa funciones serverless de solo lectura. Para operar una tienda con ventas reales en Vercel, conecta una base PostgreSQL gratuita (ej. Neon o Supabase) configurando `DATABASE_URL` en las variables de entorno de Vercel.
+
+### Opción 3: Render (Advertencia sobre disco efímero)
+- El plan gratuito de Render apaga el servicio tras 15 minutos de inactividad y su disco es efímero (al reiniciarse se restablece al estado del último commit).
+- Úsalo solo para demos temporales con datos generados por `seed_demo`.
 
 ---
 
 ## Variables de entorno (.env)
 
-Copia `.env.example` como `.env` y ajusta los valores. **Nunca subas `.env` a git.**
+Copia `.env.example` a `.env` para personalizar tu entorno:
 
-| Variable | Para qué |
-|---|---|
-| `SECRET_KEY` | Clave secreta de Django (obligatoria en producción) |
-| `DEBUG` | `True` solo en local; en Vercel queda apagado |
-| `ALLOWED_HOSTS` | Dominios permitidos (Vercel añade `*.vercel.app` solo) |
-| `DATABASE_URL` | SQLite por defecto; para PostgreSQL basta cambiar esta variable |
-| `EMAIL_*` | Correo (en desarrollo los correos se imprimen en consola) |
-| `WOMPI_*` | Pasarela opcional (Fase 3; sin llaves, el método no se muestra) |
+```env
+# Clave secreta de Django (obligatoria y aleatoria en producción)
+SECRET_KEY=clave-larga-y-aleatoria
+
+# Modo de depuración (True en local, False en producción)
+DEBUG=True
+
+# Dominios autorizados separados por coma
+ALLOWED_HOSTS=localhost,127.0.0.1,.vercel.app
+
+# Base de datos (SQLite WAL local o PostgreSQL remoto)
+DATABASE_URL=sqlite:///db.sqlite3
+
+# Correo electrónico (en desarrollo imprime en consola)
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+
+# Wompi (opcional)
+WOMPI_PUBLIC_KEY=
+WOMPI_PRIVATE_KEY=
+WOMPI_EVENTS_KEY=
+WOMPI_INTEGRITY_SECRET=
+
+# Analítica opcional (solo carga si la clienta acepta el banner de cookies)
+GA4_MEASUREMENT_ID=
+META_PIXEL_ID=
+```
 
 ---
 
-## Avisos sobre la demo en Vercel
+## Copias de seguridad (Backups)
 
-El plan gratis de Vercel no tiene disco persistente, así que la demo funciona así:
+Para resguardar la base de datos y todas las imágenes de productos y comprobantes:
 
-- **Base de datos:** viaja "horneada" en el despliegue con los datos demo. Cada visita
-  puede escribir en una copia temporal; si Vercel recicla la instancia, vuelve al estado inicial.
-  Es perfecto para **mostrar la tienda**, no para vender todavía.
-- **Imágenes:** las de ejemplo (SVG) se sirven desde el CDN de Vercel sin problema.
-- **Para la tienda real** (pedidos, pagos y clientes que no se borren) hay dos caminos gratis:
-  - Una base de datos externa gratuita (por ejemplo Neon) y poner su dirección en `DATABASE_URL`
-    de Vercel — el código ya lo soporta, no hay que tocar nada más.
-  - Un hosting con disco como PythonAnywhere o Render (gratis con límites), siguiendo la guía
-    que quedará en el README de la Fase 5.
+```bash
+python manage.py backup_db
+```
+
+Crea una carpeta fechada en `backups/backup_YYYYMMDD_HHMMSS/` conteniendo:
+- El archivo `db.sqlite3` (y sus archivos auxiliares de registro WAL).
+- La carpeta `media/` con todas las fotos de catálogo y comprobantes de pago.
+
+Puedes guardar estas carpetas en Google Drive, OneDrive o una memoria USB para máxima seguridad.
+
+---
+
+## Costos futuros al crecer el negocio
+
+El proyecto está diseñado para funcionar al **100 % sin costo inicial**. Cuando la tienda empiece a generar ventas constantes, estos son los únicos costos opcionales recomendados para crecer:
+
+1. **Nombre de dominio propio:** Un dominio `.com` o `.com.co` (aprox. $40.000 a $80.000 COP al año).
+2. **Comisión de pasarela Wompi:** Solo se cobra un porcentaje sobre las ventas cobradas exitosamente (sin costo de mantenimiento mensual).
+3. **Hosting dedicado o VPS:** Si el catálogo supera miles de visitas diarias, un servidor VPS económico en Hetzner o DigitalOcean ($4 a $6 USD/mes) o una base de datos PostgreSQL administrada.
 
 ---
 
 ## Dependencias y licencias (costo $0)
 
-Todas son gratuitas y de código abierto. Ninguna necesita tarjeta de crédito.
+Todas las dependencias son de código abierto y uso comercial permitido:
 
-| Paquete | Licencia | Para qué |
+| Paquete | Licencia | Propósito |
 |---|---|---|
-| Django 5.2 | BSD-3-Clause | Framework web |
-| dj-database-url | MIT | Leer `DATABASE_URL` (SQLite o PostgreSQL) |
-| python-dotenv | BSD-3-Clause | Variables de entorno en `.env` |
-| Pillow | MIT-CMU (HPND) | Imágenes: WebP y miniaturas |
-| django-unfold | MIT | Panel admin en español y bonito |
-| django-otp | MIT | Segundo factor para el admin (Fase 4) |
-| django-axes | MIT | Bloqueo tras intentos fallidos de ingreso |
-| rapidfuzz | MIT | Búsqueda tolerante a errores de ortografía |
-| whitenoise | MIT | Sirve los estáticos sin servidor extra |
-
-Frontend sin build ni CDNs: **HTMX** y **Alpine.js** se sirven desde `static/vendor/` con sus
-licencias (HTMX BSD-3-Clause, Alpine.js MIT); las tipografías Playfair Display y Nunito Sans
-son OFL (SIL Open Font License), auto-hospedadas en `static/fonts/`.
-Chart.js (Fase 4) también se servirá desde `static/vendor/` con licencia MIT.
-
----
-
-## Próximos pasos
-
-- **Fase 2 — Compra:** carrito persistente, motor de ofertas y cupones, checkout en 3 pasos,
-  envíos por municipio de Santander, cuentas de cliente y botón de WhatsApp.
-- **Fase 3 — Pagos y pedidos:** pasarela simulada, comprobantes, reservas de stock y seguimiento.
-- **Fase 4 — Administración:** dashboard con gráficas, inventario, importar/exportar CSV, roles y 2FA.
-- **Fase 5 — Pulido:** SEO, textos legales, rendimiento, backups y guía completa de hosting.
+| Django 5.2 | BSD-3-Clause | Framework web robusto y seguro |
+| dj-database-url | MIT | Configuración unificada de base de datos |
+| python-dotenv | BSD-3-Clause | Carga segura de variables de entorno |
+| Pillow | MIT-CMU (HPND) | Optimización y conversión de imágenes WebP |
+| django-unfold | MIT | Panel de administración moderno en español |
+| django-otp | MIT | Autenticación en dos pasos (2FA) para administradores |
+| django-axes | MIT | Protección contra ataques de fuerza bruta en logins |
+| rapidfuzz | MIT | Búsqueda tolerante a errores ortográficos |
+| whitenoise | MIT | Distribución eficiente de archivos estáticos |
+| HTMX 2.0 | BSD-2-Clause | Interactividad ligera sin frameworks pesados (en `static/vendor/`) |
+| Alpine.js 3.x | MIT | Lógica de selectores y galerías en cliente (en `static/vendor/`) |
+| Chart.js 4.x | MIT | Gráficas del panel de administración (en `static/vendor/`) |
+| Playfair & Nunito | OFL (SIL) | Tipografías auto-hospedadas (en `static/fonts/`) |
