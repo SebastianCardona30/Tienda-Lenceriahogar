@@ -1,7 +1,7 @@
 <footer class="pie">
   <div class="contenedor">
     <div class="pie__columnas">
-      <div>
+      <div class="pie__marca">
         <h3>{{ site.nombre_negocio }}</h3>
         <p>{{ site.lema }}</p>
         <p class="mt-1">
@@ -9,7 +9,7 @@
           {% if site.ciudad %}{{ site.ciudad }}<br>{% endif %}
           {% if site.horario %}{{ site.horario }}{% endif %}
         </p>
-        <div class="pie__redes mt-1">
+        <div class="pie__redes mt-2">
           {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
           {% if site.instagram %}<a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
           {% if site.facebook %}<a href="{{ site.facebook }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
