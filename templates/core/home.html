@@ -14,22 +14,67 @@
   {# ============ 1. HERO ============ #}
   <section class="hero">
     <div class="contenedor hero__contenido">
-      <div>
-        <span class="etiqueta etiqueta-nuevo">Envíos en todo Santander</span>
-        <h1>Tu hogar se ve mejor con Ciudad Bonita</h1>
+      <div class="hero__texto">
+        <span class="hero__sello">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/>
+            <circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>
+          </svg>
+          Envíos en todo Santander
+        </span>
+        <h1>Tu hogar se ve mejor con <em>Ciudad Bonita</em></h1>
         <p class="hero__bajada">
           Sábanas, edredones, toallas, cortinas y más, a precios accesibles y con la
           confianza de pagar como quieras: Nequi, PSE, transferencia o contraentrega.
         </p>
         <div class="hero__botones">
-          <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ver la tienda</a>
+          <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">
+            Ver la tienda
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+          <a class="btn btn-secundario" href="{% url 'catalog:ofertas' %}">Ofertas de la semana</a>
           {% if site.whatsapp %}
             <a class="btn btn-whatsapp" href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, quisiera ver el catálogo'|urlencode }}" target="_blank" rel="noopener">Comprar por WhatsApp</a>
           {% endif %}
         </div>
+        <ul class="hero__sellos">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>
+            </svg>
+            Envío en Santander
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>
+            </svg>
+            Pago contraentrega
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M20 11a8 8 0 0 0-14.9-4M4 5v4h4M4 13a8 8 0 0 0 14.9 4M20 19v-4h-4"/>
+            </svg>
+            Cambios fáciles
+          </li>
+        </ul>
       </div>
       <div class="hero__ilustracion" aria-hidden="true">
-        <img src="{% static 'img/placeholder.svg' %}" alt="" width="420" height="420">
+        <div class="hero__marco">
+          <img src="{% static 'img/placeholder.svg' %}" alt="" width="420" height="420">
+        </div>
+        <div class="hero__flotante hero__flotante--arriba">
+          <strong>Bordados</strong><span>hechos a tu medida</span>
+        </div>
+        <div class="hero__flotante hero__flotante--abajo">
+          <strong>Pago seguro</strong><span>Nequi · PSE · contraentrega</span>
+        </div>
       </div>
     </div>
   </section>
@@ -38,8 +83,11 @@
   {% if categorias_home %}
   <section class="seccion">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Categorías</h2>
-      <p class="seccion__bajada">Encuentra lo que necesitas para tu cama, tu baño y tu mesa</p>
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Para tu hogar</span>
+        <h2 class="seccion__titulo">Categorías</h2>
+        <p class="seccion__bajada">Encuentra lo que necesitas para tu cama, tu baño y tu mesa</p>
+      </div>
       <div class="categorias-home">
         {% for cat in categorias_home %}
           <a class="categoria-home" href="{{ cat.get_absolute_url }}">
@@ -60,15 +108,22 @@
   {% if ofertas %}
   <section class="seccion seccion--lavanda">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Ofertas de la semana</h2>
-      {% if site.ofertas_hasta %}
-        <p class="seccion__bajada">
-          ⏰ Terminan en
-          <strong class="cuenta-regresiva"
-                  x-data="cuentaRegresiva('{{ site.ofertas_hasta|date:'c' }}')"
-                  x-text="reloj">--:--:--</strong>
-        </p>
-      {% endif %}
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Esta semana</span>
+        <h2 class="seccion__titulo">Ofertas de la semana</h2>
+        {% if site.ofertas_hasta %}
+          <p class="oferta-contador">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+            </svg>
+            <span>Terminan en</span>
+            <strong class="cuenta-regresiva"
+                    x-data="cuentaRegresiva('{{ site.ofertas_hasta|date:'c' }}')"
+                    x-text="reloj">--:--:--</strong>
+          </p>
+        {% endif %}
+      </div>
       <div class="grilla">
         {% for producto in ofertas %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
       </div>
@@ -83,8 +138,11 @@
   {% if mas_vendidos %}
   <section class="seccion">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Más vendidos</h2>
-      <p class="seccion__bajada">Los favoritos de nuestras clientas</p>
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Favoritos</span>
+        <h2 class="seccion__titulo">Más vendidos</h2>
+        <p class="seccion__bajada">Los favoritos de nuestras clientas</p>
+      </div>
       <div class="grilla">
         {% for producto in mas_vendidos %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
       </div>
@@ -94,10 +152,13 @@
 
   {# ============ 5. NOVEDADES ============ #}
   {% if novedades %}
-  <section class="seccion">
+  <section class="seccion seccion--lavanda">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Novedades</h2>
-      <p class="seccion__bajada">Lo último que llegó a la tienda</p>
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Recién llegados</span>
+        <h2 class="seccion__titulo">Novedades</h2>
+        <p class="seccion__bajada">Lo último que llegó a la tienda</p>
+      </div>
       <div class="grilla">
         {% for producto in novedades %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
       </div>
@@ -109,11 +170,16 @@
   {% if bordados %}
   <section class="seccion banner-bordados">
     <div class="contenedor banner-bordados__contenido">
-      <div>
+      <div class="banner-bordados__texto">
         <span class="etiqueta etiqueta-nuevo">Hecho a tu medida</span>
         <h2>Bordados personalizados</h2>
         <p>Iniciales, nombres o frases en sábanas, toallas y almohadas. Elige la tipografía
            y el color del hilo. Es un detalle único para regalar o para ti.</p>
+        <ul class="banner-bordados__lista">
+          <li><span aria-hidden="true">✓</span> Iniciales y nombres</li>
+          <li><span aria-hidden="true">✓</span> Frases y fechas especiales</li>
+          <li><span aria-hidden="true">✓</span> Eliges tipografía y color del hilo</li>
+        </ul>
         <p class="solo-lectura"><small>Los productos personalizados no tienen cambio ni retracto, salvo defecto de fabricación.</small></p>
         <a class="btn btn-primario mt-2" href="{% url 'catalog:buscar' %}?q=bordado">Ver productos bordables</a>
       </div>
@@ -128,11 +194,21 @@
   {% if combos_home %}
   <section class="seccion">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Combos y sets</h2>
-      <p class="seccion__bajada">Lleva más por menos con sets armados para ti</p>
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Ahorra más</span>
+        <h2 class="seccion__titulo">Combos y sets</h2>
+        <p class="seccion__bajada">Lleva más por menos con sets armados para ti</p>
+      </div>
       <div class="grilla grilla--combos">
         {% for combo in combos_home %}
-          <a class="tarjeta-producto" href="{{ combo.get_absolute_url }}">
+          <a class="tarjeta-producto tarjeta-combo" href="{{ combo.get_absolute_url }}">
+            <span class="tarjeta-combo__icono" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                   stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                <rect x="3" y="8" width="18" height="4" rx="1"/>
+                <path d="M5 12v9h14v-9M12 8v13M12 8s-1-5-4-5a2.5 2.5 0 0 0 0 5M12 8s1-5 4-5a2.5 2.5 0 0 1 0 5"/>
+              </svg>
+            </span>
             <div class="tarjeta-producto__cuerpo">
               <span class="tarjeta-producto__nombre">{{ combo.nombre }}</span>
               {% if combo.ahorro_pct %}<span class="etiqueta etiqueta-oferta">Ahorras {{ combo.ahorro_pct }}%</span>{% endif %}
@@ -153,10 +229,50 @@
   <section class="seccion seccion--lavanda">
     <div class="contenedor">
       <div class="beneficios">
-        <div class="beneficio"><strong>Pago seguro</strong><span>Nequi, Daviplata, PSE, transferencia o contraentrega</span></div>
-        <div class="beneficio"><strong>Envío en Santander</strong><span>Área metropolitana y todo el departamento</span></div>
-        <div class="beneficio"><strong>Cambios fáciles</strong><span>Retracto en 5 días hábiles (excepto bordados)</span></div>
-        <div class="beneficio"><strong>Atención por WhatsApp</strong><span>Te ayudamos a elegir la talla y el color</span></div>
+        <div class="beneficio">
+          <span class="beneficio__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>
+            </svg>
+          </span>
+          <div class="beneficio__texto">
+            <strong>Pago seguro</strong><span>Nequi, Daviplata, PSE, transferencia o contraentrega</span>
+          </div>
+        </div>
+        <div class="beneficio">
+          <span class="beneficio__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>
+            </svg>
+          </span>
+          <div class="beneficio__texto">
+            <strong>Envío en Santander</strong><span>Área metropolitana y todo el departamento</span>
+          </div>
+        </div>
+        <div class="beneficio">
+          <span class="beneficio__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M20 11a8 8 0 0 0-14.9-4M4 5v4h4M4 13a8 8 0 0 0 14.9 4M20 19v-4h-4"/>
+            </svg>
+          </span>
+          <div class="beneficio__texto">
+            <strong>Cambios fáciles</strong><span>Retracto en 5 días hábiles (excepto bordados)</span>
+          </div>
+        </div>
+        <div class="beneficio">
+          <span class="beneficio__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H8l-4 3v-6.2A7.5 7.5 0 0 1 11.5 4h1A7.5 7.5 0 0 1 20 11.5z"/>
+            </svg>
+          </span>
+          <div class="beneficio__texto">
+            <strong>Atención por WhatsApp</strong><span>Te ayudamos a elegir la talla y el color</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -165,13 +281,20 @@
   {% if resenas_home %}
   <section class="seccion">
     <div class="contenedor">
-      <h2 class="seccion__titulo">Lo que dicen nuestras clientas</h2>
+      <div class="seccion__encabezado">
+        <span class="seccion__etiqueta">Clientas felices</span>
+        <h2 class="seccion__titulo">Lo que dicen nuestras clientas</h2>
+      </div>
       <div class="resenas resenas--home">
         {% for r in resenas_home %}
           <article class="resena">
+            <span class="resena__comilla" aria-hidden="true">“</span>
             <div class="resena__cabecera">
-              <strong>{{ r.nombre }}</strong>
-              <span aria-label="{{ r.calificacion }} de 5 estrellas">{% for i in "12345" %}{% if forloop.counter <= r.calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+              <span class="resena__avatar" aria-hidden="true">{{ r.nombre|first|upper }}</span>
+              <div class="resena__quien">
+                <strong>{{ r.nombre }}</strong>
+                <span aria-label="{{ r.calificacion }} de 5 estrellas">{% for i in "12345" %}{% if forloop.counter <= r.calificacion %}★{% else %}☆{% endif %}{% endfor %}</span>
+              </div>
             </div>
             <p>{{ r.comentario|truncatechars:180 }}</p>
             <small class="solo-lectura">Sobre <a href="{{ r.producto.get_absolute_url }}">{{ r.producto.nombre }}</a></small>
@@ -184,17 +307,20 @@
 
   {# ============ 10. SUSCRIPCIÓN ============ #}
   <section class="seccion suscripcion">
-    <div class="contenedor texto-centrado" style="max-width:640px;">
-      <h2>Recibe ofertas antes que nadie</h2>
-      <p>Suscríbete y te avisamos por correo de las ofertas de la semana y las novedades.
-         <strong>Recibirás un cupón de bienvenida</strong> para tu primera compra.</p>
-      <form method="post" action="{% url 'catalog:suscribir' %}" class="suscripcion__form">
-        {% csrf_token %}
-        <input type="email" name="email" required placeholder="Tu correo electrónico"
-               aria-label="Tu correo electrónico">
-        <button type="submit" class="btn btn-primario">Quiero mi cupón</button>
-      </form>
-      <small class="solo-lectura">No compartimos tu correo. Puedes darte de baja cuando quieras.</small>
+    <div class="contenedor">
+      <div class="suscripcion__caja">
+        <span class="seccion__etiqueta suscripcion__etiqueta">Club Ciudad Bonita</span>
+        <h2>Recibe ofertas antes que nadie</h2>
+        <p>Suscríbete y te avisamos por correo de las ofertas de la semana y las novedades.
+           <strong>Recibirás un cupón de bienvenida</strong> para tu primera compra.</p>
+        <form method="post" action="{% url 'catalog:suscribir' %}" class="suscripcion__form">
+          {% csrf_token %}
+          <input type="email" name="email" required placeholder="Tu correo electrónico"
+                 aria-label="Tu correo electrónico">
+          <button type="submit" class="btn btn-primario">Quiero mi cupón</button>
+        </form>
+        <small class="solo-lectura">No compartimos tu correo. Puedes darte de baja cuando quieras.</small>
+      </div>
     </div>
   </section>
 {% endblock contenido %}
