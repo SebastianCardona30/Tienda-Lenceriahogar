@@ -88,7 +88,7 @@
 }
 .drawer__linea {
   display: grid;
-  grid-template-columns: 56px 1fr auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: start;
   padding-bottom: 12px;
@@ -108,8 +108,8 @@
   font-size: 1.4rem;
 }
 .drawer__datos { display: grid; gap: 4px; min-width: 0; }
-.drawer__nombre { font-weight: 700; color: var(--texto); font-size: 0.92rem; }
-.drawer__variante { color: var(--texto-2); font-size: 0.8rem; }
+.drawer__nombre { font-weight: 700; color: var(--texto); font-size: 0.92rem; overflow-wrap: anywhere; }
+.drawer__variante { color: var(--texto-2); font-size: 0.8rem; overflow-wrap: anywhere; }
 .drawer__fila {
   display: flex;
   justify-content: space-between;
@@ -171,13 +171,13 @@
   gap: 16px;
   justify-items: center;
 }
-.carrito__grid { display: grid; gap: 20px; }
+.carrito__grid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
 
 /* ---------- Líneas ---------- */
-.carrito__lineas { display: grid; gap: 14px; align-content: start; }
+.carrito__lineas { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .linea {
   display: grid;
-  grid-template-columns: 88px 1fr;
+  grid-template-columns: 88px minmax(0, 1fr);
   gap: 14px;
   background: var(--blanco);
   border: 1px solid var(--borde);
@@ -198,8 +198,10 @@
   font-size: 2rem;
 }
 .linea__datos { display: grid; gap: 6px; align-content: start; min-width: 0; }
-.linea__nombre { font-weight: 700; color: var(--texto); }
-.linea__variante { color: var(--texto-2); font-size: 0.85rem; }
+/* overflow-wrap: anywhere evita que el Ref./SKU (palabra larga sin espacios)
+   influe el ancho mínimo y rompa el diseño en pantallas angostas */
+.linea__nombre { font-weight: 700; color: var(--texto); overflow-wrap: anywhere; }
+.linea__variante { color: var(--texto-2); font-size: 0.85rem; overflow-wrap: anywhere; }
 .linea__controles {
   display: flex;
   flex-wrap: wrap;
