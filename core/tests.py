@@ -1,3 +1,5 @@
+import time
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -173,6 +175,64 @@ class BackupDBTests(TestCase):
             archivos = list(os.walk(tmpdir))
             # Se creó al menos la subcarpeta backup_*
             self.assertTrue(len(archivos) > 0)
+
+
+class SesionPorInactividadTests(TestCase):
+    """La sesión se cierra si el usuario deja de usar la tienda un rato."""
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        Usuario = get_user_model()
+        self.usuario = Usuario.objects.create_user(
+            username="prueba_inactiva", password="Clave-Prueba-123"
+        )
+
+    def _login(self):
+        self.client.force_login(self.usuario)
+
+    def _envejecer_sesion(self, minutos=31):
+        sesion = self.client.session
+        sesion["ultima_actividad"] = time.time() - (minutos * 60)
+        sesion.save()
+
+    def test_sesion_vencida_cierra_y_redirige(self):
+        self._login()
+        self._envejecer_sesion()
+        r = self.client.get(reverse("core:home"))
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(r["Location"], reverse("accounts:ingreso"))
+        self.assertFalse(r.wsgi_request.user.is_authenticated)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_sesion_vencida_muestra_aviso(self):
+        self._login()
+        self._envejecer_sesion()
+        r = self.client.get(reverse("core:home"), follow=True)
+        self.assertContains(r, "inactividad")
+
+    def test_sesion_reciente_sigue_viva(self):
+        self._login()
+        r = self.client.get(reverse("core:home"))
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.wsgi_request.user.is_authenticated)
+
+    def test_invitado_no_pierde_su_sesion(self):
+        # El carrito de invitado no tiene credenciales: no se debe cerrar
+        sesion = self.client.session
+        sesion["ultima_actividad"] = time.time() - (31 * 60)
+        sesion["marca_prueba"] = "ok"
+        sesion.save()
+        r = self.client.get(reverse("core:home"))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(self.client.session.get("marca_prueba"), "ok")
+
+    def test_peticion_htmx_recibe_401_sin_redireccion(self):
+        self._login()
+        self._envejecer_sesion()
+        r = self.client.get(reverse("core:home"), HTTP_HX_REQUEST="true")
+        self.assertEqual(r.status_code, 401)
+        self.assertNotIn("_auth_user_id", self.client.session)
 
 
 

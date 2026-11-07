@@ -104,6 +104,9 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    # Cierra la sesión por inactividad (va después de MessageMiddleware para
+    # poder mostrar el aviso "cerramos tu sesión" con messages)
+    "core.middleware.SesionPorInactividad",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -190,6 +193,21 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
+# --- Sesión y credenciales ---
+# La sesión vive solo con el navegador abierto y se cierra por inactividad
+# (ver core.middleware.SesionPorInactividad). La credencial del usuario NUNCA
+# se guarda en localStorage: va únicamente en la cookie httpOnly, que el
+# JavaScript del navegador no puede leer ni borrar desde la consola.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # al cerrar el navegador, la sesión muere
+SESSION_COOKIE_AGE = 24 * 60 * 60        # tope máximo de vida (24 horas)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+# Minutos sin actividad antes de cerrar la sesión (ajustable por .env)
+SESION_INACTIVIDAD_MINUTOS = int(os.getenv("SESION_INACTIVIDAD_MINUTOS", "30") or 30)
+# Enlaces de recuperación de contraseña: válidos 1 hora y de un solo uso
+# (Django los invalida al cambiar la contraseña)
+PASSWORD_RESET_TIMEOUT = 60 * 60
+
 # Internacionalización: español de Colombia
 LANGUAGE_CODE = "es-co"
 TIME_ZONE = "America/Bogota"
@@ -247,6 +265,10 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 SSL_REDIRECT = os.getenv("SSL_REDIRECT", "False").strip().lower() in ("1", "true", "yes")
 if SSL_REDIRECT:
     SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+if EN_VERCEL:
+    # Vercel siempre sirve por HTTPS: la cookie de sesión solo viaja cifrada
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 if not DEBUG:
