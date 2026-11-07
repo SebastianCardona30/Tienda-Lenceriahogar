@@ -8,12 +8,13 @@
   </nav>
 
   <div class="listado__cabecera">
-    <div>
+    <div class="listado__titulo">
       <h1>{{ titulo }}</h1>
-      <p class="solo-lectura">{{ total_resultados }} producto{{ total_resultados|pluralize:"s" }}</p>
+      <p class="listado__conteo">{{ total_resultados }} producto{{ total_resultados|pluralize:"s" }}</p>
+      {% if categoria.descripcion %}<p class="listado__bajada">{{ categoria.descripcion }}</p>{% endif %}
     </div>
     <div class="listado__controles">
-      <button type="button" class="btn btn-secundario solo-movil"
+      <button type="button" class="btn btn-secundario solo-movil" x-data
               @click="$dispatch('abrir-filtros')">
         Filtros{% if filtros_activos %} ({{ filtros_activos|length }}){% endif %}
       </button>

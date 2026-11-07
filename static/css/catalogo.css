@@ -985,3 +985,333 @@ ul.sugerencias li:last-child a { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .categoria-home:hover .categoria-home__foto img { transform: none; }
 }
+
+/* =========================================================
+   Tienda, categorías y búsqueda (Lote 3)
+   ========================================================= */
+
+/* ---------- Migas de pan ---------- */
+.migas { font-size: 0.8rem; color: var(--texto-2); margin-bottom: 16px; }
+.migas a { color: var(--purpura); font-weight: 600; }
+.migas a:hover { color: var(--ciruela); text-decoration: underline; }
+.migas span { color: var(--texto-2); }
+
+/* ---------- Cabecera del listado ---------- */
+.listado__cabecera {
+  position: relative;
+  overflow: hidden;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-xl);
+  background:
+    radial-gradient(520px 220px at 92% -30%, rgba(251, 213, 229, 0.85), transparent 70%),
+    linear-gradient(120deg, var(--lavanda) 0%, var(--crema) 62%, var(--crema-2) 100%);
+  box-shadow: var(--sombra-xs);
+}
+.listado__cabecera::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -90px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(138, 79, 191, 0.16), transparent 70%);
+  pointer-events: none;
+}
+.listado__cabecera > * { position: relative; z-index: 1; }
+.listado__titulo { max-width: 62ch; min-width: 0; }
+.listado__cabecera h1 {
+  font-size: clamp(1.8rem, 4.6vw, 2.6rem);
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.listado__conteo {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radio-pill);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--borde);
+  color: var(--texto-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.listado__bajada {
+  color: var(--texto-2);
+  font-size: 0.92rem;
+  margin-top: 8px;
+  max-width: 60ch;
+}
+
+/* Orden y botón de filtros */
+.listado__controles { align-items: center; }
+.orden-form {
+  padding: 4px 4px 4px 14px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pill);
+  box-shadow: var(--sombra-xs);
+}
+.orden-form label { color: var(--texto-2); font-size: 0.8rem; font-weight: 600; }
+.orden-form select {
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  color: var(--ciruela);
+  padding: 6px 8px 6px 4px;
+  min-height: 38px;
+}
+.orden-form select:focus { outline: none; box-shadow: none; }
+
+/* Chips de filtros activos */
+.chips { gap: 8px; margin-bottom: 16px; }
+.chip {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  color: var(--ciruela);
+  padding: 7px 14px;
+  box-shadow: var(--sombra-xs);
+  transition: background-color var(--transicion), border-color var(--transicion);
+}
+.chip:hover { background: var(--lavanda); border-color: var(--purpura); color: var(--ciruela); }
+.chip--limpiar { background: transparent; border: 1.5px dashed var(--ciruela); box-shadow: none; }
+
+/* Subcategorías */
+.subcategoria-chip {
+  background: var(--blanco);
+  box-shadow: var(--sombra-xs);
+  transition: border-color var(--transicion), background-color var(--transicion), transform var(--transicion);
+}
+.subcategoria-chip:hover { background: var(--lavanda); transform: translateY(-1px); }
+
+/* ---------- Filtros (escritorio) ---------- */
+@media (min-width: 768px) {
+  .filtros {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-lg);
+    padding: 18px;
+    box-shadow: var(--sombra-xs);
+  }
+}
+.filtros__cabecera { padding-bottom: 10px; border-bottom: 1px solid var(--borde); margin-bottom: 4px; }
+.filtros__cabecera h2 { font-size: 1.05rem; }
+.filtro { padding: 14px 0; }
+.filtro:last-of-type { border-bottom: none; }
+.filtro legend {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+.filtro__opcion {
+  min-height: 40px;
+  padding-inline: 6px;
+  border-radius: 8px;
+  transition: background-color var(--transicion);
+}
+.filtro__opcion:hover { background: var(--ciruela-suave); }
+.filtro__opcion input { accent-color: var(--rosa-cta); }
+.swatch { width: 38px; height: 38px; }
+.swatch--activo { border-color: var(--ciruela); box-shadow: 0 0 0 3px var(--lavanda); }
+.filtros__acciones { margin-top: 18px; gap: 10px; }
+
+/* En móvil, cajón con cabecera fija dentro del panel */
+@media (max-width: 767px) {
+  .filtros__cabecera {
+    position: sticky;
+    top: -16px;
+    z-index: 2;
+    margin: -16px -16px 4px;
+    padding: 14px 16px 10px;
+    background: var(--blanco);
+  }
+  body:has(.filtros--abierto) { overflow: hidden; }
+}
+
+/* ---------- Rejilla de resultados ---------- */
+@media (min-width: 768px) {
+  .listado__resultados .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}
+@media (min-width: 1024px) {
+  .listado__resultados .grilla { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+}
+.listado__resultados #zona-mas { max-width: 420px; margin: 26px auto 0; }
+
+/* ---------- Estado vacío ---------- */
+.estado-vacio {
+  background:
+    radial-gradient(420px 200px at 50% 0%, rgba(251, 213, 229, 0.7), transparent 70%),
+    var(--lavanda);
+  border: 1px dashed var(--purpura);
+  border-radius: var(--radio-xl);
+  padding: clamp(28px, 5vw, 48px) 20px;
+  max-width: 640px;
+  margin-inline: auto;
+}
+.estado-vacio h2 { font-size: clamp(1.3rem, 3vw, 1.7rem); }
+.estado-vacio p { max-width: 48ch; margin-inline: auto; margin-bottom: 18px; }
+
+/* =========================================================
+   Ficha de producto (Lote 3)
+   ========================================================= */
+.ficha { gap: clamp(20px, 3vw, 36px); align-items: start; }
+.ficha__galeria { min-width: 0; align-self: start; }
+.galeria__principal {
+  border-radius: var(--radio-xl);
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+.galeria__bandera { top: 14px; left: 14px; font-size: 0.86rem; padding: 6px 14px; }
+.galeria__miniaturas { gap: 10px; margin-top: 12px; }
+.galeria__miniaturas button {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radio);
+  transition: border-color var(--transicion), transform var(--transicion);
+}
+.galeria__miniaturas button:hover { transform: translateY(-1px); }
+.galeria__miniaturas button.activa { border-color: var(--ciruela); box-shadow: 0 0 0 3px var(--lavanda); }
+
+@media (min-width: 768px) {
+  .ficha__galeria { position: sticky; top: 92px; }
+}
+
+.ficha__info {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-xl);
+  padding: clamp(18px, 2.6vw, 32px);
+  box-shadow: var(--sombra-xs);
+}
+.ficha__marca {
+  display: inline-block;
+  color: var(--rosa-cta);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ficha__info h1 {
+  font-size: clamp(1.65rem, 3.4vw, 2.5rem);
+  margin-block: 6px 10px;
+  overflow-wrap: anywhere;
+}
+.ficha__info .resumen-estrellas { gap: 8px; font-size: 0.9rem; }
+.ficha__precios { margin-block: 16px 8px; row-gap: 6px; }
+.precio--grande {
+  font-size: clamp(1.7rem, 4.4vw, 2.3rem);
+  color: var(--rosa-cta);
+  font-weight: 800;
+}
+.ficha__bajada { color: var(--texto-2); line-height: 1.6; }
+
+.selector { margin-top: 18px; }
+.selector__titulo { font-size: 0.9rem; margin-bottom: 8px; color: var(--texto-2); }
+.selector__titulo strong { color: var(--ciruela); }
+.opcion {
+  border-radius: var(--radio-pill);
+  padding: 8px 18px;
+  font-weight: 600;
+  transition: border-color var(--transicion), background-color var(--transicion), color var(--transicion);
+}
+.opcion:hover { border-color: var(--purpura); background: var(--ciruela-suave); }
+.opcion.activa {
+  border-color: var(--ciruela);
+  background: var(--ciruela);
+  color: var(--blanco);
+}
+
+.ficha__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radio-pill);
+  font-size: 0.82rem;
+  margin-block: 18px 4px;
+}
+.ficha__stock.hay { background: #E8F7EF; color: #1c6c46; }
+.ficha__stock.nohay { background: #FDECEC; color: #8f2626; }
+
+.ficha__compra { margin-top: 12px; gap: 10px; }
+.cantidad { border-radius: var(--radio-pill); }
+.cantidad button { transition: background-color var(--transicion); }
+.cantidad input { height: 46px; }
+.ficha__info > form:not(.ficha__compra) { margin-top: 10px; }
+.ficha__info > .btn-whatsapp { margin-top: 10px; }
+
+.ficha__ayudas { margin-top: 22px; }
+.ayuda { border-radius: var(--radio); transition: border-color var(--transicion), box-shadow var(--transicion); }
+.ayuda:hover { border-color: var(--lavanda-2); box-shadow: var(--sombra-xs); }
+.ayuda summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ayuda summary::after { content: "+"; color: var(--rosa-cta); font-size: 1.15rem; line-height: 1; }
+.ayuda[open] summary::after { content: "−"; }
+
+/* Pestañas */
+.ficha__pestanas { margin-top: clamp(28px, 4vw, 44px); }
+.pestanas__botones { gap: 8px; border-bottom: none; padding-bottom: 0; flex-wrap: wrap; }
+.pestanas__botones button {
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-pill);
+  background: var(--blanco);
+  color: var(--texto-2);
+  margin-bottom: 0;
+  padding: 10px 18px;
+  transition: background-color var(--transicion), color var(--transicion), border-color var(--transicion);
+}
+.pestanas__botones button:hover { background: var(--lavanda); color: var(--ciruela); }
+.pestanas__botones button.activa {
+  background: var(--ciruela);
+  border-color: var(--ciruela);
+  color: var(--blanco);
+}
+.pestanas__contenido {
+  margin-top: 12px;
+  padding: clamp(16px, 2.4vw, 24px);
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-xs);
+}
+.pestanas__contenido p + p { margin-top: 10px; }
+
+/* Reseñas en la ficha */
+.ficha__pestanas + .seccion,
+.ficha + .seccion { padding-block: clamp(26px, 4vw, 44px); }
+.resena { border-radius: var(--radio-lg); box-shadow: var(--sombra-xs); }
+.resena__cabecera strong { color: var(--ciruela); }
+.form-resena {
+  background:
+    radial-gradient(360px 160px at 100% 0%, rgba(255, 255, 255, 0.8), transparent 70%),
+    var(--lavanda);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-xs);
+}
+.form-resena input:focus, .form-resena select:focus, .form-resena textarea:focus {
+  border-color: var(--purpura);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(138, 79, 191, 0.14);
+}
+
+/* Tarjetas de combo en la ficha */
+.tarjeta-combo .tarjeta-producto__cuerpo { padding: 18px; }
+.tarjeta-combo .tarjeta-producto__nombre { min-height: 0; }
+
+/* ---------- Barra fija de compra (celular) ---------- */
+.barra-compra-movil {
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.barra-compra-movil .precio { font-size: 1.1rem; }
+@media (max-width: 767px) {
+  body:has(.barra-compra-movil) { padding-bottom: 78px; }
+  body:has(.barra-compra-movil) .whatsapp-flotante { bottom: 88px; }
+}

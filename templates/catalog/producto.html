@@ -207,7 +207,7 @@
       <h2 class="seccion__titulo">Completa tu set</h2>
       <div class="grilla grilla--combos">
         {% for combo in combos_producto %}
-          <a class="tarjeta-producto" href="{{ combo.get_absolute_url }}">
+          <a class="tarjeta-producto tarjeta-combo" href="{{ combo.get_absolute_url }}">
             <div class="tarjeta-producto__cuerpo">
               <span class="tarjeta-producto__nombre">{{ combo.nombre }}</span>
               <span class="precio">{{ combo.precio_combo|cop }}</span>
