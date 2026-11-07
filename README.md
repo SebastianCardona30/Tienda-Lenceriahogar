@@ -5,8 +5,26 @@ Desarrollada con **Python 3.12+ / Django 5.x**, arquitectura limpia con plantill
 
 Todo el texto visible para las clientas está en español de Colombia (tuteo), con precios en pesos colombianos sin decimales (**$89.900**) con IVA incluido.
 
-> **Estado del proyecto:** ✅ **Completo (Fases 0 a 5 terminadas)**.
+> **Estado del proyecto:** ✅ **Fases 0 a 5 completadas** (detalle en la tabla de abajo).
 > Incluye catálogo, carrito, promociones, checkout, zonas de Santander, pagos (simulado, transferencia y Wompi sandbox), panel de administración, inventario, reportes CSV, roles de usuario, auditoría, 2FA, SEO completo y copias de seguridad.
+
+### Estado de fases
+
+| Fase | Contenido | Estado |
+|---|---|---|
+| 0 | Base del proyecto: paleta, tipografías, estructura de apps | ✅ |
+| 1 | Catálogo, búsqueda, páginas institucionales, botón WhatsApp | ✅ |
+| 2 | Carrito, checkout en 3 pasos, cuentas, envíos, ofertas | ✅ |
+| 3 | Pagos (simulado, transferencia, Nequi/Daviplata, Wompi sandbox), reserva de stock, seguimiento, correos | ✅ |
+| 4 | Dashboard, inventario con bitácora, importar/exportar CSV, reportes, roles, auditoría, ajustes | ✅ |
+| 5 | SEO, sitemap, feed WhatsApp, textos legales, cookies, backup de BD | ✅ |
+| Seguridad y despliegue | Sesión por inactividad y al cerrar el navegador, cookies httpOnly/Secure, enlaces de recuperación de 1 hora, GitHub + despliegue automático en Vercel, revisión responsive (360/768/1280 px) | ✅ |
+
+> 📌 **Regla:** al cerrar cada fase hay que actualizar la tabla "Estado de fases" de este README (junto con PLAN.md).
+
+### Despliegue automático (GitHub → Vercel)
+
+El código vive en [github.com/SebastianCardona30/Tienda-Lenceriahogar](https://github.com/SebastianCardona30/Tienda-Lenceriahogar) y el proyecto está vinculado a Vercel: **cada push a la rama `main` genera un despliegue automático** en <https://ciudad-bonita.vercel.app>. En local, subir cambios es simplemente `git push origin main`.
 
 ---
 
@@ -98,7 +116,7 @@ El panel de administración está diseñado en español, claro y accesible desde
 | Comando | Descripción |
 |---|---|
 | `python manage.py runserver` | Inicia el servidor local de desarrollo |
-| `python manage.py test` | Ejecuta la batería de más de 280 pruebas automáticas |
+| `python manage.py test` | Ejecuta la batería de más de 305 pruebas automáticas |
 | `python manage.py check` | Verifica la integridad y configuración del sistema |
 | `python manage.py seed_demo` | Carga o refresca datos de prueba realistas (idempotente) |
 | `python manage.py setup_roles` | Crea o actualiza los roles Administradora, Empleado y Solo lectura |
@@ -141,8 +159,9 @@ El sistema cuenta con 3 modalidades de pago:
   4. Configura el archivo WSGI apuntando a `config.wsgi.application`.
   5. En la pestaña *Tasks*, puedes programar `python manage.py cancel_expired_orders` diariamente a costo $0.
 
-### Opción 2: Vercel (Excelente para demostraciones de catálogo)
-- Despliegue con `publicar-vercel.bat` o `npx vercel --prod`.
+### Opción 2: Vercel (la usamos en producción)
+- **Despliegue automático:** el repo de GitHub está vinculado al proyecto de Vercel; cada push a `main` genera un despliegue solo (build con `build.py`: migrate + seed_demo + collectstatic).
+- Despliegue manual con `publicar-vercel.bat` o `npx vercel --prod`.
 - La tienda queda en `https://tu-proyecto.vercel.app`.
 - **Nota técnica:** Vercel usa funciones serverless de solo lectura. Para operar una tienda con ventas reales en Vercel, conecta una base PostgreSQL gratuita (ej. Neon o Supabase) configurando `DATABASE_URL` en las variables de entorno de Vercel.
 

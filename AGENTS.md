@@ -30,6 +30,7 @@ Tipografías: títulos "Playfair Display" (600/700); texto "Nunito Sans" (400/60
 - Marcadores configurables en el admin para datos no inventados ([NIT], [DIRECCIÓN], [TELÉFONO], [EMAIL]).
 - Mobile-first (probar 360, 768, 1280 px), AA, objetivos táctiles 44 px, bordes 10–16 px, transiciones 150–250 ms.
 - Pruebas automáticas por área; al cerrar fase: `manage.py check`, `manage.py test`, y verificar que runserver arranca.
+- **Al cerrar cada fase: actualizar README.md** (tabla "Estado de fases") además de PLAN.md.
 - Commit por fase con mensaje claro en español. Actualizar PLAN.md siempre.
 
 ## Comandos (Windows; en Mac/Linux igual sin .\ y con python3)
