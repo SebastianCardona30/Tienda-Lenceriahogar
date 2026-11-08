@@ -6,9 +6,13 @@
 {% block contenido %}
 <div class="contenedor cuenta">
   <header class="cuenta__cabecera">
-    <div>
-      <h1>Hola, {{ user.first_name|default:user.username }}</h1>
-      <p class="cuenta__bajada">{{ user.email }}</p>
+    <div class="cuenta__identidad">
+      <span class="cuenta__avatar" aria-hidden="true">{{ user.first_name|default:user.username|first|upper }}</span>
+      <div>
+        <span class="cuenta__eyebrow">Mi cuenta</span>
+        <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+        <p class="cuenta__bajada">{{ user.email }}</p>
+      </div>
     </div>
     <form method="post" action="{% url 'accounts:salir' %}">
       {% csrf_token %}
@@ -18,13 +22,15 @@
 
   <div class="cuenta__rejilla">
     <a class="cuenta__tarjeta" href="{% url 'orders:mis_pedidos' %}">
-      <h2>🛍️ Mis pedidos</h2>
+      <span class="cuenta__icono" aria-hidden="true">🛍️</span>
+      <h2>Mis pedidos</h2>
       <p>Revisa tus compras y vuelve a pedir lo que más te gustó.</p>
       <span class="cuenta__ir">Ver mis pedidos →</span>
     </a>
 
     <a class="cuenta__tarjeta" href="{% url 'accounts:direcciones' %}">
-      <h2>📍 Mis direcciones</h2>
+      <span class="cuenta__icono" aria-hidden="true">📍</span>
+      <h2>Mis direcciones</h2>
       <p>
         {% if total_direcciones %}
           Tienes {{ total_direcciones }} guardada{{ total_direcciones|pluralize }}.
@@ -36,7 +42,8 @@
     </a>
 
     <a class="cuenta__tarjeta" href="{% url 'accounts:deseos' %}">
-      <h2>♥ Mis deseos</h2>
+      <span class="cuenta__icono" aria-hidden="true">♥</span>
+      <h2>Mis deseos</h2>
       <p>
         {% if total_deseos %}
           {{ total_deseos }} producto{{ total_deseos|pluralize }} en tu lista.
@@ -48,7 +55,8 @@
     </a>
 
     <a class="cuenta__tarjeta" href="{% url 'accounts:datos' %}">
-      <h2>👤 Mis datos</h2>
+      <span class="cuenta__icono" aria-hidden="true">👤</span>
+      <h2>Mis datos</h2>
       <p>Nombre, correo, celular y cédula.</p>
       <span class="cuenta__ir">Editar mis datos →</span>
     </a>

@@ -145,3 +145,273 @@
   .cuenta__rejilla { grid-template-columns: repeat(2, 1fr); }
   .cuenta__rejilla--invertida { grid-template-columns: 1.4fr 1fr; align-items: start; }
 }
+
+/* =========================================================
+   Cuentas: acabado visual (Lote 5)
+   ========================================================= */
+.cuenta { padding-block: clamp(24px, 4vw, 44px) clamp(40px, 6vw, 68px); max-width: 720px; }
+.cuenta--acceso { max-width: 1020px; }
+
+/* ---------- Encabezados ---------- */
+.cuenta__eyebrow {
+  display: block;
+  color: var(--rosa-cta);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cuenta__cabecera {
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.cuenta__cabecera h1 {
+  font-size: clamp(1.7rem, 4.2vw, 2.4rem);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cuenta__identidad { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.cuenta__identidad > div { min-width: 0; }
+.cuenta__avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ciruela) 0%, var(--purpura) 100%);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 1.4rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px -14px rgba(91, 42, 134, 0.8);
+}
+.cuenta__bajada { color: var(--texto-2); line-height: 1.55; }
+
+/* ---------- Tarjetas ---------- */
+.cuenta__tarjeta {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: clamp(22px, 3.6vw, 36px);
+  box-shadow: 0 20px 45px -32px rgba(91, 42, 134, 0.45);
+}
+.cuenta__tarjeta::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--rosa-cta), var(--purpura) 55%, var(--ciruela));
+}
+.cuenta__tarjeta::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  top: -80px;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 213, 229, 0.5), transparent 70%);
+  pointer-events: none;
+}
+.cuenta__tarjeta > * { position: relative; z-index: 1; }
+.cuenta__tarjeta h1 { font-size: clamp(1.6rem, 3.6vw, 2.1rem); margin-bottom: 8px; }
+.cuenta__tarjeta h2 { color: var(--ciruela); }
+
+/* Iconos de sección */
+.cuenta__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--lavanda);
+  font-size: 1.15rem;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.cuenta__icono--grande {
+  width: 58px;
+  height: 58px;
+  font-size: 1.55rem;
+  margin-bottom: 16px;
+}
+.cuenta__icono--peligro { background: #FDECEC; }
+
+/* ---------- Acceso en dos columnas ---------- */
+.cuenta--acceso { display: grid; gap: 24px; }
+.cuenta--acceso .cuenta__tarjeta { align-self: start; }
+.cuenta__beneficios { display: none; }
+
+.cuenta__beneficios {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 20px;
+  background: linear-gradient(155deg, var(--ciruela) 0%, var(--purpura) 100%);
+  color: var(--blanco);
+  box-shadow: var(--sombra);
+}
+.cuenta__beneficios::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 70%);
+  pointer-events: none;
+}
+.cuenta__beneficios > * { position: relative; z-index: 1; }
+.cuenta__beneficios-marca {
+  margin: 0;
+  color: var(--rosa-suave);
+  font-family: var(--fuente-titulos);
+  font-size: 1.05rem;
+}
+.cuenta__beneficios h2 {
+  color: var(--blanco);
+  font-size: clamp(1.4rem, 2.2vw, 1.7rem);
+  margin-block: 8px 18px;
+}
+.cuenta__beneficios ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.cuenta__beneficios li { display: flex; align-items: flex-start; gap: 12px; }
+.cuenta__beneficios li > span {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.95rem;
+}
+.cuenta__beneficios strong { display: block; font-size: 0.95rem; }
+.cuenta__beneficios p {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.cuenta__beneficios-pie {
+  margin: 22px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- Formularios ---------- */
+.cuenta .campo { gap: 7px; margin-bottom: 18px; }
+.cuenta .campo label { font-size: 0.88rem; color: var(--texto); }
+.cuenta .campo input[type="text"],
+.cuenta .campo input[type="email"],
+.cuenta .campo input[type="password"],
+.cuenta .campo input[type="tel"],
+.cuenta .campo input[type="number"],
+.cuenta .campo select,
+.cuenta .campo textarea {
+  min-height: 46px;
+  border-radius: var(--radio);
+  padding: 11px 14px;
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+.cuenta .campo input:focus,
+.cuenta .campo select:focus,
+.cuenta .campo textarea:focus {
+  border-color: var(--purpura);
+  box-shadow: 0 0 0 4px rgba(138, 79, 191, 0.14);
+}
+.cuenta .campo__casilla {
+  padding: 11px 13px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--crema);
+  color: var(--texto-2);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.cuenta .campo__casilla input { accent-color: var(--rosa-cta); }
+.cuenta__tarjeta form .btn-bloque { min-height: 48px; margin-top: 6px; }
+
+/* ---------- Enlaces ---------- */
+.cuenta__enlaces { margin-top: 12px; font-size: 0.9rem; }
+.cuenta__enlaces + .cuenta__enlaces { margin-top: 8px; }
+.cuenta__tarjeta > .cuenta__enlaces:last-child {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--borde);
+}
+.cuenta__enlaces .btn { min-height: 44px; }
+
+/* ---------- Panel ---------- */
+.cuenta__rejilla { gap: 16px; }
+.cuenta__rejilla .cuenta__tarjeta {
+  padding: 20px;
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-xs);
+}
+.cuenta__rejilla .cuenta__tarjeta::after {
+  width: 130px;
+  height: 130px;
+  right: -55px;
+  top: -55px;
+}
+.cuenta__rejilla .cuenta__tarjeta:hover {
+  transform: translateY(-3px);
+  border-color: var(--lavanda-2);
+  box-shadow: var(--sombra);
+}
+.cuenta__rejilla .cuenta__tarjeta h2 { margin: 0; font-size: 1.05rem; }
+.cuenta__rejilla .cuenta__tarjeta p { line-height: 1.5; }
+.cuenta__ir { margin-top: 2px; }
+
+/* ---------- Direcciones ---------- */
+.direccion { border-radius: var(--radio-lg); box-shadow: var(--sombra-xs); }
+.direccion--principal {
+  background: linear-gradient(135deg, var(--lavanda) 0%, var(--blanco) 85%);
+  border-color: var(--purpura);
+}
+.direccion p { line-height: 1.5; overflow-wrap: anywhere; }
+.direccion__acciones { flex-wrap: wrap; }
+.direccion__acciones .btn-texto { padding: 8px 0; }
+
+/* ---------- Estados vacíos ---------- */
+.cuenta__vacio {
+  background:
+    radial-gradient(420px 200px at 50% 0%, rgba(251, 213, 229, 0.6), transparent 70%),
+    var(--blanco);
+  border: 1px dashed var(--purpura);
+  border-radius: var(--radio-xl);
+  padding: clamp(30px, 5vw, 46px) 20px;
+}
+.cuenta__vacio p { max-width: 46ch; color: var(--texto-2); }
+.cuenta__vacio .btn { min-height: 46px; }
+
+/* ---------- Zona de peligro ---------- */
+.cuenta__peligro { border-color: rgba(217, 63, 63, 0.45); }
+.cuenta__peligro::before { background: linear-gradient(90deg, var(--error), var(--oferta)); }
+.cuenta__peligro h1 { color: var(--error); }
+.cuenta__aviso { border-radius: var(--radio-lg); line-height: 1.5; }
+.cuenta__boton-peligro { min-height: 48px; }
+
+/* ---------- Escritorio ---------- */
+@media (min-width: 900px) {
+  .cuenta--acceso { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  .cuenta--acceso .cuenta__beneficios { display: block; position: sticky; top: 92px; }
+  .cuenta__rejilla--invertida section.cuenta__tarjeta { position: sticky; top: 92px; }
+}

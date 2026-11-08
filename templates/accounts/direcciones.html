@@ -5,7 +5,10 @@
 {% block contenido %}
 <div class="contenedor cuenta">
   <header class="cuenta__cabecera">
-    <h1>Mis direcciones</h1>
+    <div>
+      <span class="cuenta__eyebrow">Mi cuenta</span>
+      <h1>Mis direcciones</h1>
+    </div>
     <a class="btn btn-secundario" href="{% url 'accounts:panel' %}">← Mi cuenta</a>
   </header>
 

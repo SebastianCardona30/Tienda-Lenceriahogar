@@ -3,8 +3,10 @@
 {% block titulo %}Crear cuenta · {{ site.nombre_negocio }}{% endblock titulo %}
 
 {% block contenido %}
-<div class="contenedor cuenta">
+<div class="contenedor cuenta cuenta--acceso">
   <section class="cuenta__tarjeta">
+    <span class="cuenta__icono cuenta__icono--grande" aria-hidden="true">🌸</span>
+    <span class="cuenta__eyebrow">Primera vez</span>
     <h1>Crea tu cuenta</h1>
     <p class="cuenta__bajada">
       Guarda tus direcciones, deseos y pedidos para la próxima vez.
@@ -22,5 +24,7 @@
       ¿Ya tienes cuenta? <a href="{% url 'accounts:ingreso' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Inicia sesión</a>
     </p>
   </section>
+
+  {% include "accounts/_beneficios.html" %}
 </div>
 {% endblock contenido %}
