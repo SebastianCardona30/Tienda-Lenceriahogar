@@ -66,6 +66,15 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Verificación local: build.py en limpio OK, 25/25 pruebas, simulación VERCEL=1 (home/tienda/estáticos 200)
 - [x] Desplegar a Vercel y verificar la URL pública — **https://ciudad-bonita.vercel.app** (proyecto outi2/ciudad-bonita; SECRET_KEY guardada como variable de entorno; build remoto OK con uv desde pyproject.toml)
 
+## Rediseño visual (pedido del usuario — noviembre 2026)
+- [x] Lote 1 — Sistema visual global: tokens de color y tipografía fluida, botones, encabezado sticky, pie degradado, mensajes y utilidades; `header.html`, `footer.html` y `base.html` con enlace de salto y theme-color
+- [x] Lote 2 — Portada editorial: hero compacto con sellos y CTAs, tarjetas flotantes, categorías superpuestas, ofertas con cuenta regresiva, bordados, combos, beneficios, reseñas y suscripción
+- [x] Lote 3 — Tienda y ficha: cabecera editorial del listado, filtros y panel móvil, rejilla 2/3 columnas, tarjetas de producto y bloque de combos
+- [x] Lote 4 — Carrito y checkout: líneas y resumen con acento y sticky, pasos como pastillas, confirmación con sello y línea de tiempo, seguimiento público, pasarela y comprobante
+- [x] Lote 5 — Cuentas: acceso y registro en dos columnas con panel de beneficios, panel con avatar e iconos, direcciones, deseos, pedidos y zona de peligro
+- [x] Lote 6 — Admin: panel, reportes e importación CSV adaptados a la paleta de la tienda y al tema claro/oscuro de django-unfold (`.dark`)
+- [x] Cierre: `manage.py check` limpio, 305/305 pruebas y auditoría sin desbordes a 360/768/1280 px en cada lote
+
 ## Decisiones anotadas (opción más simple y segura)
 - Python del equipo: 3.14.7 (no hay 3.12 instalada); Django 5.2.18 instalado y verificado funcionando sobre 3.14. Spec dice 3.12: se usa la versión disponible porque el código no depende de 3.12 en particular.
 - git no estaba instalado en la máquina; se instaló Git 2.56.0.3 (gratuito) con winget para poder cumplir los commits por fase.

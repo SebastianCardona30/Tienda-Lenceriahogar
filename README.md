@@ -18,6 +18,7 @@ Todo el texto visible para las clientas está en español de Colombia (tuteo), c
 | 3 | Pagos (simulado, transferencia, Nequi/Daviplata, Wompi sandbox), reserva de stock, seguimiento, correos | ✅ |
 | 4 | Dashboard, inventario con bitácora, importar/exportar CSV, reportes, roles, auditoría, ajustes | ✅ |
 | 5 | SEO, sitemap, feed WhatsApp, textos legales, cookies, backup de BD | ✅ |
+| Rediseño visual | Sistema visual completo (tokens, header/pie, portada, tienda y ficha, carrito y checkout, cuentas y panel, admin con tema claro/oscuro), auditado a 360/768/1280 px | ✅ |
 | Seguridad y despliegue | Sesión por inactividad y al cerrar el navegador, cookies httpOnly/Secure, enlaces de recuperación de 1 hora, GitHub + despliegue automático en Vercel, revisión responsive (360/768/1280 px) | ✅ |
 
 > 📌 **Regla:** al cerrar cada fase hay que actualizar la tabla "Estado de fases" de este README (junto con PLAN.md).
