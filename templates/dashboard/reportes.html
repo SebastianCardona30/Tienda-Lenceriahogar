@@ -1,28 +1,15 @@
 {% extends "admin/base_site.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}Reportes | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
-<style>
-    .cb-grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-    .cb-tarjeta { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1.25rem; }
-    .cb-rotulo { font-size: .8rem; color: #6A6173; text-transform: uppercase; letter-spacing: .04em; }
-    .cb-titulo { font-size: 1.05rem; font-weight: 700; color: #5B2A86; margin: .25rem 0 .5rem; }
-    .cb-nota { font-size: .85rem; color: #6A6173; margin-bottom: .9rem; }
-    .cb-boton { display: inline-block; background: #C2185B; color: #fff; border: 0;
-        border-radius: 10px; padding: .55rem 1.1rem; font-weight: 700; cursor: pointer;
-        text-decoration: none; font-size: .9rem; }
-    .cb-campo { display: flex; flex-direction: column; gap: .25rem; margin-bottom: .75rem; }
-    .cb-campo label { font-size: .8rem; font-weight: 600; color: #2A2230; }
-    .cb-campo input { padding: .5rem .6rem; border: 1px solid #E7DCEE; border-radius: 10px;
-        background: #FFF8FB; font-size: .9rem; }
-</style>
+<link rel="stylesheet" href="{% static 'css/admin-propio.css' %}">
 {% endblock %}
 
 {% block content %}
-<div style="max-width: 960px;">
+<div class="cb-vista" style="max-width: 960px;">
     <div class="cb-tarjeta" style="margin-bottom: 1.25rem;">
         <div class="cb-rotulo">Reportes</div>
         <h1 class="cb-titulo">Descarga los números de tu negocio</h1>
@@ -68,9 +55,7 @@
     </div>
 
     <p style="margin-top: 1.25rem;">
-        <a href="{% url 'admin:index' %}" style="color:#5B2A86; font-weight:600;">
-            ← Volver al panel
-        </a>
+        <a href="{% url 'admin:index' %}" class="cb-enlace">← Volver al panel</a>
     </p>
 </div>
 {% endblock %}

@@ -1,0 +1,302 @@
+/* =========================================================
+   Vistas propias del admin: panel, reportes e importar CSV.
+   Se apoyan en la paleta de la tienda y respetan el tema
+   claro/oscuro de django-unfold (clase .dark en <html>).
+   ========================================================= */
+
+.cb-panel,
+.cb-vista {
+  --cb-superficie: #FFFFFF;
+  --cb-superficie-2: #FFF8FB;
+  --cb-borde: #E7DCEE;
+  --cb-borde-suave: #F1E8FA;
+  --cb-texto: #2A2230;
+  --cb-texto-2: #6A6173;
+  --cb-acento: #5B2A86;
+  --cb-acento-suave: #F1E8FA;
+  --cb-alerta: #D93F3F;
+  --cb-alerta-fondo: #FDECEC;
+  --cb-accion: #C2185B;
+}
+
+.dark .cb-panel,
+.dark .cb-vista {
+  --cb-superficie: #1E293B;
+  --cb-superficie-2: #0F172A;
+  --cb-borde: #334155;
+  --cb-borde-suave: #334155;
+  --cb-texto: #E2E8F0;
+  --cb-texto-2: #A9B7C9;
+  --cb-acento: #DCC3EF;
+  --cb-acento-suave: #4A2170;
+  --cb-alerta: #FCA5A5;
+  --cb-alerta-fondo: #431E1E;
+  --cb-accion: #FBD5E5;
+}
+
+.cb-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Tarjetas y KPIs ---------- */
+.cb-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.cb-tarjeta {
+  background: var(--cb-superficie);
+  border: 1px solid var(--cb-borde);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.cb-tarjeta .cb-rotulo {
+  font-size: 0.8rem;
+  color: var(--cb-texto-2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cb-tarjeta .cb-valor {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--cb-acento);
+  margin-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.cb-tarjeta .cb-nota {
+  font-size: 0.8rem;
+  color: var(--cb-texto-2);
+  margin-top: 0.25rem;
+}
+
+.cb-tarjeta .cb-nota a {
+  color: var(--cb-accion);
+  font-weight: 600;
+}
+
+.cb-tarjeta.cb-alerta .cb-valor { color: var(--cb-alerta); }
+.cb-tarjeta.cb-accion .cb-valor { color: var(--cb-accion); }
+
+/* ---------- Gráficas ---------- */
+.cb-grid2 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .cb-grid2 { grid-template-columns: 1fr; }
+}
+
+.cb-grafica {
+  background: var(--cb-superficie);
+  border: 1px solid var(--cb-borde);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.cb-grafica h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cb-texto);
+  margin: 0 0 0.75rem;
+}
+
+.cb-lienzo {
+  position: relative;
+  height: 240px;
+}
+
+/* ---------- Tablas ---------- */
+.cb-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.cb-tabla th {
+  text-align: left;
+  color: var(--cb-texto-2);
+  font-weight: 600;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--cb-borde);
+}
+
+.cb-tabla td {
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--cb-borde-suave);
+  color: var(--cb-texto);
+}
+
+.cb-tabla tr:last-child td { border-bottom: 0; }
+
+.cb-lista-vacia {
+  color: var(--cb-texto-2);
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.cb-chip {
+  display: inline-block;
+  background: var(--cb-acento-suave);
+  color: var(--cb-acento);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cb-seccion-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cb-texto);
+}
+
+/* ---------- Botones y enlaces ---------- */
+.cb-boton {
+  display: inline-block;
+  background: #C2185B;
+  color: #FFFFFF;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cb-boton:hover { background: #A5144C; color: #FFFFFF; }
+
+.cb-boton-secundario {
+  display: inline-block;
+  background: var(--cb-acento-suave);
+  color: var(--cb-acento);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.cb-boton-secundario:hover {
+  border-color: var(--cb-acento);
+  color: var(--cb-acento);
+}
+
+.cb-boton-texto {
+  color: var(--cb-texto-2);
+  font-weight: 600;
+  padding: 0.55rem 0.5rem;
+  text-decoration: none;
+}
+
+.cb-boton-texto:hover { color: var(--cb-texto); }
+
+.cb-enlace {
+  color: var(--cb-acento);
+  font-weight: 600;
+}
+
+.cb-enlace:hover { text-decoration: underline; }
+
+/* ---------- Reportes ---------- */
+.cb-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.cb-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cb-acento);
+  margin: 0.25rem 0 0.5rem;
+}
+
+.cb-nota {
+  font-size: 0.85rem;
+  color: var(--cb-texto-2);
+  margin-bottom: 0.9rem;
+}
+
+.cb-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.cb-campo label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cb-texto);
+}
+
+.cb-campo input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--cb-borde);
+  border-radius: 10px;
+  background: var(--cb-superficie-2);
+  color: var(--cb-texto);
+  font-size: 0.9rem;
+}
+
+.cb-campo input:focus {
+  outline: 2px solid var(--cb-acento);
+  outline-offset: 1px;
+}
+
+/* ---------- Importar CSV ---------- */
+.cb-etiqueta {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cb-texto);
+  margin-bottom: 0.35rem;
+}
+
+.cb-archivo {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--cb-borde);
+  border-radius: 10px;
+  background: var(--cb-superficie-2);
+  color: var(--cb-texto);
+}
+
+.cb-acciones {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.cb-error {
+  margin-top: 1.25rem;
+  border: 1px solid var(--cb-alerta);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--cb-alerta-fondo);
+  color: var(--cb-texto);
+}
+
+.cb-error strong { color: var(--cb-alerta); }
+
+.cb-ayuda {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--cb-texto-2);
+  line-height: 1.55;
+}

@@ -1,28 +1,5 @@
 {% load static format_tags %}
 {# Panel de administración: métricas del negocio + gráficas con Chart.js local #}
-<style>
-    .cb-panel { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem; }
-    .cb-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-    .cb-tarjeta { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1rem 1.25rem; }
-    .cb-tarjeta .cb-rotulo { font-size: 0.8rem; color: #6A6173; text-transform: uppercase; letter-spacing: .04em; }
-    .cb-tarjeta .cb-valor { font-size: 1.6rem; font-weight: 700; color: #5B2A86; margin-top: .25rem; }
-    .cb-tarjeta .cb-nota { font-size: 0.8rem; color: #6A6173; margin-top: .25rem; }
-    .cb-tarjeta.cb-alerta .cb-valor { color: #D93F3F; }
-    .cb-tarjeta.cb-accion .cb-valor { color: #C2185B; }
-    .cb-grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
-    @media (max-width: 900px) { .cb-grid2 { grid-template-columns: 1fr; } }
-    .cb-grafica { background: #fff; border: 1px solid #E7DCEE; border-radius: 12px; padding: 1rem 1.25rem; }
-    .cb-grafica h3 { font-size: .95rem; font-weight: 700; color: #2A2230; margin: 0 0 .75rem; }
-    .cb-lienzo { position: relative; height: 240px; }
-    .cb-tabla { width: 100%; border-collapse: collapse; font-size: .875rem; }
-    .cb-tabla th { text-align: left; color: #6A6173; font-weight: 600; padding: .4rem .5rem; border-bottom: 1px solid #E7DCEE; }
-    .cb-tabla td { padding: .45rem .5rem; border-bottom: 1px solid #F1E8FA; color: #2A2230; }
-    .cb-tabla tr:last-child td { border-bottom: 0; }
-    .cb-lista-vacia { color: #6A6173; font-size: .875rem; padding: .5rem 0; }
-    .cb-chip { display: inline-block; background: #F1E8FA; color: #5B2A86; border-radius: 999px; padding: .1rem .6rem; font-size: .75rem; font-weight: 600; }
-    .cb-seccion-titulo { font-size: 1rem; font-weight: 700; color: #2A2230; }
-</style>
-
 <div class="cb-panel">
     {# ---------- KPIs ---------- #}
     <div class="cb-kpis">
@@ -102,8 +79,7 @@
     {# ---------- Listas ---------- #}
     <div class="flex items-center justify-between">
         <span class="cb-seccion-titulo">Detalle</span>
-        <a href="{% url 'admin_reportes' %}"
-           style="background:#F1E8FA; color:#5B2A86; border-radius:10px; padding:.45rem 1rem; font-weight:700; text-decoration:none; font-size:.85rem;">
+        <a href="{% url 'admin_reportes' %}" class="cb-boton-secundario">
             Descargar reportes CSV
         </a>
     </div>
@@ -192,6 +168,15 @@
 (function () {
     const serie = {{ serie_ventas_json|safe }};
     const estados = {{ estados_json|safe }};
+    // El admin de Unfold alterna entre tema claro y oscuro con la clase .dark
+    const oscuro = document.documentElement.classList.contains("dark");
+    const colorTexto = oscuro ? "#CBD5E1" : "#6A6173";
+    const colorGrilla = oscuro ? "rgba(148, 163, 184, 0.22)" : "rgba(106, 97, 115, 0.14)";
+
+    if (window.Chart) {
+        Chart.defaults.color = colorTexto;
+        Chart.defaults.borderColor = colorGrilla;
+    }
 
     const ctxVentas = document.getElementById("cb-grafica-ventas");
     if (ctxVentas && window.Chart) {
@@ -202,7 +187,7 @@
                 datasets: [{
                     label: "Ventas (COP)",
                     data: serie.montos,
-                    backgroundColor: "#8A4FBF",
+                    backgroundColor: oscuro ? "#A78BFA" : "#8A4FBF",
                     borderRadius: 6,
                 }],
             },
