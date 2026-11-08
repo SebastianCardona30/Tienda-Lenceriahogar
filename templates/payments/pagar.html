@@ -7,8 +7,10 @@
 
 {% block contenido %}
 <div class="contenedor pasarela">
-  {# Esta pantalla imita a la pasarela real: mismo formato de monto y referencia.
-     Cuando se conecte una pasarela de verdad (Wompi), solo se cambia esta vista. #}
+  {% comment %}
+  Esta pantalla imita a la pasarela real: mismo formato de monto y referencia.
+  Cuando se conecte una pasarela de verdad (Wompi), solo se cambia esta vista.
+  {% endcomment %}
   <section class="pasarela__caja" aria-label="Pago en línea">
     <header class="pasarela__cabecera">
       <span class="pasarela__candado" aria-hidden="true">🔒</span>
@@ -30,13 +32,11 @@
     </dl>
 
     {% if wompi_activo and wompi_url %}
-    <div style="margin: 1.5rem 0; text-align: center;">
-      <a href="{{ wompi_url }}" class="btn btn-principal" style="background:#8A4FBF; color:#fff; display:inline-block; padding:0.8rem 1.6rem; border-radius:10px; font-weight:700; text-decoration:none;">
+    <div class="pasarela__wompi">
+      <a href="{{ wompi_url }}" class="btn btn-primario btn-bloque">
         Pagar con Wompi (Tarjetas, PSE, Nequi, DaviPlata) →
       </a>
-      <p style="font-size:0.8rem; color:#6A6173; margin-top:0.5rem;">
-        Transacción segura procesada por Wompi Bancolombia.
-      </p>
+      <p>Transacción segura procesada por Wompi Bancolombia.</p>
     </div>
     {% endif %}
 

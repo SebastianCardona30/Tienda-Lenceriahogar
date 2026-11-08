@@ -78,3 +78,106 @@
 .comprobante__estado { margin: 0 20px 12px; padding: 12px; border-radius: var(--radio); font-size: 0.88rem; }
 .comprobante__estado--recibido { background: #e8f7ef; border: 1px solid var(--exito); color: #1d6b47; }
 .comprobante__form { padding: 0 20px 8px; display: grid; gap: 12px; }
+
+/* =========================================================
+   Pasarela y comprobante: acabado visual (Lote 4)
+   ========================================================= */
+.pasarela { padding-block: clamp(24px, 4vw, 40px) clamp(40px, 6vw, 72px); }
+.pasarela__caja {
+  border-radius: var(--radio-xl);
+  border-color: var(--borde);
+}
+.pasarela__cabecera {
+  background: linear-gradient(135deg, var(--ciruela) 0%, var(--purpura) 100%);
+  padding: 20px 22px;
+  gap: 14px;
+}
+.pasarela__candado {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 1.35rem;
+}
+.pasarela__negocio { font-size: 1.05rem; line-height: 1.25; overflow-wrap: anywhere; }
+.pasarela__subtitulo { opacity: 0.9; }
+
+.pasarela__monto {
+  align-items: center;
+  padding: 18px 22px;
+  background: linear-gradient(120deg, var(--lavanda) 0%, var(--crema) 100%);
+}
+.pasarela__monto strong {
+  color: var(--ciruela);
+  font-size: clamp(1.5rem, 4.4vw, 1.9rem);
+  white-space: nowrap;
+}
+
+.pasarela__datos { padding: 16px 22px; }
+.pasarela__datos > div { align-items: baseline; }
+.pasarela__datos dt { flex: none; }
+.pasarela__datos dd { min-width: 0; overflow-wrap: anywhere; }
+
+.pasarela__aviso {
+  margin: 0 22px 16px;
+  border-radius: var(--radio);
+  line-height: 1.5;
+}
+
+.pasarela__botones { padding: 0 22px 14px; gap: 10px; }
+.pasarela__botones .btn-pago {
+  border-radius: var(--radio-pill);
+  min-height: 46px;
+  font-size: 0.95rem;
+}
+
+.pasarela__wompi {
+  margin: 4px 22px 18px;
+  padding: 16px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--ciruela-suave);
+  text-align: center;
+  display: grid;
+  gap: 8px;
+}
+.pasarela__wompi .btn { min-height: 46px; }
+.pasarela__wompi p { margin: 0; color: var(--texto-2); font-size: 0.8rem; }
+
+.pasarela__pie { padding-inline: 22px; line-height: 1.5; }
+.pasarela__pie:last-child { padding-bottom: 20px; }
+
+/* ---------- Comprobante ---------- */
+.comprobante__titulo { margin: 16px 22px 8px; font-size: 1.05rem; }
+.comprobante__medios { padding: 0 22px 8px; }
+.comprobante__medios li { border-radius: var(--radio); background: var(--crema); }
+.comprobante__datos {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radio);
+  background: var(--blanco);
+  border: 1px dashed var(--borde);
+  overflow-wrap: anywhere;
+}
+.comprobante__estado {
+  margin: 0 22px 14px;
+  border-radius: var(--radio);
+  line-height: 1.5;
+}
+.comprobante__form { padding: 0 22px 10px; }
+.comprobante__form .campo:last-of-type { margin-bottom: 0; }
+.comprobante__form .btn-bloque { min-height: 48px; }
+
+/* El input de archivo tiene un ancho intrínseco grande: fijamos las pistas
+   en minmax(0, 1fr) y el control a 100% para que no desborde en celular. */
+.comprobante__form { grid-template-columns: minmax(0, 1fr); }
+.comprobante__form .campo { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.comprobante__form input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.85rem;
+}

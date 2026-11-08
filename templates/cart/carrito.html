@@ -7,7 +7,11 @@
 
 {% block contenido %}
 <div class="contenedor carrito">
-  <h1 class="carrito__titulo">Tu carrito</h1>
+  <header class="carrito__cabecera">
+    <span class="carrito__eyebrow">Tu selección</span>
+    <h1 class="carrito__titulo">Tu carrito</h1>
+    <p class="carrito__bajada">Revisa tus productos, aplica tu cupón y calcula el envío antes de pagar.</p>
+  </header>
 
   {% if carrito_ui.avisos %}
     <ul class="carrito__avisos" role="status">
@@ -17,6 +21,12 @@
 
   {% if carrito_ui.vacio %}
     <div class="carrito__vacio">
+      <span class="carrito__vacio-icono" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8h12l-1 12H7L6 8z"/>
+          <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+        </svg>
+      </span>
       <p>Tu carrito está vacío. ¡Explora la tienda y encuentra algo bonito para tu hogar!</p>
       <a class="btn btn-primario" href="{% url 'catalog:tienda' %}">Ir a la tienda</a>
     </div>

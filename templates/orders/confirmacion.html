@@ -6,9 +6,14 @@
 {% block contenido %}
 <div class="contenedor pedido">
   <header class="pedido__cabecera">
-    <h1>¡Gracias, {{ pedido.nombre }}! 🎉</h1>
-    <p class="pedido__numero">Tu pedido <strong>{{ pedido.numero }}</strong> quedó confirmado.</p>
-    <p class="pedido__fecha">Fecha: {{ pedido.creado|date:"d \d\e F \d\e Y, H:i" }}</p>
+    <span class="pedido__sello" aria-hidden="true">✓</span>
+    <div class="pedido__cabecera-texto">
+      <span class="pedido__eyebrow">Pedido confirmado</span>
+      <h1>¡Gracias, {{ pedido.nombre }}! 🎉</h1>
+      <p class="pedido__numero">Tu pedido <strong>{{ pedido.numero }}</strong> quedó confirmado.</p>
+      <p class="pedido__fecha">Fecha: {{ pedido.creado|date:"d \d\e F \d\e Y, H:i" }}</p>
+    </div>
+    <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
   </header>
 
   <div class="pedido__grid">

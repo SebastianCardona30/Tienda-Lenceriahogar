@@ -173,3 +173,284 @@
   .checkout__grid .resumen { position: sticky; top: 16px; }
   .pedido__grid { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
 }
+
+/* =========================================================
+   Checkout, confirmación y seguimiento (Lote 4)
+   ========================================================= */
+.checkout { padding-block: clamp(20px, 3vw, 34px) clamp(40px, 5vw, 64px); }
+.checkout__cabecera { margin-bottom: 20px; }
+.checkout__eyebrow,
+.pedido__eyebrow {
+  display: block;
+  color: var(--rosa-cta);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.checkout__titulo { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-block: 4px 6px; }
+.checkout__bajada { color: var(--texto-2); max-width: 62ch; }
+
+/* ---------- Pasos como pastillas ---------- */
+.pasos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 6px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pill);
+  background: var(--blanco);
+  box-shadow: var(--sombra-xs);
+}
+.paso {
+  flex: 1 1 0;
+  min-width: 96px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: none;
+  border-radius: var(--radio-pill);
+  font-size: 0.85rem;
+  transition: background-color var(--transicion), color var(--transicion);
+}
+.paso__numero { width: 26px; height: 26px; font-size: 0.78rem; }
+.paso--activo {
+  background: var(--ciruela);
+  color: var(--blanco);
+  border-top-color: transparent;
+  box-shadow: var(--sombra-xs);
+}
+.paso--activo .paso__numero { background: rgba(255, 255, 255, 0.22); color: var(--blanco); }
+.paso--listo { background: #E8F7EF; border-top-color: transparent; }
+.paso--listo .paso__numero { background: var(--exito); color: var(--blanco); }
+
+/* ---------- Formulario por pasos ---------- */
+.checkout__pasos { min-width: 0; }
+.paso-contenido {
+  border-radius: var(--radio-xl);
+  padding: clamp(18px, 2.6vw, 28px);
+  box-shadow: var(--sombra-xs);
+  gap: 0;
+}
+.paso-contenido legend {
+  font-family: var(--fuente-titulos);
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  padding: 0 10px;
+}
+.paso-contenido .campo { margin-bottom: 14px; }
+.paso-contenido .campo:last-of-type { margin-bottom: 4px; }
+.paso-contenido .btn-bloque { min-height: 48px; }
+.checkout__envio {
+  background: var(--lavanda);
+  border: 1px solid var(--lavanda-2);
+  border-radius: var(--radio);
+  padding: 12px 14px;
+  color: var(--texto);
+}
+.checkout__nota { line-height: 1.55; }
+.checkout__botones { gap: 10px; margin-top: 16px; }
+.checkout__botones .btn { min-height: 46px; }
+@media (max-width: 520px) {
+  .checkout__botones { flex-direction: column-reverse; }
+  .checkout__botones .btn { flex: none; width: 100%; }
+}
+
+/* Resumen del checkout */
+.checkout__grid .resumen { align-self: start; }
+.checkout__lineas { gap: 10px; }
+.checkout__lineas li {
+  align-items: flex-start;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--borde);
+}
+.checkout__lineas li:last-child { border-bottom: 0; padding-bottom: 0; }
+.checkout__lineas span { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- Confirmación ---------- */
+.pedido { padding-block: clamp(22px, 3vw, 34px) clamp(40px, 5vw, 64px); max-width: 960px; }
+.pedido__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 16px;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: var(--radio-xl);
+  background:
+    radial-gradient(420px 200px at 100% 0%, rgba(255, 255, 255, 0.9), transparent 70%),
+    linear-gradient(135deg, #E8F7EF 0%, #F4FBF8 70%);
+  border: 1px solid var(--exito);
+  box-shadow: var(--sombra-xs);
+}
+.pedido__cabecera::after {
+  content: "";
+  position: absolute;
+  right: -50px;
+  bottom: -70px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(46, 158, 107, 0.18), transparent 70%);
+  pointer-events: none;
+}
+.pedido__cabecera > * { position: relative; z-index: 1; }
+.pedido__sello {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blanco);
+  border: 1px solid var(--exito);
+  color: var(--exito);
+  font-size: 1.4rem;
+  font-weight: 800;
+  box-shadow: var(--sombra-xs);
+}
+.pedido__cabecera-texto { min-width: 0; flex: 1 1 240px; }
+.pedido__cabecera h1 {
+  font-size: clamp(1.55rem, 3.6vw, 2.2rem);
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.pedido__numero { margin: 0; overflow-wrap: anywhere; }
+.pedido__numero strong {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: var(--radio-pill);
+  background: var(--blanco);
+  border: 1px solid rgba(46, 158, 107, 0.35);
+  color: var(--ciruela);
+  letter-spacing: 0.02em;
+}
+
+/* Detalle y acciones */
+.pedido__grid { gap: clamp(18px, 3vw, 26px); }
+.pedido__detalle {
+  border-radius: var(--radio-xl);
+  padding: clamp(18px, 2.6vw, 26px);
+  box-shadow: var(--sombra-xs);
+  min-width: 0;
+}
+.pedido__detalle h2 {
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  margin-top: 24px;
+}
+.pedido__detalle h2:first-of-type { margin-top: 0; }
+.pedido__lineas { gap: 10px; }
+.pedido__lineas li {
+  align-items: flex-start;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--borde);
+}
+.pedido__lineas li:last-child { border-bottom: 0; padding-bottom: 0; }
+.pedido__lineas li > span { min-width: 0; overflow-wrap: anywhere; }
+.pedido__siguiente {
+  list-style: none;
+  counter-reset: paso;
+  padding-left: 0;
+  gap: 12px;
+}
+.pedido__siguiente li {
+  position: relative;
+  padding-left: 36px;
+  line-height: 1.55;
+}
+.pedido__siguiente li::before {
+  counter-increment: paso;
+  content: counter(paso);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ciruela-suave);
+  color: var(--ciruela);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.pedido__siguiente strong { color: var(--ciruela); }
+.pedido__seguimiento {
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio);
+  padding: 14px;
+  line-height: 1.55;
+}
+.pedido__acciones {
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra-xs);
+  padding: clamp(18px, 2.6vw, 24px);
+}
+.pedido__acciones .btn { min-height: 46px; }
+
+/* ---------- Seguimiento público ---------- */
+.seguimiento .pedido__cabecera {
+  background:
+    radial-gradient(420px 200px at 100% 0%, rgba(251, 213, 229, 0.8), transparent 70%),
+    linear-gradient(135deg, var(--lavanda) 0%, var(--crema) 75%);
+  border-color: var(--borde);
+}
+.seguimiento .pedido__cabecera::after {
+  background: radial-gradient(circle, rgba(138, 79, 191, 0.16), transparent 70%);
+}
+.seguimiento__form {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-xl);
+  padding: clamp(18px, 3vw, 26px);
+  box-shadow: var(--sombra-xs);
+  margin-bottom: 24px;
+}
+.seguimiento__form .campo { margin-bottom: 0; }
+.seguimiento__form .btn { min-height: 46px; }
+.seguimiento__resultado {
+  border-radius: var(--radio-xl);
+  padding: clamp(18px, 3vw, 26px);
+  box-shadow: var(--sombra-xs);
+}
+.seguimiento__resultado .resumen__totales { margin-top: 16px; }
+.seguimiento__linea { position: relative; gap: 16px; }
+.seguimiento__paso {
+  align-items: flex-start;
+  padding-left: 18px;
+  border-left: 2px solid var(--lavanda-2);
+  position: relative;
+}
+.seguimiento__paso::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--purpura);
+  box-shadow: 0 0 0 3px var(--lavanda);
+}
+.seguimiento__paso .estado { flex: none; }
+
+/* ---------- Lista de pedidos ---------- */
+.pedido-tarjeta {
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-xs);
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+.pedido-tarjeta:hover { border-color: var(--lavanda-2); box-shadow: var(--sombra); }
+.pedido-tarjeta__numero { overflow-wrap: anywhere; }
+.pedido-tarjeta__cabecera { flex-wrap: wrap; }
+.pedido-tarjeta__items li { overflow-wrap: anywhere; }
+.pedido-tarjeta__pie { flex-wrap: wrap; }
+
+@media (min-width: 960px) {
+  .checkout__grid .resumen { position: sticky; top: 92px; }
+  .pedido__acciones { position: sticky; top: 92px; }
+}
