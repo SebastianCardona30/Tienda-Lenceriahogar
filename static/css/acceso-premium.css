@@ -1,0 +1,108 @@
+/* Acceso: acabado premium minimalista, limitado a login/registro. */
+.cuenta--acceso {
+  position: relative;
+  isolation: isolate;
+  max-width: 1040px;
+  gap: clamp(20px, 4vw, 40px);
+}
+.cuenta--acceso::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 4% 8% 12%;
+  border-radius: 40px;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(251, 213, 229, .72), transparent 45%),
+    radial-gradient(ellipse at 90% 82%, rgba(138, 79, 191, .15), transparent 48%);
+  filter: blur(3px);
+}
+.cuenta--acceso .cuenta__tarjeta {
+  padding: clamp(26px, 4vw, 44px);
+  border: 1px solid rgba(231, 220, 238, .9);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 24px 64px rgba(61, 27, 94, .11), 0 3px 12px rgba(61, 27, 94, .04);
+}
+.cuenta--acceso .cuenta__tarjeta::before {
+  height: 4px;
+  background: linear-gradient(90deg, var(--rosa-suave), var(--purpura), var(--ciruela));
+}
+.cuenta--acceso .cuenta__tarjeta::after {
+  right: -100px;
+  top: -110px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(241, 232, 250, .85), rgba(251, 213, 229, .28) 48%, transparent 72%);
+}
+.cuenta--acceso .cuenta__icono--grande {
+  color: var(--ciruela);
+  background: linear-gradient(145deg, #F8F1FC, #FDEBF3);
+  box-shadow: inset 0 0 0 1px rgba(91, 42, 134, .08), 0 8px 20px rgba(91, 42, 134, .08);
+}
+.cuenta--acceso .cuenta__eyebrow {
+  letter-spacing: .18em;
+  margin-bottom: 8px;
+}
+.cuenta--acceso .cuenta__tarjeta h1 {
+  font-size: clamp(1.9rem, 4vw, 2.45rem);
+  letter-spacing: -.035em;
+}
+.cuenta--acceso .cuenta__bajada {
+  max-width: 48ch;
+  line-height: 1.65;
+}
+.cuenta--acceso .campo { gap: 8px; margin-bottom: 19px; }
+.cuenta--acceso .campo label { font-size: .9rem; font-weight: 700; }
+.cuenta--acceso .campo input[type="text"],
+.cuenta--acceso .campo input[type="email"],
+.cuenta--acceso .campo input[type="password"],
+.cuenta--acceso .campo input[type="tel"] {
+  min-height: 52px;
+  padding-inline: 16px;
+  border: 1px solid #E5D9EC;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff, #FFFCFE);
+  box-shadow: 0 2px 6px rgba(61, 27, 94, .025);
+}
+.cuenta--acceso .campo input::placeholder { color: #9A8FA6; }
+.cuenta--acceso .campo input:focus {
+  border-color: var(--purpura);
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(138, 79, 191, .13);
+}
+.cuenta--acceso form > .btn-primario {
+  min-height: 54px;
+  margin-top: 5px;
+  font-size: 1rem;
+  background: linear-gradient(120deg, var(--ciruela), #7940A7 58%, var(--purpura));
+  box-shadow: 0 12px 26px rgba(91, 42, 134, .22);
+}
+.cuenta--acceso form > .btn-primario:hover {
+  background: linear-gradient(120deg, #4A2174, var(--ciruela), #7140A0);
+  box-shadow: 0 16px 30px rgba(91, 42, 134, .27);
+}
+.cuenta--acceso .cuenta__enlaces { font-size: .92rem; }
+.cuenta--acceso .cuenta__enlaces a { color: var(--ciruela); text-underline-offset: 3px; }
+.cuenta--acceso .cuenta__enlaces a:hover { color: var(--rosa-cta); text-decoration: underline; }
+.cuenta--acceso .cuenta__enlaces:last-child {
+  margin-top: 20px;
+  padding-top: 17px;
+  border-top: 1px solid #F0E7F3;
+}
+.cuenta--acceso .cuenta__beneficios {
+  border: 1px solid rgba(255, 255, 255, .2);
+  background: linear-gradient(150deg, #4A2174 0%, #5B2A86 52%, #8550B0 100%);
+  box-shadow: 0 22px 50px rgba(61, 27, 94, .18);
+}
+.cuenta--acceso .cuenta__beneficios h2 { line-height: 1.2; }
+@media (min-width: 900px) {
+  .cuenta--acceso { grid-template-columns: minmax(0, 1fr) 350px; align-items: center; }
+  .cuenta--acceso .cuenta__beneficios { position: relative; top: auto; }
+}
+@media (max-width: 520px) {
+  .cuenta--acceso { padding-inline: 18px; }
+  .cuenta--acceso .cuenta__tarjeta { padding: 26px 21px; border-radius: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cuenta--acceso *, .cuenta--acceso *::before, .cuenta--acceso *::after { transition: none !important; }
+}

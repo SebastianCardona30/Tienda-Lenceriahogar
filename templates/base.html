@@ -21,14 +21,13 @@
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   <link rel="stylesheet" href="{% static 'css/cuenta.css' %}">
   <link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
+  <link rel="stylesheet" href="{% static 'css/acceso-premium.css' %}">
   {% block styles_extra %}{% endblock styles_extra %}
   {% block metas_extra %}{% endblock metas_extra %}
 </head>
 <body>
   <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
-
   {% include "includes/header.html" %}
-
   <main class="contenido" id="contenido">
     {% if messages %}
       <div class="contenedor mt-2">
@@ -39,14 +38,11 @@
         </ul>
       </div>
     {% endif %}
-
     {% block contenido %}{% endblock contenido %}
   </main>
-
   {% include "includes/footer.html" %}
   {% include "includes/drawer_carrito.html" %}
   {% include "includes/banner_cookies.html" %}
-
   {% if site.whatsapp %}
     <a class="whatsapp-flotante"
        href="https://wa.me/{{ site.whatsapp }}?text={% filter urlencode %}{% block mensaje_whatsapp %}Hola, quisiera información sobre sus productos de {{ site.nombre_negocio }}.{% endblock mensaje_whatsapp %}{% endfilter %}"
@@ -55,7 +51,6 @@
       <span class="whatsapp-flotante__texto">WhatsApp</span>
     </a>
   {% endif %}
-
   <script src="{% static 'vendor/htmx.min.js' %}"></script>
   <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
   <script src="{% static 'js/main.js' %}"></script>
