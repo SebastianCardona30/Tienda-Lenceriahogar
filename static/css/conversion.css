@@ -1,0 +1,237 @@
+/* =========================================================
+   Mejora de conversión y premium para Ciudad Bonita
+   Capa extra sobre la base visual actual
+   ========================================================= */
+
+.hero {
+  position: relative;
+  padding: 52px 0 40px;
+}
+
+.hero__contenido {
+  display: grid;
+  gap: 30px;
+  align-items: center;
+}
+
+.hero__texto {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(91, 42, 134, 0.08);
+  border: 1px solid rgba(91, 42, 134, 0.12);
+  color: var(--ciruela);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.hero h1 {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.hero h1 em {
+  color: var(--ciruela);
+  font-style: normal;
+  text-shadow: 0 10px 30px rgba(91, 42, 134, 0.14);
+}
+
+.hero__bajada {
+  font-size: 1.08rem;
+  max-width: 60ch;
+  color: var(--texto-2);
+}
+
+.hero__botones {
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.btn,
+.btn-primario,
+.btn-secundario,
+.btn-whatsapp {
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(91, 42, 134, 0.12);
+  transition: transform var(--transicion), box-shadow var(--transicion), background-color var(--transicion), border-color var(--transicion);
+}
+
+.btn:hover,
+.btn-primario:hover,
+.btn-secundario:hover,
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(91, 42, 134, 0.14);
+}
+
+.hero__sellos {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px 0 0;
+  padding: 0;
+}
+
+.hero__sellos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 14px;
+  font-size: 0.92rem;
+  color: var(--texto);
+  box-shadow: var(--sombra-xs);
+}
+
+.hero__sellos li svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ciruela);
+}
+
+.seccion {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.seccion--lavanda {
+  background: linear-gradient(180deg, rgba(241, 232, 250, 0.52), rgba(255, 255, 255, 0.32));
+}
+
+.seccion__encabezado {
+  margin-bottom: 20px;
+}
+
+.seccion__etiqueta {
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ciruela);
+}
+
+.seccion__titulo {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  margin-top: 8px;
+}
+
+.seccion__bajada {
+  margin-top: 8px;
+  color: var(--texto-2);
+}
+
+.categoria-home,
+.tarjeta-producto,
+.beneficio,
+.resena,
+.suscripcion__caja {
+  border: 1px solid var(--borde);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(4px);
+  box-shadow: var(--sombra-xs);
+}
+
+.categoria-home,
+.tarjeta-producto {
+  transition: transform var(--transicion), box-shadow var(--transicion), border-color var(--transicion);
+}
+
+.categoria-home:hover,
+.tarjeta-producto:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra);
+  border-color: rgba(91, 42, 134, 0.16);
+}
+
+.beneficio {
+  padding: 18px 16px;
+  border-radius: 18px;
+}
+
+.beneficio__icono {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--lavanda), rgba(255, 255, 255, 0.9));
+  color: var(--ciruela);
+}
+
+.resena {
+  border-radius: 18px;
+}
+
+.suscripcion__caja {
+  border-radius: 24px;
+  padding: clamp(20px, 3vw, 34px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(241,232,250,0.72));
+}
+
+.suscripcion__form {
+  margin-top: 16px;
+}
+
+.suscripcion__form input {
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.9);
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding-top: 64px;
+    padding-bottom: 48px;
+  }
+
+  .hero__contenido {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .hero__ilustracion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hero__marco {
+    box-shadow: 0 28px 60px rgba(91, 42, 134, 0.14);
+    border-radius: 26px;
+  }
+
+  .hero__flotante {
+    transform: translateY(0);
+  }
+
+  .seccion {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero__botones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__botones .btn,
+  .hero__botones a {
+    width: 100%;
+    justify-content: center;
+  }
+}
