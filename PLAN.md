@@ -98,3 +98,11 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - Fase 3: pagos — `metodo_pago` incluye "pasarela" (primera opción del checkout cuando está habilitada). Contraentrega entra "En preparación"; pasarela y transferencia entran "Pendiente de pago". La pasarela simulada es una pantalla propia con el mismo formato de monto y referencia que la real: con una llave de Wompi se cambia solo la vista y la simulada se oculta sola. Todas las transiciones de estado pasan por `orders.servicios.cambiar_estado` (escribe en `HistorialPedido`).
 - Fase 2: WhatsApp — el botón flotante de `base.html` usa el bloque `mensaje_whatsapp` (con `{% filter urlencode %}`); cada página lo sobreescribe con un mensaje propio (la ficha menciona el producto, la búsqueda la consulta, etc.). Sin número en `SiteConfig.whatsapp` no se muestra.
 - Fase 1: `escapejson` no existe en Django 5.2; el JSON-LD y los textos para JS se arman en la vista con `json.dumps` + `|safe`.
+
+## Ajuste de imagenes y estilo premium (10-nov-2026)
+- [x] seed_demo asigna las 40 fotos WebP reales de media/productos (y sus miniaturas) en lugar de marcadores SVG
+- [x] 8 fotos de categoria generadas con Pillow desde fotos de producto (media/categorias/*.webp)
+- [x] Hero del inicio con foto real (static/img/hero.webp) en lugar de placeholder.svg
+- [x] base.html: hojas premium (carrito-premium, conversion, acceso-premium) cargan al final para sobreescribir la base; carrito-premium.css quedaba sin enlazar
+- [x] Aviso "Imagenes de ejemplo con fines de demostracion" en el pie; nota en README y creditos en docs/fuentes-imagenes.md
+- [x] Suite completa: 316 pruebas OK

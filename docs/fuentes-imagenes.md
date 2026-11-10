@@ -51,3 +51,9 @@ rosa palo y gris perla, toallas verde agua, etc.).
 | Cojín lumbar rectangular 20x40 - Mostaza | 1635065 | ambermb | Pixabay License | Pixabay | https://pixabay.com/photos/1635065/ | Sí (tinte textil) |
 
 Conteo: 40 fotos · 40 productos · 100% verificadas visualmente con colores y categorías exactas.
+
+## Imagenes del sitio (hero y categorias)
+
+- Hero del inicio: Pixabay id 1846251 (bed, bedroom, blanket, books, cover, cozy...), Pixabay Content License, https://pixabay.com/photos/bed-bedroom-blanket-books-cover-1846251/ . Guardada como static/img/hero.webp.
+- Tarjetas de categoria del inicio (media/categorias/*.webp): recortes derivados con Pillow de las propias fotos de producto ya acreditadas en la tabla superior (una por categoria).
+- Todas las imagenes son de ejemplo con fines de demostracion: no representan el producto real. Cambiarlas por fotos propias antes de vender.

@@ -16,11 +16,13 @@
   <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/conversion.css' %}">
   <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   <link rel="stylesheet" href="{% static 'css/cuenta.css' %}">
   <link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
+  {# Capas premium al final: deben sobreescribir la base visual #}
+  <link rel="stylesheet" href="{% static 'css/carrito-premium.css' %}">
+  <link rel="stylesheet" href="{% static 'css/conversion.css' %}">
   <link rel="stylesheet" href="{% static 'css/acceso-premium.css' %}">
   {% block styles_extra %}{% endblock styles_extra %}
   {% block metas_extra %}{% endblock metas_extra %}

@@ -120,6 +120,8 @@ El panel de administración está diseñado en español, claro y accesible desde
 | `python manage.py test` | Ejecuta la batería de más de 305 pruebas automáticas |
 | `python manage.py check` | Verifica la integridad y configuración del sistema |
 | `python manage.py seed_demo` | Carga o refresca datos de prueba realistas (idempotente) |
+
+> **Fotos de la demo:** las imágenes del catálogo son fotos de banco gratuito (Pixabay Content License) usadas solo como ejemplo. No son el producto real y deben cambiarse por fotos propias antes de vender. Los créditos están en `docs/fuentes-imagenes.md`.
 | `python manage.py setup_roles` | Crea o actualiza los roles Administradora, Empleado y Solo lectura |
 | `python manage.py backup_db` | Realiza una copia de seguridad fechada de la BD y la carpeta media/ |
 | `python manage.py cancel_expired_orders` | Cancela pedidos con reserva vencida y devuelve el stock al inventario |

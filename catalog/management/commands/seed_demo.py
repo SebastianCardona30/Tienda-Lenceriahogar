@@ -362,14 +362,21 @@ class Command(BaseCommand):
                 nombre=nombre,
                 defaults={"orden": orden, "activa": True},
             )
-            if creada and not cat.imagen:
-                ruta = base_media / "categorias" / f"{cat.slug}.svg"
-                ruta.parent.mkdir(parents=True, exist_ok=True)
-                ruta.write_text(
-                    CATEGORIA_MARCADOR.format(color=color, nombre=nombre), encoding="utf-8"
-                )
-                cat.imagen.name = f"categorias/{cat.slug}.svg"
-                cat.save()
+            if creada or not cat.imagen or cat.imagen.name.endswith(".svg"):
+                # Foto real (WebP en media/) si existe; si no, marcador SVG.
+                # Se reevalúa en cada corrida para migrar de SVG a foto real.
+                foto_real = base_media / "categorias" / f"{cat.slug}.webp"
+                if foto_real.exists():
+                    cat.imagen.name = f"categorias/{cat.slug}.webp"
+                    cat.save()
+                elif creada and not cat.imagen:
+                    ruta = base_media / "categorias" / f"{cat.slug}.svg"
+                    ruta.parent.mkdir(parents=True, exist_ok=True)
+                    ruta.write_text(
+                        CATEGORIA_MARCADOR.format(color=color, nombre=nombre), encoding="utf-8"
+                    )
+                    cat.imagen.name = f"categorias/{cat.slug}.svg"
+                    cat.save()
             categorias[nombre] = cat
             for i, sub in enumerate(hijas, start=1):
                 Categoria.objects.get_or_create(
@@ -409,23 +416,54 @@ class Command(BaseCommand):
             prod.save()
             if creada:
                 creados += 1
-                # Fotos marcador de posición (dos fotos por producto)
+                # Fotos del producto: primero las reales (WebP ya optimizadas
+                # en media/productos, versionadas en git); si no existen, dos
+                # marcadores SVG de posición para no dejar la ficha vacía.
                 from catalog.models import FotoProducto
 
-                for n_foto in (1, 2):
+                carpeta_fotos = base_media / "productos"
+                reales = sorted(
+                    p for p in carpeta_fotos.glob(f"{prod.slug}-*.webp")
+                    if p.stem.rsplit("-", 1)[-1].isdigit()
+                )
+                for n_foto, ruta in enumerate(reales, start=1):
                     if prod.fotos.count() >= n_foto:
                         continue
-                    color = COLORES[(idx + n_foto) % len(COLORES)]
-                    ruta = base_media / "productos" / f"{prod.slug}-{n_foto}.svg"
-                    ruta.parent.mkdir(parents=True, exist_ok=True)
-                    ruta.write_text(
-                        CATEGORIA_MARCADOR.format(color=color, nombre=nombre[:40]),
-                        encoding="utf-8",
-                    )
                     foto = FotoProducto(producto=prod, orden=n_foto,
                                         alt=f"{nombre} - foto {n_foto}")
-                    foto.imagen.name = f"productos/{prod.slug}-{n_foto}.svg"
+                    foto.imagen.name = f"productos/{ruta.name}"
+                    mini = carpeta_fotos / "miniaturas" / ruta.name
+                    if mini.exists():
+                        foto.miniatura.name = f"productos/miniaturas/{ruta.name}"
                     foto.save()
+                if not reales:
+                    for n_foto in (1, 2):
+                        if prod.fotos.count() >= n_foto:
+                            continue
+                        color = COLORES[(idx + n_foto) % len(COLORES)]
+                        ruta = base_media / "productos" / f"{prod.slug}-{n_foto}.svg"
+                        ruta.parent.mkdir(parents=True, exist_ok=True)
+                        ruta.write_text(
+                            CATEGORIA_MARCADOR.format(color=color, nombre=nombre[:40]),
+                            encoding="utf-8",
+                        )
+                        foto = FotoProducto(producto=prod, orden=n_foto,
+                                            alt=f"{nombre} - foto {n_foto}")
+                        foto.imagen.name = f"productos/{prod.slug}-{n_foto}.svg"
+                        foto.save()
+            else:
+                # Migra fotos SVG heredadas a las reales (WebP) sin duplicar
+                from catalog.models import FotoProducto
+
+                carpeta_fotos = base_media / "productos"
+                for foto in prod.fotos.exclude(imagen__endswith=".webp"):
+                    ruta = carpeta_fotos / f"{prod.slug}-{foto.orden}.webp"
+                    if ruta.exists():
+                        foto.imagen.name = f"productos/{ruta.name}"
+                        mini = carpeta_fotos / "miniaturas" / ruta.name
+                        if mini.exists():
+                            foto.miniatura.name = f"productos/miniaturas/{ruta.name}"
+                        foto.save()
 
             # Variantes
             for talla, color in variantes:
