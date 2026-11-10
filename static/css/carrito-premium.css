@@ -188,11 +188,19 @@
 
 .resumen .btn-bloque,
 .checkout .btn-bloque,
-.resumen .btn {
+.resumen .btn-bloque,
+.resumen > .btn {
   width: 100%;
 }
 
-.resumen .btn {
+/* Dentro de una fila (input + botón) el botón no debe estirarse:
+   si lo hace, aplasta el input y desborda el panel fuera de la pantalla. */
+.campo-fila .btn {
+  width: auto;
+  flex: none;
+}
+
+.resumen > .btn {
   margin-top: 10px;
 }
 
@@ -202,6 +210,12 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.9fr);
   gap: 22px;
   align-items: start;
+}
+
+/* Evita que el contenido (refs largas, precios) empuje las columnas fuera */
+.carrito__grid > *,
+.checkout__grid > * {
+  min-width: 0;
 }
 
 .linea {
@@ -353,6 +367,11 @@
   border: none;
   margin: 0;
   padding: 0;
+}
+
+/* display:grid anula el atributo hidden del checkout de 3 pasos */
+.paso-contenido[hidden] {
+  display: none;
 }
 
 .paso-contenido legend {

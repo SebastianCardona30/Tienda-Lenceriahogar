@@ -99,6 +99,11 @@
   box-shadow: var(--sombra-xs);
 }
 
+/* display:grid anula el atributo hidden del checkout de 3 pasos */
+.paso-contenido[hidden] {
+  display: none;
+}
+
 .paso-contenido legend {
   padding: 0 8px;
   font-weight: 800;

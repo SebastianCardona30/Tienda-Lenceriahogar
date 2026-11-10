@@ -50,8 +50,30 @@
       </div>
     {% endif %}
 
-    <a class="btn btn-primario btn-bloque" href="{{ producto.get_absolute_url }}">
-      {% if producto.agotado %}Ver producto{% else %}Ver y agregar{% endif %}
-    </a>
+    {% with variantes=producto.variantes_activas %}
+      {% if variantes %}
+        <ul class="tarjeta-producto__tallas" aria-label="Tallas disponibles">
+          {% for v in variantes|slice:":5" %}
+            <li {% if not v.disponible %}class="talla--agotada"{% endif %}>{{ v.talla_label }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <div class="tarjeta-producto__acciones">
+        {% with primera=variantes|first %}
+          {% if primera and primera.disponible %}
+            <form method="post" action="{% url 'cart:agregar' %}">
+              {% csrf_token %}
+              <input type="hidden" name="sku" value="{{ primera.sku }}">
+              <input type="hidden" name="cantidad" value="1">
+              <button type="submit" class="btn btn-primario btn-bloque">Agregar al carrito</button>
+            </form>
+          {% else %}
+            <a class="btn btn-primario btn-bloque" href="{{ producto.get_absolute_url }}">Ver producto</a>
+          {% endif %}
+        {% endwith %}
+        <a class="btn btn-secundario btn-bloque" href="{{ producto.get_absolute_url }}">Ver tallas</a>
+      </div>
+    {% endwith %}
   </div>
 </article>

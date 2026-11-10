@@ -103,6 +103,15 @@ ul.sugerencias li:last-child a { border-bottom: none; }
 .tarjeta-producto:hover .tarjeta-producto__foto img { transform: scale(1.04); }
 .tarjeta-producto__etiquetas { position: absolute; top: 8px; left: 8px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .tarjeta-producto__detalle { font-size: 0.82rem; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tarjeta-producto__tallas { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 2px 0 0; padding: 0; }
+.tarjeta-producto__tallas li {
+  font-size: 0.72rem; font-weight: 700; color: var(--ciruela);
+  background: var(--lavanda); border: 1px solid var(--borde);
+  border-radius: 999px; padding: 3px 10px;
+}
+.tarjeta-producto__tallas .talla--agotada { color: var(--texto-2); text-decoration: line-through; opacity: 0.7; }
+.tarjeta-producto__acciones { display: grid; gap: 8px; margin-top: 8px; }
+.tarjeta-producto__acciones .btn { min-height: 42px; padding: 8px 14px; font-size: 0.85rem; }
 .tarjeta-producto__precios { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .nota-oferta { font-size: 0.72rem; color: var(--texto-2); }
 
