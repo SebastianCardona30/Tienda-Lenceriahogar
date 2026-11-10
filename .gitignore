@@ -10,6 +10,8 @@ db.sqlite3-*
 media/
 staticfiles/
 backups/
+scripts/candidatas/descargas_raw/
+scripts/candidatas/cache_api/
 
 # Vercel (salida de build; se regenera en cada despliegue)
 .vercel/
