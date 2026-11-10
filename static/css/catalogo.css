@@ -1315,3 +1315,62 @@ ul.sugerencias li:last-child a { border-bottom: none; }
   body:has(.barra-compra-movil) { padding-bottom: 78px; }
   body:has(.barra-compra-movil) .whatsapp-flotante { bottom: 88px; }
 }
+
+/* =========================================================
+   Lote búsqueda: marca en tarjeta, chips de etiquetas,
+   estado vacío con sugerencias y filtro de marca colapsable
+   ========================================================= */
+.tarjeta-producto__marca {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purpura);
+}
+
+.ficha__etiquetas { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.chip--tag { font-size: 0.78rem; padding: 5px 12px; }
+.chip--tag:hover { background: var(--rosa-suave); border-color: var(--rosa-cta); color: var(--rosa-cta); }
+
+.estado-vacio__sub { font-weight: 700; color: var(--ciruela); margin-bottom: 10px; }
+.estado-vacio__sugerencias {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 0 auto 18px;
+  padding: 0;
+  max-width: 380px;
+}
+.estado-vacio__sugerencias a {
+  display: block;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 10px 14px;
+  color: var(--ciruela);
+  font-weight: 600;
+  transition: border-color var(--transicion), transform var(--transicion);
+}
+.estado-vacio__sugerencias a:hover { border-color: var(--purpura); transform: translateY(-1px); }
+.estado-vacio__etiquetas .chips { justify-content: center; margin-bottom: 18px; }
+
+.filtro-detalle__titulo {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--texto-2);
+  padding: 6px 10px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--crema);
+  transition: border-color var(--transicion);
+}
+.filtro-detalle__titulo::-webkit-details-marker { display: none; }
+.filtro-detalle__titulo::after { content: "▾"; margin-left: auto; transition: transform var(--transicion); }
+.filtro-detalle[open] .filtro-detalle__titulo::after { transform: rotate(180deg); }
+.filtro-detalle__titulo:hover { border-color: var(--purpura); }
+.filtro-detalle__titulo small { color: var(--texto-2); font-weight: 400; }
+.filtro-detalle__cuerpo { display: grid; gap: 2px; margin-top: 8px; max-height: 260px; overflow-y: auto; }

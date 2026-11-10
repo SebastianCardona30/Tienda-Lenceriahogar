@@ -5,7 +5,10 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
-from catalog.filters import aplicar_busqueda, aplicar_filtros, aplicar_orden, queryset_base
+from catalog.filters import (
+    anotar_relevancia, aplicar_busqueda, aplicar_filtros, aplicar_orden,
+    etiquetas_populares, queryset_base, sugerencias_por_busqueda,
+)
 from catalog.models import Categoria, Producto, Variante
 from catalog.search import busqueda_tolerante, expandir_consulta, normalizar_texto
 from promotions.models import Cupon
@@ -64,6 +67,85 @@ class BusquedaTests(TestCase):
 
         aplicar_busqueda(queryset_base(), "producto que no existe xyz")
         self.assertTrue(BusquedaSinResultados.objects.filter(consulta__icontains="xyz").exists())
+
+
+class BusquedaAvanzadaTests(TestCase):
+    """Búsqueda multi-palabra, por marca, con errores de ortografía y relevancia."""
+
+    def setUp(self):
+        self.sabana = crear_producto(
+            "Juego de sábanas 400 hilos", marca="Wamsutta",
+            etiquetas="sábanas, queen, algodón",
+        )
+        self.toalla = crear_producto(
+            "Toalla de playa gigante", marca="Christy",
+            etiquetas="toalla, playa, verano",
+        )
+
+    def test_multipalabra_sin_frase_completa(self):
+        # La frase "sabanas 400" no existe como tal, pero sí las dos palabras
+        qs = aplicar_busqueda(queryset_base(), "sabanas 400", registrar_vacios=False)
+        self.assertIn(self.sabana, qs)
+        self.assertNotIn(self.toalla, qs)
+
+    def test_consulta_por_marca(self):
+        qs = aplicar_busqueda(queryset_base(), "christy", registrar_vacios=False)
+        self.assertIn(self.toalla, qs)
+        self.assertNotIn(self.sabana, qs)
+
+    def test_error_de_ortografia_encuentra_el_producto(self):
+        edredon = crear_producto("Edredón doble plumón", etiquetas="edredón, invierno")
+        qs = aplicar_busqueda(queryset_base(), "edreton", registrar_vacios=False)
+        self.assertIn(edredon, qs)
+
+    def test_consulta_inventada_no_devuelve_todo(self):
+        qs = aplicar_busqueda(queryset_base(), "xyzcosaqq", registrar_vacios=False)
+        self.assertEqual(qs.count(), 0)
+
+    def test_orden_por_relevancia(self):
+        qs = aplicar_busqueda(queryset_base(), "toalla playa", registrar_vacios=False)
+        qs = aplicar_orden(anotar_relevancia(qs, "toalla playa"), "")
+        self.assertEqual(list(qs)[0], self.toalla)
+
+
+class EstadoVacioTests(TestCase):
+    """El estado vacío sugiere productos parecidos y etiquetas para volver a intentar."""
+
+    def setUp(self):
+        self.edredon = crear_producto(
+            "Edredón doble plumón 200 gr - Blanco",
+            etiquetas="edredón, invierno, doble",
+        )
+
+    def test_sugerencias_se_parecen_a_la_busqueda(self):
+        self.assertIn(self.edredon, sugerencias_por_busqueda("edredoncitos"))
+
+    def test_etiquetas_populares(self):
+        self.assertIn("invierno", etiquetas_populares())
+
+    def test_plantilla_muestra_sugerencias(self):
+        r = self.client.get(reverse("catalog:buscar"), {"q": "edredoncitos"})
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "¿Quizá buscabas esto?")
+        self.assertContains(r, "Edredón doble plumón 200 gr - Blanco")
+
+    def test_plantilla_muestra_etiquetas_cuando_no_hay_nada(self):
+        r = self.client.get(reverse("catalog:buscar"), {"q": "xyzcosaqq"})
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "No encontramos productos")
+        self.assertContains(r, "Prueba con:")
+
+    def test_tarjeta_muestra_la_marca(self):
+        crear_producto("Almohada suave", marca="Serta", etiquetas="almohada")
+        r = self.client.get(reverse("catalog:tienda"))
+        self.assertContains(r, "tarjeta-producto__marca")
+
+    def test_ficha_muestra_las_etiquetas_como_chips(self):
+        crear_producto("Almohada suave", marca="Serta", etiquetas="almohada, algodón")
+        prod = Producto.objects.get(nombre="Almohada suave")
+        r = self.client.get(prod.get_absolute_url())
+        self.assertContains(r, "chip--tag")
+        self.assertContains(r, "?q=almohada")
 
 
 class FiltrosTests(TestCase):

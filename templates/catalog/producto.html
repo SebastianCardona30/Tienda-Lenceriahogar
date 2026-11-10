@@ -57,6 +57,13 @@
     {# ============ INFORMACIÓN ============ #}
     <div class="ficha__info">
       {% if producto.marca %}<p class="ficha__marca">{{ producto.marca }}</p>{% endif %}
+      {% if producto.etiquetas %}
+        <div class="ficha__etiquetas" aria-label="Etiquetas del producto">
+          {% for t in producto.etiquetas|separar %}
+            <a class="chip chip--tag" href="{% url 'catalog:buscar' %}?q={{ t|urlencode }}">{{ t }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
       <h1>{{ producto.nombre }}</h1>
 
       {% if producto.total_resenas %}

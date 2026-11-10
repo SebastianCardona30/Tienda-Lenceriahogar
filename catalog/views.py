@@ -7,8 +7,9 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from catalog.filters import (
-    ORDENES, aplicar_busqueda, aplicar_filtros, aplicar_orden, conteos_por_opcion,
-    opciones_filtros, queryset_base,
+    ORDENES, anotar_relevancia, aplicar_busqueda, aplicar_filtros, aplicar_orden,
+    conteos_por_opcion, opciones_filtros, queryset_base, etiquetas_populares,
+    sugerencias_por_busqueda,
 )
 from catalog.models import Categoria, Combo, Producto, Resena, Variante
 
@@ -22,11 +23,20 @@ def _contexto_listado(request, qs, titulo, contexto_extra=None):
         qs = aplicar_busqueda(qs, consulta)
 
     qs, filtros_activos = aplicar_filtros(qs, request.GET)
+    qs = anotar_relevancia(qs, consulta)
     orden = request.GET.get("orden", "")
     qs = aplicar_orden(qs, orden)
 
     paginador = Paginator(qs, POR_PAGINA)
     pagina = paginador.get_page(request.GET.get("pagina", 1))
+
+    # Estado vacío: productos parecidos y etiquetas para intentar de nuevo
+    sugerencias = []
+    etiquetas = []
+    if not paginador.count:
+        if consulta:
+            sugerencias = sugerencias_por_busqueda(consulta)
+        etiquetas = etiquetas_populares()
 
     # Chips de filtros activos, con su enlace para quitarlos uno a uno
     chips = []
@@ -54,6 +64,8 @@ def _contexto_listado(request, qs, titulo, contexto_extra=None):
         "opciones": opciones_filtros(),
         "conteos": conteos_por_opcion(queryset_base()),
         "total_resultados": paginador.count,
+        "sugerencias": sugerencias,
+        "etiquetas_populares": etiquetas,
         "es_htmx": request.headers.get("HX-Request") == "true",
         "params_base": request.GET.copy(),
     }

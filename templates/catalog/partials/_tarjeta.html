@@ -25,6 +25,7 @@
   </a>
 
   <div class="tarjeta-producto__cuerpo">
+    {% if producto.marca %}<p class="tarjeta-producto__marca">{{ producto.marca }}</p>{% endif %}
     <a class="tarjeta-producto__nombre" href="{{ producto.get_absolute_url }}">{{ producto.nombre }}</a>
     {% if producto.descripcion_corta %}<p class="tarjeta-producto__detalle">{{ producto.descripcion_corta }}</p>{% endif %}
 

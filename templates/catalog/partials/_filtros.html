@@ -80,12 +80,21 @@
     {% if opciones.marcas %}
     <fieldset class="filtro">
       <legend>Marca</legend>
-      {% for m in opciones.marcas %}
-        <label class="filtro__opcion">
-          <input type="radio" name="marca" value="{{ m }}" {% if request.GET.marca == m %}checked{% endif %}>
-          <span>{{ m }}</span>
-        </label>
-      {% endfor %}
+      <details class="filtro-detalle" {% if request.GET.marca or conteos.marcas|length > 8 %}open{% endif %}>
+        <summary class="filtro-detalle__titulo">
+          {% if request.GET.marca %}{{ request.GET.marca }}{% else %}Todas las marcas{% endif %}
+          <small>({{ opciones.marcas|length }})</small>
+        </summary>
+        <div class="filtro-detalle__cuerpo">
+          {% for m in opciones.marcas %}
+            <label class="filtro__opcion">
+              <input type="radio" name="marca" value="{{ m }}" {% if request.GET.marca == m %}checked{% endif %}>
+              <span>{{ m }}</span>
+              {% with c=conteos.marcas|dictkey:m %}{% if c %}<small class="filtro__conteo">{{ c }}</small>{% endif %}{% endwith %}
+            </label>
+          {% endfor %}
+        </div>
+      </details>
     </fieldset>
     {% endif %}
 

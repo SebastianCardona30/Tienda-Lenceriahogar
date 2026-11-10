@@ -75,6 +75,15 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] Lote 6 — Admin: panel, reportes e importación CSV adaptados a la paleta de la tienda y al tema claro/oscuro de django-unfold (`.dark`)
 - [x] Cierre: `manage.py check` limpio, 305/305 pruebas y auditoría sin desbordes a 360/768/1280 px en cada lote
 
+## Catálogo y búsqueda avanzada (noviembre 2026)
+- [x] Búsqueda multi-palabra (AND) con ponderación de relevancia (100/90/80/60/30) y sinónimos por palabra
+- [x] Corrección tolerante de ortografía con umbral por longitud para evitar falsos positivos
+- [x] Asignación de 24 marcas globales verificadas (Wamsutta, Frette, Calvin Klein, etc.) y etiquetas en los 40 productos
+- [x] Filtro de marcas con detalle colapsable y conteos exactos
+- [x] Estado vacío enriquecido: sugerencias "¿Quizá buscabas esto?" y chips de etiquetas populares
+- [x] Documentación de fuentes de imágenes y marcas en `docs/`
+- [x] 316/316 pruebas automáticas pasando al 100%
+
 ## Decisiones anotadas (opción más simple y segura)
 - Python del equipo: 3.14.7 (no hay 3.12 instalada); Django 5.2.18 instalado y verificado funcionando sobre 3.14. Spec dice 3.12: se usa la versión disponible porque el código no depende de 3.12 en particular.
 - git no estaba instalado en la máquina; se instaló Git 2.56.0.3 (gratuito) con winget para poder cumplir los commits por fase.

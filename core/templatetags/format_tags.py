@@ -13,6 +13,14 @@ def dictkey(d, clave):
 
 
 @register.filter
+def separar(texto, separador=","):
+    """Divide un texto en lista: 'sábanas, queen' -> ['sábanas', 'queen']."""
+    if not texto:
+        return []
+    return [p.strip() for p in str(texto).split(separador) if p.strip()]
+
+
+@register.filter
 def cop(valor):
     """
     Formato de moneda colombiana sin decimales: 89900 -> "$89.900".

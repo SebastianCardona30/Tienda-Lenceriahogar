@@ -61,7 +61,26 @@
       {% if not productos %}
         <div class="estado-vacio">
           <h2>No encontramos productos con esa búsqueda</h2>
-          <p>Prueba con otra palabra, quita algún filtro o escríbenos: quizás lo tenemos y aún no está publicado.</p>
+          {% if consulta and sugerencias %}
+            <p class="estado-vacio__sub">¿Quizá buscabas esto?</p>
+            <ul class="estado-vacio__sugerencias">
+              {% for s in sugerencias %}
+                <li><a href="{{ s.get_absolute_url }}">{{ s.nombre }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>Prueba con otra palabra, quita algún filtro o escríbenos: quizás lo tenemos y aún no está publicado.</p>
+          {% endif %}
+          {% if etiquetas_populares %}
+            <div class="estado-vacio__etiquetas">
+              <p class="estado-vacio__sub">Prueba con:</p>
+              <div class="chips">
+                {% for t in etiquetas_populares %}
+                  <a class="chip chip--tag" href="{% url 'catalog:buscar' %}?q={{ t|urlencode }}">{{ t }}</a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
           {% if site.whatsapp %}
             <a class="btn btn-whatsapp" href="https://wa.me/{{ site.whatsapp }}?text={{ 'Hola, busqué un producto en su tienda y no lo encontré: '|add:consulta|urlencode }}" target="_blank" rel="noopener">Preguntar por WhatsApp</a>
           {% endif %}

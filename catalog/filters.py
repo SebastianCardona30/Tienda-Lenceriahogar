@@ -5,12 +5,13 @@ Todo se calcula en el servidor con el ORM de Django (sin servicios externos)
 para que funcione igual en SQLite y PostgreSQL.
 """
 from django.db.models import (
-    Avg, BooleanField, Count, DecimalField, F, Min, Q, Sum, Value,
+    Avg, BooleanField, Case, Count, DecimalField, F, IntegerField, Min, Q, Sum,
+    Value, When,
 )
 from django.db.models.functions import Coalesce
 
 from catalog.models import BusquedaSinResultados, Producto, Sinonimo
-from catalog.search import busqueda_tolerante, expandir_consulta, normalizar_texto
+from catalog.search import busqueda_tolerante, normalizar_texto
 
 # Opciones de orden disponibles en la tienda
 ORDENES = {
@@ -46,39 +47,145 @@ def queryset_base():
     )
 
 
+def _grupos_sinonimos():
+    """Sinónimos activos como listas de palabras normalizadas."""
+    return [[normalizar_texto(p) for p in s.lista()] for s in Sinonimo.objects.filter(activo=True)]
+
+
+def _alternativas(palabra, grupos):
+    """La palabra y sus sinónimos: 'edredon' -> ['edredon', 'cubrelecho', 'plumon']."""
+    alts = [palabra]
+    for grupo in grupos:
+        if palabra in grupo:
+            alts.extend(g for g in grupo if g)
+    salida, vistas = [], set()
+    for a in alts:
+        if a and a not in vistas:
+            vistas.add(a)
+            salida.append(a)
+    return salida
+
+
 def aplicar_busqueda(qs, consulta, registrar_vacios=True):
     """
-    Filtra por texto con tolerancia a errores y sinónimos.
-    Si no hay resultados, registra la búsqueda para verla en el admin.
+    Filtra por texto en cascada: todas las palabras a la vez (AND), con
+    sinónimos por palabra y tolerancia a errores de ortografía.
+
+    Así 'juego sabanas queen' encuentra lo que contiene las tres palabras,
+    aunque la frase completa no exista en ningún producto.
+    Si nada coincide, devuelve un queryset vacío.
     """
     consulta = normalizar_texto(consulta)
     if not consulta:
         return qs
 
-    sinonimos = [s.lista() for s in Sinonimo.objects.filter(activo=True)]
-    palabras = expandir_consulta(consulta, sinonimos)
+    grupos = _grupos_sinonimos()
+    palabras = [p for p in consulta.split() if len(p) >= 3] or consulta.split()
 
-    condicion = Q()
+    candidatos = None  # se carga solo si hace falta corregir ortografía
+    condiciones = []
     for palabra in palabras:
-        condicion |= Q(busqueda__icontains=palabra)
+        alternativas = _alternativas(palabra, grupos)
+        exactas = [a for a in alternativas if qs.filter(busqueda__icontains=a).exists()]
+        if exactas:
+            cond = Q()
+            for a in exactas:
+                cond |= Q(busqueda__icontains=a)
+            condiciones.append(cond)
+            continue
 
-    resultados = qs.filter(condicion).distinct()
+        # Sin coincidencia exacta: intenta corregir el error de ortografía
+        # (solo en consultas cortas, para no "adivinar" en frases largas)
+        if len(palabras) <= 3:
+            if candidatos is None:
+                candidatos = list(qs.values_list("busqueda", flat=True)[:3000])
+                # Palabras sueltas del catálogo: 'edreton' -> 'edredon'
+                vocabulario = sorted({
+                    w.strip(".,;:/()")
+                    for texto in candidatos
+                    for w in texto.split()
+                    if len(w.strip(".,;:/()")) > 3
+                })
+            # Se exige longitud parecida para no "adivinar" con palabras
+            # cortas distintas ('xyzcosa' no debe encontrar 'rosa')
+            parecidos = [
+                w for w in busqueda_tolerante(palabra, vocabulario, umbral=80)
+                if abs(len(w) - len(palabra)) <= 1
+            ]
+            if parecidos:
+                cond = Q()
+                for w in parecidos:
+                    cond |= Q(busqueda__icontains=w)
+                condiciones.append(cond)
+        # La palabra que no coincide se descarta: mejor mostrar algo parecido
+        # que no mostrar nada.
 
-    # Si no encontró nada y la consulta es corta, busca parecidos (typos)
-    if not resultados.exists() and len(consulta.split()) <= 3:
-        candidatos = list(qs.values_list("busqueda", flat=True)[:3000])
-        parecidos = busqueda_tolerante(consulta, candidatos)
-        if parecidos:
-            condicion_p = Q()
-            for p in parecidos:
-                for sub in p.split():
-                    if len(sub) > 3:
-                        condicion_p |= Q(busqueda__icontains=sub)
-            resultados = qs.filter(condicion_p).distinct()
+    if condiciones:
+        combinada = condiciones[0]
+        for c in condiciones[1:]:
+            combinada &= c
+        resultados = qs.filter(combinada).distinct()
+    else:
+        resultados = qs.none()
 
     if not resultados.exists() and registrar_vacios:
         BusquedaSinResultados.objects.create(consulta=consulta)
     return resultados
+
+
+def anotar_relevancia(qs, consulta=""):
+    """
+    Puntaje de relevancia para el orden por defecto ("Relevancia").
+
+    100: el texto de búsqueda empieza igual que el producto (la marca cuenta,
+    porque también está en el campo busqueda), 90: coincide la marca exacta,
+    80: contiene la frase completa, 60: contiene todas las palabras,
+    30: contiene alguna palabra.
+    """
+    consulta = normalizar_texto(consulta)
+    if not consulta:
+        return qs.annotate(relevancia=Value(0, output_field=IntegerField()))
+
+    palabras = [p for p in consulta.split() if len(p) >= 3] or consulta.split()
+    casos = [
+        When(busqueda__istartswith=consulta, then=Value(100)),
+        When(marca__iexact=consulta, then=Value(90)),
+        When(busqueda__icontains=consulta, then=Value(80)),
+    ]
+    if len(palabras) > 1:
+        todas = Q()
+        for p in palabras:
+            todas &= Q(busqueda__icontains=p)
+        casos.append(When(todas, then=Value(60)))
+    alguna = Q()
+    for p in palabras:
+        alguna |= Q(busqueda__icontains=p)
+    casos.append(When(alguna, then=Value(30)))
+
+    return qs.annotate(
+        relevancia=Case(*casos, default=Value(0), output_field=IntegerField())
+    )
+
+
+def sugerencias_por_busqueda(consulta, limite=4):
+    """Productos cuyo nombre se parece a la búsqueda (estado vacío)."""
+    productos = list(Producto.objects.filter(estado="publicado"))
+    nombres = {normalizar_texto(p.nombre): p for p in productos}
+    parecidos = busqueda_tolerante(consulta, list(nombres), umbral=55)
+    return [nombres[n] for n in parecidos[:limite]]
+
+
+def etiquetas_populares(limite=10):
+    """Etiquetas más usadas por los productos publicados (chips del estado vacío)."""
+    from collections import Counter
+
+    contador = Counter()
+    for texto in Producto.objects.filter(estado="publicado").values_list("etiquetas", flat=True):
+        for etiqueta in texto.split(","):
+            etiqueta = etiqueta.strip()
+            if etiqueta:
+                contador[etiqueta] += 1
+    return [etiqueta for etiqueta, _n in contador.most_common(limite)]
 
 
 def opciones_filtros():
@@ -96,9 +203,14 @@ def opciones_filtros():
             v[campo] for v in publicadas if v[campo] not in (None, "")
         })
 
+    # .order_by() vacío: Meta.ordering ('-creado') se colaría en el SELECT y
+    # rompería el DISTINCT (marcas repetidas y conteos en 1)
     marcas = sorted(
         Producto.objects.filter(estado="publicado")
-        .exclude(marca="").values_list("marca", flat=True).distinct()
+        .exclude(marca="")
+        .order_by()
+        .values_list("marca", flat=True)
+        .distinct()
     )
     return {
         "tallas": lista("variantes__talla"),
@@ -211,6 +323,8 @@ def conteos_por_opcion(qs):
     Contador de productos por opción de filtro (talla, color, material, marca).
     Se calcula sobre el listado base (con búsqueda aplicada, sin filtros).
     """
+    # Sin orden: si no, 'creado' entra al GROUP BY y cada cuenta queda en 1
+    qs = qs.order_by()
     variantes = qs.filter(variantes__activa=True)
     return {
         "tallas": {

@@ -128,6 +128,171 @@ PRODUCTOS = [
      [("Otra medida", "40 x 150 cm")]),
 ]
 
+# Marca global verificada y etiquetas de búsqueda por producto.
+# Las marcas son reales (sitios oficiales verificados); ver docs/fuentes-marcas.md.
+DATOS_PRODUCTO = {
+    "Juego de sábanas 400 hilos - Blanco nacar": (
+        "Wamsutta",
+        "sábanas, 400 hilos, algodón, queen, blanco nacar, matrimonio, hotel, regalo",
+    ),
+    "Juego de sábanas algodón peinado - Gris perla": (
+        "Calvin Klein Home",
+        "sábanas, algodón peinado, 300 hilos, gris perla, queen, semidoble, suave",
+    ),
+    "Sábana ajustable con cierre - Rosa palo": (
+        "IKEA",
+        "sábana ajustable, cierre, rosa palo, antiarrugas, sencilla, semidoble, doble",
+    ),
+    "Juego de sábanas 300 hilos estampado floral": (
+        "H&M Home",
+        "sábanas, 300 hilos, floral, estampado, queen, doble, algodón",
+    ),
+    "Sábana sencilla lisas - 6 colores": (
+        "IKEA",
+        "sábana sencilla, lisa, 6 colores, lavanda, blanco, vino, económica",
+    ),
+    "Edredón doble plumón 200 gr - Blanco": (
+        "Pottery Barn",
+        "edredón, plumón, 200 gr, doble, blanco, invierno, calientico",
+    ),
+    "Edredón semidoble sintético acolchado": (
+        "Pottery Barn",
+        "edredón, sintético, acolchado, semidoble, crema, antialergia",
+    ),
+    "Funda para edredón 400 hilos - Estampado lunares": (
+        "Zara Home",
+        "funda edredón, 400 hilos, lunares, estampado, doble, queen, algodón",
+    ),
+    "Edredón infantil plano - Motivos de flores": (
+        "H&M Home",
+        "edredón infantil, flores, niños, semidoble, regalo",
+    ),
+    "Cobija acolchada doble - Beige": (
+        "Pendleton",
+        "cobija, acolchada, doble, beige, invierno, frazada",
+    ),
+    "Cubrelechos semidoble jacquard": (
+        "Ralph Lauren Home",
+        "cubrelecho, jacquard, semidoble, azul rey, doble, decorativo",
+    ),
+    "Cobija pesada tipo manta - Gris": (
+        "Pendleton",
+        "cobija pesada, manta, gris, antiestres, doble, semidoble",
+    ),
+    "Cubrelechos King bordado en esquinas": (
+        "Frette",
+        "cubrelecho, king, bordado, esquinas, blanco, vino, premium",
+    ),
+    "Almohada rectangular 50x65 - Fibra siliconada": (
+        "Serta",
+        "almohada, fibra siliconada, 50x65, rectangular, suave",
+    ),
+    "Almohada ortopédica viscoelástica": (
+        "Tempur",
+        "almohada, ortopédica, viscoelástica, cervical, apoyo, salud",
+    ),
+    "Protector de colchón impermeable Queen": (
+        "Sealy",
+        "protector de colchón, impermeable, queen, hipoalergénico, antiácaros",
+    ),
+    "Pack de 2 almohadas con funda bordada": (
+        "Casper",
+        "almohada, pack 2, funda bordada, bordado, regalo, matrimonio",
+    ),
+    "Toalla de baño 500 g/m² - Blanco": (
+        "1888 Mills",
+        "toalla, 500 g, algodón, blanco, absorbente, baño",
+    ),
+    "Toalla cara y mano set x2 - Verde agua": (
+        "Christy",
+        "toalla, cara, mano, set, verde agua, algodón, regalo",
+    ),
+    "Toalla de playa gigante 90x180": (
+        "Dock & Bay",
+        "toalla de playa, gigante, 90x180, verano, playa, algodón",
+    ),
+    "Toalla de baño 600 g/m² premium": (
+        "Wamsutta",
+        "toalla, 600 g, premium, algodón peinado, marfil, ceniza, hotel",
+    ),
+    "Set de 4 toallas de baño - Línea hotel": (
+        "Christy",
+        "toalla, set 4, línea hotel, blanco, gris perla, algodón, regalo",
+    ),
+    "Cortina de baño PEVA con imanes": (
+        "IKEA",
+        "cortina de baño, PEVA, imanes, impermeable, ducha",
+    ),
+    "Tapete de baño antideslizante - Blanco": (
+        "Gorilla Grip",
+        "tapete, antideslizante, blanco, baño, microfibra",
+    ),
+    "Set de 3 accesorios de baño con soporte": (
+        "iDesign",
+        "accesorios de baño, set 3, soporte, organizador",
+    ),
+    "Cortina de baño textil con diseño de piedras": (
+        "H&M Home",
+        "cortina de baño, textil, piedras, decorativo, ducha",
+    ),
+    "Tapete masajeador de goma - Gris": (
+        "Mohawk Home",
+        "tapete, masajeador, goma, gris, antideslizante, baño",
+    ),
+    "Cortina blackout 140x250 - Vino": (
+        "Eclipse",
+        "cortina, blackout, oscureciente, 140x250, vino, ventana",
+    ),
+    "Cortina con vuelo y ojales - Crema": (
+        "Levolor",
+        "cortina, vuelo, ojales, crema, clásico, ventana",
+    ),
+    "Cortina voile con paneles - Blanco": (
+        "IKEA",
+        "cortina, voile, paneles, blanco, translúcido, luminoso",
+    ),
+    "Cortina triple capa blackout estampada": (
+        "Eclipse",
+        "cortina, triple capa, blackout, estampada, térmico, ventana",
+    ),
+    "Cojín decorativo cuadrado 45x45 - Terracota": (
+        "Umbra",
+        "cojín, decorativo, 45x45, terracota, sala, moderno",
+    ),
+    "Pack de 2 cojines redondos - Rosa antiguo": (
+        "Pier 1",
+        "cojín, pack 2, redondo, rosa antiguo, decorativo, regalo",
+    ),
+    "Mantel rectangular 6 plazas - Lino natural": (
+        "Williams Sonoma",
+        "mantel, lino, natural, 6 plazas, 140x220, cocina, elegante",
+    ),
+    "Servilletas de tela x4 - Crema bordadas": (
+        "Ralph Lauren Home",
+        "servilletas, tela, crema, bordadas, x4, mesa, regalo",
+    ),
+    "Cojín de sofá rectangular 30x50 - Índigo": (
+        "Pier 1",
+        "cojín, sofá, 30x50, índigo, sala, moderno",
+    ),
+    "Camino de mesa estampado - Flores": (
+        "Zara Home",
+        "camino de mesa, flores, estampado, decoración, cocina",
+    ),
+    "Juego de sábanas para cama sencilla - Azul cielo": (
+        "H&M Home",
+        "sábanas, cama sencilla, azul cielo, microfibra, juvenil, económica",
+    ),
+    "Toalla de playa microfibra compacta - Multicolor": (
+        "Dock & Bay",
+        "toalla de playa, microfibra, compacta, multicolor, verano, rapidsecado",
+    ),
+    "Cojín lumbar rectangular 20x40 - Mostaza": (
+        "Tempur",
+        "cojín, lumbar, 20x40, mostaza, apoyo, oficina, sala",
+    ),
+}
+
 PROVEEDORES = [
     ("Textiles del Oriente S.A.S.", "María Fernanda Rojas", "607690012345", 7),
     ("Hogar y Confort Ltda.", "Carlos Pérez", "6076312345", 10),
@@ -215,6 +380,7 @@ class Command(BaseCommand):
         # ---------- Productos y variantes ----------
         creados = 0
         for idx, (nombre, categoria, material, precio, variantes) in enumerate(PRODUCTOS):
+            marca_seed, etiquetas_seed = DATOS_PRODUCTO.get(nombre, ("Ciudad Bonita", ""))
             prod, creada = Producto.objects.get_or_create(
                 nombre=nombre,
                 defaults={
@@ -227,7 +393,8 @@ class Command(BaseCommand):
                         "• Envío en todo Santander.\n"
                         "• Cambios dentro de 5 días hábiles (excepto personalizados)."
                     ),
-                    "marca": "Ciudad Bonita",
+                    "marca": marca_seed,
+                    "etiquetas": etiquetas_seed,
                     "proveedor": proveedores[PROVEEDORES[idx % len(PROVEEDORES)][0]],
                     "material": material,
                     "composicion": material,
