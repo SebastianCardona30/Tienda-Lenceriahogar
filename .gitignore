@@ -7,7 +7,9 @@ venv/
 # Django
 db.sqlite3
 db.sqlite3-*
-media/
+media/*
+!media/categorias/
+!media/productos/
 staticfiles/
 backups/
 scripts/candidatas/descargas_raw/
