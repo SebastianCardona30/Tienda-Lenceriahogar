@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}{{ site.nombre_negocio }}{% endblock titulo %}</title>
   <meta name="description" content="{% block meta_descripcion %}Sábanas, edredones, toallas, cortinas y más para tu hogar en Bucaramanga. Envíos en Santander y pagos con Nequi, PSE y contraentrega.{% endblock meta_descripcion %}">
-  <!-- Open Graph / Redes sociales (WhatsApp, Facebook) -->
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}{{ site.nombre_negocio }}{% endblock %}">
   <meta property="og:description" content="{% block og_description %}Sábanas, edredones, toallas, cortinas y más para tu hogar en Bucaramanga. Envíos en Santander y pagos con Nequi, PSE y contraentrega.{% endblock og_description %}">
@@ -18,17 +17,15 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
-  <link rel="stylesheet" href="{% static 'css/carrito-premium.css' %}">
   <link rel="stylesheet" href="{% static 'css/cuenta.css' %}">
   <link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
+  <link rel="stylesheet" href="{% static 'css/conversion-premium.css' %}">
   {% block styles_extra %}{% endblock styles_extra %}
   {% block metas_extra %}{% endblock metas_extra %}
 </head>
 <body>
   <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
-
   {% include "includes/header.html" %}
-
   <main class="contenido" id="contenido">
     {% if messages %}
       <div class="contenedor mt-2">
@@ -39,23 +36,19 @@
         </ul>
       </div>
     {% endif %}
-
     {% block contenido %}{% endblock contenido %}
   </main>
-
   {% include "includes/footer.html" %}
   {% include "includes/drawer_carrito.html" %}
   {% include "includes/banner_cookies.html" %}
-
   {% if site.whatsapp %}
     <a class="whatsapp-flotante"
        href="https://wa.me/{{ site.whatsapp }}?text={% filter urlencode %}{% block mensaje_whatsapp %}Hola, quisiera información sobre sus productos de {{ site.nombre_negocio }}.{% endblock mensaje_whatsapp %}{% endfilter %}"
        target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-3-1-5-4-5.2-4.2-.2-.2-1.2-1.6-1.2-1.6-.1-.1-.7-.9-.7-2.1 0-1.1.6-1.7.8-1.9.2-.3.5-.3.7-.3h.5c.2 0 .5 0 .8.6.3.7.9 2.4.9 2.5.1.1.1.2 0 .4-.1.2-.1.4-.2.5-.1.1-.2.2-.4.4-.1.1-.2.2-.1.4.1.2.6 1 1.3 1.6.9.8 1.6 1 1.8 1.1.2.1.4.1.5-.1.1-.2.7-.8.9-1.1.2-.3.4-.2.8-.1.4.1 1.6.7 2.4 1.1.8.9 1.2 1.2 1.2.2 0 .5-.1.8-.3.3-.2 1-.8 1.2-1.2.3-.4.3-.7.2-.9-.1-.2-.3-.3-.6-.5z"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1-3-1-5-4-5.2-4.2-.2-.2-1.2-1.6-1.2-1.7-.1-.1-.7-.9-.9-2.1 0-1.3.7-1.9.9-2.1.2-.2.4-.3.6-.3h.4c.1 0 .3 0 .4.3l.5 1.2c.1.2.1.4 0 .6l-.3.5c-.2.2-.2.3-.1.5.3.6.7 1.2 1.3 1.7.6.6 1.2 1 1.9 1.4.3.2.4.1.5-.1l.5-.7c.1-.2.3-.2.5-.1l1.3.8c.2.1.3.2.3.4z"/></svg>
       <span class="whatsapp-flotante__texto">WhatsApp</span>
     </a>
   {% endif %}
-
   <script src="{% static 'vendor/htmx.min.js' %}"></script>
   <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
   <script src="{% static 'js/main.js' %}"></script>
