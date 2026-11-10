@@ -1118,4 +1118,95 @@ ul.sugerencias li:last-child a { border-bottom: none; }
   border-color: var(--purpura);
 }
 
+/* =========================================================
+   Banner del inicio a sangre con foto de fondo (estilo
+   de las tiendas del sector: imagen + degradado + texto)
+   ========================================================= */
+.hero.hero--banner {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(56px, 8vw, 110px);
+  background: #3A1B54;
+}
+.hero--banner .hero__fondo {
+  position: absolute;
+  inset: 0;
+}
+.hero--banner .hero__fondo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero--banner .hero__fondo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg,
+    rgba(42, 34, 48, 0.88) 0%,
+    rgba(91, 42, 134, 0.62) 52%,
+    rgba(42, 34, 48, 0.22) 100%);
+}
+.hero--banner .hero__contenido {
+  position: relative;
+  z-index: 1;
+}
+.hero--banner .hero__texto {
+  max-width: 640px;
+}
+.hero--banner .hero__sello {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: var(--blanco);
+  backdrop-filter: blur(6px);
+}
+.hero--banner .hero__texto h1 {
+  color: var(--blanco);
+}
+.hero--banner .hero__texto h1 em {
+  color: var(--rosa-suave);
+}
+.hero--banner .hero__bajada {
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 56ch;
+}
+.hero--banner .hero__sellos li {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: var(--blanco);
+}
+.hero--banner .hero__sellos li svg { color: var(--rosa-suave); }
+.hero--banner .btn-secundario {
+  background: var(--blanco);
+  color: var(--ciruela);
+  border-color: var(--blanco);
+}
+.hero--banner .hero__flotante {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+/* Banner de bordados con foto de fondo propia y velo de color */
+.banner-bordados {
+  background:
+    linear-gradient(125deg, rgba(91, 42, 134, 0.92) 0%, rgba(138, 79, 191, 0.86) 100%),
+    url("../img/banner-bordados.webp") center / cover no-repeat;
+}
+
+/* =========================================================
+   Menú de categorías en una sola línea (estilo tienda)
+   ========================================================= */
+.menu-nav > .contenedor > ul {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: center;
+  justify-content: safe center;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.menu-nav > .contenedor > ul::-webkit-scrollbar { display: none; }
+.menu-nav a {
+  padding: 10px 11px;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
 /* ---------- Fin ---------- */

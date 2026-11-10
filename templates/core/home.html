@@ -12,7 +12,10 @@
 
 {% block contenido %}
   {# ============ 1. HERO ============ #}
-  <section class="hero">
+  <section class="hero hero--banner">
+    <div class="hero__fondo" aria-hidden="true">
+      <img src="{% static 'img/hero.webp' %}" alt="" width="1280" height="853">
+    </div>
     <div class="contenedor hero__contenido">
       <div class="hero__texto">
         <span class="hero__sello">
@@ -66,9 +69,6 @@
         </ul>
       </div>
       <div class="hero__ilustracion" aria-hidden="true">
-        <div class="hero__marco">
-          <img src="{% static 'img/hero.webp' %}" alt="" width="420" height="420">
-        </div>
         <div class="hero__flotante hero__flotante--arriba">
           <strong>Bordados</strong><span>hechos a tu medida</span>
         </div>
