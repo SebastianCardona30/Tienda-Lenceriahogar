@@ -1,14 +1,5 @@
 {% load static format_tags %}
 <article class="tarjeta-producto">
-  <form method="post" action="{% url 'accounts:alternar_deseo' %}" class="tarjeta-producto__deseo">
-    {% csrf_token %}
-    <input type="hidden" name="producto" value="{{ producto.pk }}">
-    <button type="submit" class="corazon {% if producto.pk in deseos_ids %}corazon--activa{% endif %}"
-            aria-pressed="{% if producto.pk in deseos_ids %}true{% else %}false{% endif %}"
-            aria-label="{% if producto.pk in deseos_ids %}Quitar de mis deseos{% else %}Guardar en mis deseos{% endif %}: {{ producto.nombre }}">
-      <span aria-hidden="true">{% if producto.pk in deseos_ids %}♥{% else %}♡{% endif %}</span>
-    </button>
-  </form>
   <a class="tarjeta-producto__foto" href="{{ producto.get_absolute_url }}" tabindex="-1" aria-hidden="true">
     {% if producto.portada %}
       <img src="{% if producto.portada.miniatura %}{{ producto.portada.miniatura.url }}{% else %}{{ producto.portada.imagen.url }}{% endif %}"
@@ -20,9 +11,38 @@
       {% if producto.ahorro_pct %}<span class="etiqueta etiqueta-oferta">-{{ producto.ahorro_pct }}%</span>{% endif %}
       {% if producto.es_nuevo %}<span class="etiqueta etiqueta-nuevo">Nuevo</span>{% endif %}
       {% if producto.agotado %}<span class="etiqueta etiqueta-unidades">Agotado</span>
-      {% elif producto.stock_disponible <= 5 %}<span class="etiqueta etiqueta-unidades">Últimas unidades</span>{% endif %}
+      {% elif producto.stock_disponible <= 5 %}<span class="etiqueta etiqueta-unidades">¡Últimas unidades!</span>{% endif %}
     </div>
   </a>
+
+  {# --- Acciones rápidas: aparecen al pasar el cursor sobre la foto --- #}
+  <div class="tarjeta-producto__rapidas">
+    <form method="post" action="{% url 'accounts:alternar_deseo' %}" class="tarjeta-producto__deseo">
+      {% csrf_token %}
+      <input type="hidden" name="producto" value="{{ producto.pk }}">
+      <button type="submit" class="corazon {% if producto.pk in deseos_ids %}corazon--activa{% endif %}"
+              aria-pressed="{% if producto.pk in deseos_ids %}true{% else %}false{% endif %}"
+              aria-label="{% if producto.pk in deseos_ids %}Quitar de mis deseos{% else %}Guardar en mis deseos{% endif %}: {{ producto.nombre }}">
+        <span aria-hidden="true">{% if producto.pk in deseos_ids %}♥{% else %}♡{% endif %}</span>
+      </button>
+    </form>
+    <a class="corazon" href="{{ producto.get_absolute_url }}"
+       aria-label="Vista rápida de {{ producto.nombre }}">
+      <span aria-hidden="true">&#128065;</span>
+    </a>
+    {% with primera=producto.variantes_activas|first %}
+      {% if primera and primera.disponible %}
+        <form method="post" action="{% url 'cart:agregar' %}" class="tarjeta-producto__deseo">
+          {% csrf_token %}
+          <input type="hidden" name="sku" value="{{ primera.sku }}">
+          <input type="hidden" name="cantidad" value="1">
+          <button type="submit" class="corazon" aria-label="Agregar {{ producto.nombre }} al carrito">
+            <span aria-hidden="true">&#128722;</span>
+          </button>
+        </form>
+      {% endif %}
+    {% endwith %}
+  </div>
 
   <div class="tarjeta-producto__cuerpo">
     {% if producto.marca %}<p class="tarjeta-producto__marca">{{ producto.marca }}</p>{% endif %}

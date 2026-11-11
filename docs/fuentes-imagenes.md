@@ -57,3 +57,11 @@ Conteo: 40 fotos · 40 productos · 100% verificadas visualmente con colores y c
 - Hero del inicio: Pixabay id 1846251 (bed, bedroom, blanket, books, cover, cozy...), Pixabay Content License, https://pixabay.com/photos/bed-bedroom-blanket-books-cover-1846251/ . Guardada como static/img/hero.webp.
 - Tarjetas de categoria del inicio (media/categorias/*.webp): recortes derivados con Pillow de las propias fotos de producto ya acreditadas en la tabla superior (una por categoria).
 - Todas las imagenes son de ejemplo con fines de demostracion: no representan el producto real. Cambiarlas por fotos propias antes de vender.
+
+## Productos ampliados (24 piezas nuevas)
+
+Fotos de las 24 piezas nuevas del catalogo (saten, cobijas termicas, batas, organizadores,
+cortinas de pana, cojines de terciopelo, manteles, etc.), descargadas de Pixabay con la
+Pixabay Content License y procesadas igual que las anteriores (WebP 1200x1200 + miniatura 400x400).
+Los ID de Pixabay y las consultas usadas quedan en scripts/candidatas/cache_nuevos/ y
+catalog/productos_extra.py. Generadas por scripts/nuevos_productos.py.

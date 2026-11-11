@@ -90,6 +90,9 @@ def agregar(request):
         messages.success(
             request, f"¡Listo! {variante.producto.nombre} está en tu carrito."
         )
+    if request.POST.get("comprar_ahora"):
+        # Compra directa: sigue al checkout sin volver a la página anterior
+        return redirect("orders:checkout")
     return _volver(request, abrir_drawer=True)
 
 

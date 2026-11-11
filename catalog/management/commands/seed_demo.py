@@ -385,9 +385,13 @@ class Command(BaseCommand):
         self.stdout.write(f"· {len(categorias)} categorías con subcategorías")
 
         # ---------- Productos y variantes ----------
+        from catalog.productos_extra import EXTRA_PRODUCTOS, EXTRA_DATOS_PRODUCTO
+
+        todos = list(PRODUCTOS) + list(EXTRA_PRODUCTOS)
+        datos_producto = {**DATOS_PRODUCTO, **EXTRA_DATOS_PRODUCTO}
         creados = 0
-        for idx, (nombre, categoria, material, precio, variantes) in enumerate(PRODUCTOS):
-            marca_seed, etiquetas_seed = DATOS_PRODUCTO.get(nombre, ("Ciudad Bonita", ""))
+        for idx, (nombre, categoria, material, precio, variantes) in enumerate(todos):
+            marca_seed, etiquetas_seed = datos_producto.get(nombre, ("Ciudad Bonita", ""))
             prod, creada = Producto.objects.get_or_create(
                 nombre=nombre,
                 defaults={
@@ -464,6 +468,9 @@ class Command(BaseCommand):
                         if mini.exists():
                             foto.miniatura.name = f"productos/miniaturas/{ruta.name}"
                         foto.save()
+                    elif prod.fotos.filter(imagen__endswith=".webp").exists():
+                        # Marcador SVG huérfano: el producto ya tiene foto real
+                        foto.delete()
 
             # Variantes
             for talla, color in variantes:

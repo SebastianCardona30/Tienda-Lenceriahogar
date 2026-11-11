@@ -79,7 +79,25 @@
     </div>
   </section>
 
-  {# ============ 2. CATEGORÍAS CON IMAGEN ============ #}
+  {# ============ 2. COLECCIÓN DE NAVIDAD ============ #}
+  <section class="seccion navidad">
+    <div class="contenedor navidad__banner">
+      <div class="nieve" aria-hidden="true">
+        <span>&#10052;</span><span>&#10052;</span><span>&#10052;</span>
+        <span>&#10052;</span><span>&#10052;</span><span>&#10052;</span>
+        <span>&#10052;</span><span>&#10052;</span>
+      </div>
+      <div class="navidad__contenido">
+        <p class="navidad__eslogan">COLECCIÓN DE NAVIDAD</p>
+        <h2 class="navidad__titulo">Texturas que abrigan tus mejores momentos</h2>
+        <p class="navidad__bajada">Edredones, cobijas y mantas para regalar (o regalarte) esta temporada.
+          Pregunta por nuestros bordados personalizados con iniciales y nombres.</p>
+        <a class="btn btn-primario" href="{% url 'catalog:ofertas' %}">Ver colección de Navidad</a>
+      </div>
+    </div>
+  </section>
+
+  {# ============ 3. CATEGORÍAS CON IMAGEN ============ #}
   {% if categorias_home %}
   <section class="seccion">
     <div class="contenedor">

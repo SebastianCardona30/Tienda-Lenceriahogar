@@ -106,3 +106,14 @@ Marca cada casilla `[x]` al terminar. Si pierdes el hilo, relee AGENTS.md y cont
 - [x] base.html: hojas premium (carrito-premium, conversion, acceso-premium) cargan al final para sobreescribir la base; carrito-premium.css quedaba sin enlazar
 - [x] Aviso "Imagenes de ejemplo con fines de demostracion" en el pie; nota en README y creditos en docs/fuentes-imagenes.md
 - [x] Suite completa: 316 pruebas OK
+
+
+
+## Estilo boutique premium y catalogo ampliado (10-nov-2026, tarde)
+- [x] Header estilo tienda premium: buscador pill centrado, corazon de deseos con contador y menu oscuro en mayusculas
+- [x] Tarjetas: chips de tallas, boton Agregar al carrito directo y acciones rapidas (deseo, vista rapida, agregar) al pasar el cursor
+- [x] Ficha de producto estilo referencia: galeria lateral con flechas y puntos, swatches de color redondos, badge AHORRA, Comprar ahora directo al checkout, pestanas Descripcion / Politica de Envios / Politica de Devoluciones
+- [x] Decoracion de Navidad: banner de coleccion con nieve animada (respeta prefers-reduced-motion)
+- [x] Carrusel automatico Tambien te pueden interesar (avanza solo, se detiene al pasar el cursor)
+- [x] Catalogo ampliado a 64 productos: 24 piezas nuevas con fotos Pixabay generadas por scripts/nuevos_productos.py
+- [x] 316 pruebas OK

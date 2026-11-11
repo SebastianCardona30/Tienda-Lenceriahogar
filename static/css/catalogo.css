@@ -1209,4 +1209,311 @@ ul.sugerencias li:last-child a { border-bottom: none; }
   white-space: nowrap;
 }
 
+/* =========================================================
+   Acciones rápidas al pasar el cursor (corazón, vista
+   rápida, agregar) — estilo tiendas del sector
+   ========================================================= */
+.tarjeta-producto__rapidas {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 3;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: opacity var(--transicion), transform var(--transicion);
+  pointer-events: none;
+}
+.tarjeta-producto:hover .tarjeta-producto__rapidas,
+.tarjeta-producto:focus-within .tarjeta-producto__rapidas {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.tarjeta-producto__rapidas .corazon {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--borde);
+}
+/* En pantallas táctiles no hay hover: siempre visibles */
+@media (hover: none) {
+  .tarjeta-producto__rapidas { opacity: 1; transform: none; pointer-events: auto; }
+}
+
+/* =========================================================
+   Ficha de producto estilo referencia: galería lateral,
+   swatches de color redondos, badge AHORRA y compra directa
+   ========================================================= */
+.galeria__miniaturas--lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+.galeria__miniaturas--lateral button {
+  width: 64px;
+  height: 64px;
+  flex: none;
+}
+.ficha__galeria {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.galeria__flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--borde);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ciruela);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color var(--transicion), color var(--transicion);
+}
+.galeria__flecha:hover { background: var(--ciruela); color: var(--blanco); }
+.galeria__flecha--izq { left: 10px; }
+.galeria__flecha--der { right: 10px; }
+.galeria__puntos {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.galeria__puntos button {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+.galeria__puntos button.activa { background: var(--ciruela); width: 22px; border-radius: 999px; }
+
+.selector__opciones--swatch { gap: 10px; }
+.swatch-c {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--borde);
+  background: var(--muestra, var(--lavanda));
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--transicion), border-color var(--transicion);
+}
+.swatch-c:hover { transform: scale(1.12); }
+.swatch-c.activa { border-color: var(--ciruela); box-shadow: 0 0 0 3px var(--lavanda); }
+
+.ficha__ahorro {
+  background: var(--oferta);
+  color: var(--blanco);
+  font-weight: 800;
+}
+.ficha__pagos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--blanco);
+  color: var(--texto-2);
+  font-size: 0.86rem;
+}
+.ficha__pagos svg { width: 20px; height: 20px; flex: none; color: var(--ciruela); }
+
+/* Botones de compra de la ficha */
+.btn-compra {
+  background: var(--texto);
+  color: var(--blanco);
+  border-radius: 999px;
+  font-weight: 800;
+}
+.btn-compra:hover { background: var(--ciruela-900, var(--texto)); color: var(--blanco); }
+.btn-ahora {
+  background: linear-gradient(135deg, var(--rosa-cta) 0%, var(--purpura) 100%);
+  color: var(--blanco);
+  border-radius: 999px;
+  font-weight: 800;
+}
+.btn-ahora:hover { color: var(--blanco); transform: translateY(-2px); }
+
+/* =========================================================
+   Decoración de Navidad: banner con nieve animada
+   ========================================================= */
+.navidad__banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: clamp(32px, 5vw, 56px);
+  background:
+    radial-gradient(700px 320px at 88% 10%, rgba(251, 213, 229, 0.35), transparent 70%),
+    linear-gradient(125deg, #2E1A47 0%, var(--ciruela) 55%, var(--purpura) 100%);
+  color: var(--blanco);
+  text-align: center;
+}
+.navidad__eslogan {
+  letter-spacing: 0.28em;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--rosa-suave);
+}
+.navidad__titulo {
+  color: var(--blanco);
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  margin-block: 10px 12px;
+}
+.navidad__bajada {
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 54ch;
+  margin-inline: auto;
+}
+.navidad__contenido { position: relative; z-index: 2; }
+.nieve {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.nieve span {
+  position: absolute;
+  top: -24px;
+  color: rgba(255, 255, 255, 0.75);
+  animation: caer-nieve 9s linear infinite;
+}
+.nieve span:nth-child(1) { left: 8%;  font-size: 16px; animation-delay: 0s; }
+.nieve span:nth-child(2) { left: 22%; font-size: 11px; animation-delay: 1.6s; }
+.nieve span:nth-child(3) { left: 37%; font-size: 18px; animation-delay: 3.1s; }
+.nieve span:nth-child(4) { left: 52%; font-size: 12px; animation-delay: 4.4s; }
+.nieve span:nth-child(5) { left: 66%; font-size: 15px; animation-delay: 5.8s; }
+.nieve span:nth-child(6) { left: 78%; font-size: 10px; animation-delay: 7.2s; }
+.nieve span:nth-child(7) { left: 88%; font-size: 17px; animation-delay: 2.4s; }
+.nieve span:nth-child(8) { left: 95%; font-size: 12px; animation-delay: 6.3s; }
+@keyframes caer-nieve {
+  to { transform: translateY(420px) rotate(180deg); opacity: 0.15; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nieve span { animation: none; top: 12px; }
+}
+
+/* =========================================================
+   Carrusel automático "También te pueden interesar"
+   ========================================================= */
+.carrusel {
+  position: relative;
+  overflow: hidden;
+}
+.carrusel__pista {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-block: 6px;
+}
+.carrusel__pista::-webkit-scrollbar { display: none; }
+.carrusel__pista > * {
+  flex: 0 0 min(260px, 72vw);
+  scroll-snap-align: start;
+}
+.carrusel__flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--borde);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ciruela);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: var(--sombra);
+  transition: background-color var(--transicion), color var(--transicion);
+}
+.carrusel__flecha:hover { background: var(--ciruela); color: var(--blanco); }
+.carrusel__flecha--izq { left: -6px; }
+.carrusel__flecha--der { right: -6px; }
+
+/* =========================================================
+   Header estilo boutique: buscador centrado grande y barra
+   de menú oscura con mayúsculas (como las tiendas del sector)
+   ========================================================= */
+.encabezado {
+  background: var(--crema);
+  border-bottom: 1px solid var(--borde);
+}
+.buscar__caja {
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1.5px solid var(--borde);
+  background: var(--blanco);
+}
+.buscar button {
+  border-radius: 999px;
+  background: var(--texto);
+  color: var(--blanco);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding-inline: 22px;
+}
+.buscar button:hover { background: var(--ciruela); }
+.menu-nav {
+  background: var(--texto);
+  border-bottom: none;
+}
+.menu-nav > .contenedor > ul {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: center;
+  justify-content: safe center;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.menu-nav > .contenedor > ul::-webkit-scrollbar { display: none; }
+.menu-nav a {
+  padding: 13px 15px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.88);
+}
+.menu-nav a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--blanco);
+  box-shadow: none;
+}
+.menu-nav__ofertas { color: var(--rosa-suave) !important; }
+.menu-nav__sub {
+  background: var(--blanco);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.menu-nav__sub a {
+  color: var(--texto);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.menu-nav__sub a:hover { background: var(--lavanda); color: var(--ciruela); }
+
 /* ---------- Fin ---------- */

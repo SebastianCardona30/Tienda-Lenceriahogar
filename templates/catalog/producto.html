@@ -26,7 +26,18 @@
 
   <div class="ficha" x-data="fichaProducto({{ variantes_json }})">
     {# ============ GALERÍA ============ #}
-    <div class="ficha__galeria" x-data="{ activa: 0 }">
+    <div class="ficha__galeria" x-data="{ activa: 0, total: {{ producto.fotos.count|default:1 }} }">
+      {% if producto.fotos.count > 1 %}
+        <div class="galeria__miniaturas galeria__miniaturas--lateral">
+          {% for foto in producto.fotos.all %}
+            <button type="button" @click="activa = {{ forloop.counter0 }}"
+                    :class="activa === {{ forloop.counter0 }} ? 'activa' : ''"
+                    aria-label="Ver foto {{ forloop.counter }}">
+              <img src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}" alt="" loading="lazy">
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
       <div class="galeria__principal">
         {% if producto.fotos.all %}
           {% for foto in producto.fotos.all %}
@@ -40,18 +51,20 @@
         {% if producto.ahorro_pct %}
           <span class="etiqueta etiqueta-oferta galeria__bandera">-{{ producto.ahorro_pct }}%</span>
         {% endif %}
+        {% if producto.fotos.count > 1 %}
+          <button type="button" class="galeria__flecha galeria__flecha--izq"
+                  @click="activa = (activa - 1 + total) % total" aria-label="Foto anterior">‹</button>
+          <button type="button" class="galeria__flecha galeria__flecha--der"
+                  @click="activa = (activa + 1) % total" aria-label="Foto siguiente">›</button>
+          <div class="galeria__puntos">
+            {% for foto in producto.fotos.all %}
+              <button type="button" @click="activa = {{ forloop.counter0 }}"
+                      :class="activa === {{ forloop.counter0 }} ? 'activa' : ''"
+                      aria-label="Ir a la foto {{ forloop.counter }}"></button>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
-      {% if producto.fotos.count > 1 %}
-        <div class="galeria__miniaturas">
-          {% for foto in producto.fotos.all %}
-            <button type="button" @click="activa = {{ forloop.counter0 }}"
-                    :class="activa === {{ forloop.counter0 }} ? 'activa' : ''"
-                    aria-label="Ver foto {{ forloop.counter }}">
-              <img src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagen.url }}{% endif %}" alt="" loading="lazy">
-            </button>
-          {% endfor %}
-        </div>
-      {% endif %}
     </div>
 
     {# ============ INFORMACIÓN ============ #}
@@ -80,9 +93,19 @@
                 x-cloak>{{ producto.precio_tachado|cop }}</span>
         {% endif %}
         <span class="precio precio--grande" x-text="formatear(varianteSeleccionada.precio_final)">{{ producto.precio_minimo|cop }}</span>
+        <span class="etiqueta etiqueta-oferta ficha__ahorro"
+              x-show="varianteSeleccionada.ahorro > 0"
+              x-text="'AHORRA ' + formatear(varianteSeleccionada.precio - varianteSeleccionada.precio_final)">AHORRA {{ producto.precio_tachado|cop }}</span>
         <span class="iva">IVA {% if site.iva_incluido %}incluido{% else %}por aparte{% endif %}</span>
-        <span class="etiqueta etiqueta-oferta" x-show="varianteSeleccionada.ahorro > 0" x-text="'Ahorras ' + varianteSeleccionada.ahorro + '%'"></span>
       </div>
+
+      <p class="ficha__pagos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" aria-hidden="true" focusable="false">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>
+        </svg>
+        Paga con Nequi, PSE, transferencia o contraentrega al recibir.
+      </p>
 
       {% if producto.descripcion_corta %}<p class="ficha__bajada">{{ producto.descripcion_corta }}</p>{% endif %}
 
@@ -102,10 +125,12 @@
       {% if colores %}
       <div class="selector">
         <p class="selector__titulo">Color: <strong x-text="seleccion.color || 'elige uno'"></strong></p>
-        <div class="selector__opciones">
+        <div class="selector__opciones selector__opciones--swatch">
           {% for c in colores %}
-            <button type="button" class="opcion" :class="seleccion.color === '{{ c }}' ? 'activa' : ''"
-                    @click="elegir('color', '{{ c }}')">{{ c }}</button>
+            <button type="button" class="swatch-c" :class="seleccion.color === '{{ c }}' ? 'activa' : ''"
+                    style="--muestra: {{ c|color_hex }}"
+                    @click="elegir('color', '{{ c }}')" title="{{ c }}"
+                    aria-label="Color {{ c }}"><span class="solo-lectura">{{ c }}</span></button>
           {% endfor %}
         </div>
       </div>
@@ -140,11 +165,15 @@
           <input type="number" name="cantidad" x-model.number="cantidad" min="1" value="1" aria-label="Cantidad">
           <button type="button" @click="cantidad++" aria-label="Agregar uno">+</button>
         </div>
-        <button type="submit" class="btn btn-primario btn-bloque" x-show="varianteSeleccionada.sku">
+        <button type="submit" class="btn btn-compra btn-bloque" x-show="varianteSeleccionada.sku">
           Agregar al carrito
         </button>
-        <button type="button" class="btn btn-primario btn-bloque" x-show="!varianteSeleccionada.sku"
+        <button type="button" class="btn btn-compra btn-bloque" x-show="!varianteSeleccionada.sku"
                 @click="avisarEleccion()">Elige talla y color</button>
+        <button type="submit" name="comprar_ahora" value="1" class="btn btn-ahora btn-bloque"
+                x-show="varianteSeleccionada.sku">
+          Comprar ahora
+        </button>
       </form>
 
       {% if site.whatsapp %}
@@ -188,22 +217,26 @@
   <section class="ficha__pestanas" x-data="{ pestana: 'descripcion' }">
     <div class="pestanas__botones" role="tablist">
       <button type="button" :class="pestana === 'descripcion' ? 'activa' : ''" @click="pestana = 'descripcion'">Descripción</button>
-      <button type="button" :class="pestana === 'cuidado' ? 'activa' : ''" @click="pestana = 'cuidado'">Materiales y cuidado</button>
-      <button type="button" :class="pestana === 'envios' ? 'activa' : ''" @click="pestana = 'envios'">Envíos y devoluciones</button>
+      <button type="button" :class="pestana === 'cuidado' ? 'activa' : ''" @click="pestana = 'cuidado'">Política de Envíos</button>
+      <button type="button" :class="pestana === 'envios' ? 'activa' : ''" @click="pestana = 'envios'">Política de Devoluciones</button>
     </div>
     <div class="pestanas__contenido">
       <div x-show="pestana === 'descripcion'">
         {% if producto.descripcion_larga %}{{ producto.descripcion_larga|linebreaks }}{% else %}<p class="solo-lectura">Estamos preparando la descripción de este producto. Escríbenos por WhatsApp si quieres fotos o detalles.</p>{% endif %}
-      </div>
-      <div x-show="pestana === 'cuidado'">
         {% if producto.material %}<p><strong>Material:</strong> {{ producto.material }}</p>{% endif %}
         {% if producto.composicion %}<p><strong>Composición:</strong> {{ producto.composicion }}</p>{% endif %}
-        {% if producto.cuidado %}<p><strong>Cuidado:</strong> {{ producto.cuidado|linebreaks }}</p>{% else %}<p class="solo-lectura">Lavar con agua fría, no usar blanqueante y secar a baja temperatura.</p>{% endif %}
+        {% if producto.cuidado %}<p><strong>Cuidado:</strong> {{ producto.cuidado|linebreaks }}</p>{% endif %}
+      </div>
+      <div x-show="pestana === 'cuidado'">
+        <p>Enviamos solo dentro de Santander: área metropolitana de Bucaramanga con entrega propia o mensajero, y el resto del departamento por transportadora.</p>
+        <p>Los tiempos de entrega varían según tu municipio; los calculas en el carrito antes de pagar.</p>
+        <a class="btn btn-secundario mt-1" href="{% url 'core:pagina' 'envios-y-cobertura' %}">Ver detalle de envíos</a>
       </div>
       <div x-show="pestana === 'envios'">
-        <p>Enviamos solo dentro de Santander: área metropolitana de Bucaramanga con entrega propia o mensajero, y el resto del departamento por transportadora.</p>
-        <p>Retracto dentro de los 5 días hábiles siguientes a la entrega (excepto productos personalizados con bordado).</p>
-        <a class="btn btn-secundario mt-1" href="{% url 'core:pagina' 'envios-y-cobertura' %}">Ver detalle de envíos</a>
+        <p>Tienes 5 días hábiles para retractarte desde la entrega, siempre que el producto esté nuevo y en su empaque original.</p>
+        {% if producto.es_bordado %}<p><strong>Los productos personalizados con bordado no tienen cambio ni retracto</strong>, salvo defecto de fabricación.</p>{% endif %}
+        <p>Garantía legal de 90 días por defectos de confección o costura.</p>
+        <a class="btn btn-secundario mt-1" href="{% url 'core:pagina' 'cambios-y-devoluciones' %}">Ver política completa</a>
       </div>
     </div>
   </section>
@@ -270,12 +303,16 @@
     </form>
   </section>
 
-  {# ============ RELACIONADOS ============ #}
+  {# ============ RELACIONADOS (carrusel automático) ============ #}
   {% if relacionados %}
     <section class="seccion">
-      <h2 class="seccion__titulo">También te puede gustar</h2>
-      <div class="grilla">
-        {% for producto in relacionados %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+      <h2 class="seccion__titulo">También te pueden interesar</h2>
+      <div class="carrusel" x-data="carruselAuto()" x-init="iniciar()" @mouseenter="detener()" @mouseleave="iniciar()">
+        <button type="button" class="carrusel__flecha carrusel__flecha--izq" @click="mover(-1)" aria-label="Anterior">‹</button>
+        <div class="carrusel__pista" x-ref="pista">
+          {% for producto in relacionados %}{% include "catalog/partials/_tarjeta.html" %}{% endfor %}
+        </div>
+        <button type="button" class="carrusel__flecha carrusel__flecha--der" @click="mover(1)" aria-label="Siguiente">›</button>
       </div>
     </section>
   {% endif %}
@@ -339,6 +376,29 @@ function fichaProducto(variantes) {
     },
     avisarEleccion: function () {
       CiudadBonita.avisar("Elige talla y color para continuar 😉");
+    },
+  };
+}
+
+// Carrusel automático: avanza solo y se detiene al pasar el cursor.
+function carruselAuto() {
+  return {
+    timer: null,
+    mover: function (dir) {
+      var p = this.$refs.pista;
+      if (!p) return;
+      var paso = Math.min(p.clientWidth * 0.8, 560);
+      var destino = p.scrollLeft + dir * paso;
+      if (destino > p.scrollWidth - p.clientWidth - 4) destino = 0;  // bucle
+      p.scrollTo({ left: destino, behavior: "smooth" });
+    },
+    iniciar: function () {
+      var self = this;
+      this.detener();
+      this.timer = setInterval(function () { self.mover(1); }, 3800);
+    },
+    detener: function () {
+      if (this.timer) { clearInterval(this.timer); this.timer = null; }
     },
   };
 }
